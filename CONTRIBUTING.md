@@ -29,8 +29,6 @@ Do not open an issue on GitHub until you have collected positive feedback about 
 Do you have questions about the source code?
 
 contact me via email.
-Do you want to contribute to the Rails documentation?
-
-We welcome all kinds of feedback.
+I welcome all kinds of feedback.
 
 Bas vd Berg
