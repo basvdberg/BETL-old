@@ -1,5 +1,5 @@
 
--- START BETL Release version 3.0.68 , date: 2017-09-12 15:52:19
+-- START BETL Release version 3.0.69 , date: 2017-12-07 10:12:45
 
 -- schemas
 IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = N'def')
@@ -66,7 +66,7 @@ GO
 CREATE TABLE [def].[Object_type]
 (
 	  [object_type_id] INT NOT NULL
-	, [object_type] VARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	, [object_type] VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, CONSTRAINT [PK_Object_type] PRIMARY KEY ([object_type_id] ASC)
 )
 
@@ -74,7 +74,7 @@ CREATE TABLE [def].[Object_type]
 GO
 CREATE TABLE [def].[Prefix]
 (
-	  [prefix_name] VARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
+	  [prefix_name] VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
 	, [default_template_id] INT NULL
 )
 
@@ -83,10 +83,10 @@ GO
 CREATE TABLE [def].[Property]
 (
 	  [property_id] INT NOT NULL
-	, [property_name] VARCHAR(255) COLLATE Latin1_General_CI_AS NULL
-	, [description] VARCHAR(255) COLLATE Latin1_General_CI_AS NULL
-	, [property_scope] VARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-	, [default_value] VARCHAR(255) COLLATE Latin1_General_CI_AS NULL
+	, [property_name] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [description] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [property_scope] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [default_value] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, [apply_table] BIT NULL
 	, [apply_view] BIT NULL
 	, [apply_schema] BIT NULL
@@ -94,7 +94,7 @@ CREATE TABLE [def].[Property]
 	, [apply_srv] BIT NULL
 	, [apply_user] BIT NULL
 	, [record_dt] DATETIME NULL DEFAULT(getdate())
-	, [record_user] VARCHAR(255) COLLATE Latin1_General_CI_AS NULL DEFAULT(suser_sname())
+	, [record_user] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL DEFAULT(suser_sname())
 	, CONSTRAINT [PK_Property_1] PRIMARY KEY ([property_id] ASC)
 )
 
@@ -104,9 +104,9 @@ CREATE TABLE [def].[Property_value]
 (
 	  [property_id] INT NOT NULL
 	, [object_id] INT NOT NULL
-	, [value] VARCHAR(255) COLLATE Latin1_General_CI_AS NULL
+	, [value] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, [record_dt] DATETIME NULL
-	, [record_user] VARCHAR(255) COLLATE Latin1_General_CI_AS NULL
+	, [record_user] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, CONSTRAINT [PK_Property_Value] PRIMARY KEY ([property_id] ASC, [object_id] ASC)
 )
 
@@ -115,9 +115,9 @@ GO
 CREATE TABLE [def].[Template]
 (
 	  [template_id] SMALLINT NOT NULL
-	, [template] VARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	, [template] VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, [record_dt] DATETIME NULL DEFAULT(getdate())
-	, [record_name] VARCHAR(255) COLLATE Latin1_General_CI_AS NULL DEFAULT(suser_sname())
+	, [record_name] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL DEFAULT(suser_sname())
 	, CONSTRAINT [PK_Template] PRIMARY KEY ([template_id] ASC)
 )
 
@@ -126,8 +126,8 @@ GO
 CREATE TABLE [util].[Log_level]
 (
 	  [log_level_id] SMALLINT NOT NULL
-	, [log_level] VARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-	, [log_level_description] VARCHAR(255) COLLATE Latin1_General_CI_AS NULL
+	, [log_level] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [log_level_description] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, CONSTRAINT [PK_Log_level_1] PRIMARY KEY ([log_level_id] ASC)
 )
 
@@ -136,7 +136,7 @@ GO
 CREATE TABLE [util].[Log_type]
 (
 	  [log_type_id] SMALLINT NOT NULL
-	, [log_type] VARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	, [log_type] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, [min_log_level_id] INT NULL
 	, CONSTRAINT [PK_Log_type_1] PRIMARY KEY ([log_type_id] ASC)
 )
@@ -160,8 +160,8 @@ CREATE TABLE [dbo].[Transfer]
 	, [batch_id] INT NULL
 	, [start_dt] DATETIME NULL
 	, [end_dt] DATETIME NULL
-	, [src_name] VARCHAR(100) COLLATE Latin1_General_CI_AS NULL
-	, [dest_name] VARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	, [src_name] VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [dest_name] VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, [rec_cnt_src] INT NULL
 	, [rec_cnt_new] INT NULL
 	, [rec_cnt_changed] INT NULL
@@ -177,7 +177,7 @@ GO
 CREATE TABLE [dbo].[Batch]
 (
 	  [batch_id] INT NOT NULL IDENTITY(1,1)
-	, [batch_name] VARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	, [batch_name] VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, [batch_start_dt] DATETIME NULL DEFAULT(getdate())
 	, [batch_end_dt] DATETIME NULL
 	, [status_id] INT NULL
@@ -191,7 +191,7 @@ CREATE TABLE [dbo].[Transfer_log]
 (
 	  [log_id] INT NOT NULL IDENTITY(1,1)
 	, [log_dt] DATETIME NULL DEFAULT(getdate())
-	, [msg] VARCHAR(MAX) COLLATE Latin1_General_CI_AS NULL
+	, [msg] VARCHAR(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, [transfer_id] INT NULL
 	, [log_level_id] INT NULL
 	, [log_type_id] INT NULL
@@ -205,21 +205,21 @@ CREATE TABLE [dbo].[Error]
 (
 	  [error_id] INT NOT NULL IDENTITY(1,1)
 	, [error_code] INT NULL
-	, [error_msg] VARCHAR(5000) COLLATE Latin1_General_CI_AS NULL
+	, [error_msg] VARCHAR(5000) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, [error_line] INT NULL
-	, [error_procedure] VARCHAR(255) COLLATE Latin1_General_CI_AS NULL
-	, [error_procedure_id] VARCHAR(255) COLLATE Latin1_General_CI_AS NULL
-	, [error_execution_id] VARCHAR(255) COLLATE Latin1_General_CI_AS NULL
-	, [error_event_name] VARCHAR(255) COLLATE Latin1_General_CI_AS NULL
+	, [error_procedure] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [error_procedure_id] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [error_execution_id] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [error_event_name] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, [error_severity] INT NULL
 	, [error_state] INT NULL
-	, [error_source] VARCHAR(255) COLLATE Latin1_General_CI_AS NULL
-	, [error_interactive_mode] VARCHAR(255) COLLATE Latin1_General_CI_AS NULL
-	, [error_machine_name] VARCHAR(255) COLLATE Latin1_General_CI_AS NULL
-	, [error_user_name] VARCHAR(255) COLLATE Latin1_General_CI_AS NULL
+	, [error_source] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [error_interactive_mode] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [error_machine_name] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [error_user_name] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, [transfer_id] INT NULL
 	, [record_dt] DATETIME NULL DEFAULT(getdate())
-	, [record_user] VARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	, [record_user] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, CONSTRAINT [PK_error_id] PRIMARY KEY ([error_id] DESC)
 )
 
@@ -228,7 +228,7 @@ GO
 CREATE TABLE [dbo].[Status]
 (
 	  [transfer_status_id] INT NOT NULL
-	, [transfer_status_name] VARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	, [transfer_status_name] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, CONSTRAINT [PK_Status] PRIMARY KEY ([transfer_status_id] ASC)
 )
 
@@ -239,13 +239,13 @@ CREATE TABLE [def].[Col_hist]
 	  [column_id] INT NOT NULL IDENTITY(1,1)
 	, [eff_dt] DATETIME NOT NULL
 	, [object_id] INT NOT NULL
-	, [column_name] VARCHAR(64) COLLATE Latin1_General_CI_AS NOT NULL
-	, [prefix] VARCHAR(64) COLLATE Latin1_General_CI_AS NULL
-	, [entity_name] VARCHAR(64) COLLATE Latin1_General_CI_AS NULL
+	, [column_name] VARCHAR(64) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
+	, [prefix] VARCHAR(64) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [entity_name] VARCHAR(64) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, [foreign_column_id] INT NULL
 	, [ordinal_position] SMALLINT NULL
 	, [is_nullable] BIT NULL
-	, [data_type] VARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	, [data_type] VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, [max_len] INT NULL
 	, [numeric_precision] INT NULL
 	, [numeric_scale] INT NULL
@@ -253,7 +253,7 @@ CREATE TABLE [def].[Col_hist]
 	, [src_column_id] INT NULL
 	, [delete_dt] DATETIME NULL
 	, [record_dt] DATETIME NULL
-	, [record_user] VARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	, [record_user] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, [chksum] INT NOT NULL
 	, [transfer_id] INT NULL
 	, [part_of_unique_index] BIT NULL DEFAULT((0))
@@ -267,10 +267,10 @@ GO
 CREATE TABLE [def].[Column_type]
 (
 	  [column_type_id] INT NOT NULL
-	, [column_type_name] VARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-	, [column_type_description] VARCHAR(255) COLLATE Latin1_General_CI_AS NULL
+	, [column_type_name] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [column_type_description] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, [record_dt] DATETIME NULL
-	, [record_user] VARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	, [record_user] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, CONSTRAINT [PK_Column_type] PRIMARY KEY ([column_type_id] ASC)
 )
 
@@ -280,15 +280,15 @@ CREATE TABLE [def].[Obj]
 (
 	  [object_id] INT NOT NULL IDENTITY(1,1)
 	, [object_type_id] INT NOT NULL
-	, [object_name] VARCHAR(100) COLLATE Latin1_General_CI_AS NOT NULL
+	, [object_name] VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
 	, [parent_id] INT NULL
-	, [scope] VARCHAR(50) COLLATE Latin1_General_CI_AS NULL
+	, [scope] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, [template_id] SMALLINT NULL
 	, [delete_dt] DATETIME NULL
 	, [record_dt] DATETIME NULL DEFAULT(getdate())
-	, [record_user] VARCHAR(50) COLLATE Latin1_General_CI_AS NULL DEFAULT(suser_sname())
-	, [prefix] VARCHAR(50) COLLATE Latin1_General_CI_AS NULL
-	, [object_name_no_prefix] VARCHAR(100) COLLATE Latin1_General_CI_AS NULL
+	, [record_user] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL DEFAULT(suser_sname())
+	, [prefix] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [object_name_no_prefix] VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
 	, CONSTRAINT [PK__Object] PRIMARY KEY ([object_id] DESC)
 )
 
@@ -301,12 +301,13 @@ CREATE UNIQUE NONCLUSTERED INDEX [UIX__Object_id_parent_object_id] ON [def].[Obj
 
 GO
 
-	INSERT [dbo].[Version] ([major_version], [minor_version], [build], build_dt) VALUES (3,0,68,'2017-09-12 15:52:19')
+	INSERT [dbo].[Version] ([major_version], [minor_version], [build], build_dt) VALUES (3,0,69,'2017-12-07 10:12:45')
 	GO
 	
 print '-- 1. Obj_ext'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -353,6 +354,7 @@ ISNULL('[' + case when srv<>'LOCALHOST'then srv else null end  + '].', '') -- do
 
 
 
+
 , object_type, object_name, srv, db, [schema], 
 table_or_view, scope, template_id, parent_id, grand_parent_id, great_grand_parent_id, delete_dt, record_dt, record_user
 , prefix, [object_name_no_prefix]
@@ -371,10 +373,12 @@ left join def.Prefix p on q2_1.prefix = p.prefix_name
 
 
 
+
 GO
 print '-- 2. get_cols'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -462,10 +466,12 @@ end
 
 
 
+
 GO
 print '-- 3. prefix_first_underscore'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -514,10 +520,12 @@ END
 
 
 
+
 GO
 print '-- 4. suffix_first_underscore'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -566,10 +574,12 @@ END
 
 
 
+
 GO
 print '-- 5. prefix'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -610,10 +620,12 @@ END
 
 
 
+
 GO
 print '-- 6. suffix'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -656,10 +668,12 @@ END
 
 
 
+
 GO
 print '-- 7. content_type_name'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -692,10 +706,12 @@ END
 
 
 
+
 GO
 print '-- 8. ddl_clear'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -752,10 +768,12 @@ end
 
 
 
+
 GO
 print '-- 9. Col'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -790,10 +808,12 @@ CREATE VIEW [def].[Col] AS
 
 
 
+
 GO
 print '-- 10. object_name'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -884,10 +904,12 @@ END
 
 
 
+
 GO
 print '-- 11. trim'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -928,10 +950,12 @@ END
 
 
 
+
 GO
 print '-- 12. obj_id'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -1014,10 +1038,12 @@ END
 
 
 
+
 GO
 print '-- 13. ddl_table'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -1096,6 +1122,7 @@ SELECT @SQL = 'CREATE TABLE ' + @object_name + CHAR(13) + '(' + CHAR(13) + STUFF
 
 
 
+
     LEFT JOIN sys.default_constraints dc WITH (NOWAIT) ON c.default_object_id != 0 AND c.[object_id] = dc.parent_object_id AND c.column_id = dc.parent_column_id
     LEFT JOIN sys.identity_columns ic WITH (NOWAIT) ON c.is_identity = 1 AND c.[object_id] = ic.[object_id] AND c.column_id = ic.column_id
     WHERE c.[object_id] = @object_id
@@ -1152,6 +1179,7 @@ SELECT @SQL = 'CREATE TABLE ' + @object_name + CHAR(13) + '(' + CHAR(13) + STUFF
 
 
 
+
         FROM sys.foreign_keys fk WITH (NOWAIT)
         JOIN sys.objects ro WITH (NOWAIT) ON ro.[object_id] = fk.referenced_object_id
         WHERE fk.parent_object_id = @object_id
@@ -1186,10 +1214,12 @@ end
 
 
 
+
 GO
 print '-- 14. addQuotes'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -1222,10 +1252,12 @@ END
 
 
 
+
 GO
 print '-- 15. ddl_content'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -1283,6 +1315,7 @@ print'
 INSERT [def].[Prefix] ([prefix_name], [default_template_id]) VALUES (N''stgd'', 12)
 
 
+
 GO
 INSERT [def].[Prefix] ([prefix_name], [default_template_id]) VALUES (N''stgf'', 13)
 GO
@@ -1307,6 +1340,7 @@ GO
 INSERT [def].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (60, N''date_datatype_based_on_suffix'', N''if a column ends with the suffix _date then it''''s a date datatype column (instead of e.g. datetime)'', N''db_object'', N''1'', NULL, NULL, NULL, NULL, 1, NULL, CAST(N''2015-09-02T13:16:15.733'' AS DateTime), N''C2H_PC\BAS'')
 
 
+
 GO
 INSERT [def].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (70, N''is_localhost'', N''This server is localhost. For performance reasons we don''''t want to access localhost via linked server as we would with external sources'', N''db_object'', N''0'', NULL, NULL, NULL, NULL, 1, NULL, CAST(N''2015-09-24T16:22:45.233'' AS DateTime), N''C2H_PC\BAS'')
 GO
@@ -1323,6 +1357,7 @@ GO
 INSERT [def].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (120, N''exec_sql'', N''set this to 0 to print the generated sql instead of executing it. usefull for debugging'', N''user'', N''1'', NULL, NULL, NULL, NULL, NULL, 1, CAST(N''2017-02-02T15:04:49.867'' AS DateTime), N'''')
 GO
 INSERT [def].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (130, N''log_level'', N''controls the amount of logging. ERROR,INFO, DEBUG, VERBOSE'', N''user'', N''INFO'', NULL, NULL, NULL, NULL, NULL, 1, CAST(N''2017-02-02T15:06:12.167'' AS DateTime), N'''')
+
 
 
 GO
@@ -1367,6 +1402,7 @@ GO
 INSERT [util].[Log_level] ([log_level_id], [log_level], [log_level_description]) VALUES (30, N''INFO'', N''Log headers and footers'')
 
 
+
 GO
 INSERT [util].[Log_level] ([log_level_id], [log_level], [log_level_description]) VALUES (40, N''DEBUG'', N''Log everything only at top nesting level'')
 GO
@@ -1394,10 +1430,12 @@ end
 
 
 
+
 GO
 print '-- 16. schema_id'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -1498,10 +1536,12 @@ END
 
 
 
+
 GO
 print '-- 17. column_type_name'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -1534,10 +1574,12 @@ END
 
 
 
+
 GO
 print '-- 18. split'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -1590,10 +1632,12 @@ END
 
 
 
+
 GO
 print '-- 19. refresh_views'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -1681,10 +1725,12 @@ END
 
 
 
+
 GO
 print '-- 20. ddl_other'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -1799,6 +1845,7 @@ begin
 
 
 
+
       print 'print ''-- '+ convert(varchar(255), @id) + '. '+ @obj_name + '''
 
 	  GO
@@ -1833,10 +1880,12 @@ end
 
 
 
+
 GO
 print '-- 21. apply_params'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -1911,10 +1960,12 @@ END
 
 
 
+
 GO
 print '-- 22. const'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -1955,10 +2006,12 @@ END
 
 
 
+
 GO
 print '-- 23. Int2Char'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -1982,10 +2035,12 @@ END
 
 
 
+
 GO
 print '-- 24. parent'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -2024,10 +2079,12 @@ END
 
 
 
+
 GO
 print '-- 25. Col_ext'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -2074,10 +2131,12 @@ WHERE column_id IN ( 1140)
 
 
 
+
 GO
 print '-- 26. create_table'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -2170,6 +2229,7 @@ BEGIN
 	select @unique_index+= case when @unique_index='' then '' else ',' end + 
 	'['+ column_name + ']' + @nl
 	from @cols 
+
 	where part_of_unique_index = 1 
 
 
@@ -2270,6 +2330,7 @@ SET @refresh_sql = '
 	INSERT INTO @p VALUES ('obj_name'				, @obj_name) 
 	INSERT INTO @p VALUES ('obj_name_striped'		, REPLACE(REPLACE(@obj_name, '[', ''), ']', '') )
 	INSERT INTO @p VALUES ('schema_id'				, @schema_id) 
+
 	INSERT INTO @p VALUES ('prim_key'				, @prim_key ) 
 
 
@@ -2329,10 +2390,12 @@ END
 
 
 
+
 GO
 print '-- 27. ddl_betl'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -2456,6 +2519,7 @@ GO
 	+convert(varchar(255), @build_dt) + ''')
 	GO
 	'
+
 	exec [dbo].[ddl_other]
 
 
@@ -2470,10 +2534,12 @@ end
 
 
 
+
 GO
 print '-- 28. get_obj_id'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -2563,6 +2629,7 @@ BEGIN
 
 
 
+
 	end 
 	if @obj_id <0 -- ambiguous object-id 
 	begin
@@ -2596,10 +2663,12 @@ END
 
 
 
+
 GO
 print '-- 29. get_prop_obj_id'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -2669,10 +2738,12 @@ end
 
 
 
+
 GO
 print '-- 30. getp'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -2777,10 +2848,12 @@ end
 
 
 
+
 GO
 print '-- 31. guess_entity_name'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -2823,10 +2896,12 @@ END
 
 
 
+
 GO
 print '-- 32. guess_foreign_col_id'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -2898,10 +2973,12 @@ END
 
 
 
+
 GO
 print '-- 33. guess_prefix'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -2962,10 +3039,12 @@ END
 
 
 
+
 GO
 print '-- 34. info'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -3058,6 +3137,7 @@ BEGIN
 
 
 
+
 	LEFT OUTER JOIN [def].[Obj] AS parent_o ON o.parent_id = parent_o.[object_id] 
 	LEFT OUTER JOIN [def].[Obj] AS grand_parent_o ON parent_o.parent_id = grand_parent_o.[object_id] 
 	LEFT OUTER JOIN [def].[Obj] AS great_grand_parent_o ON grand_parent_o.parent_id = great_grand_parent_o.[object_id] 
@@ -3094,10 +3174,12 @@ END
 
 
 
+
 GO
 print '-- 35. Prop_ext'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -3140,10 +3222,12 @@ LEFT OUTER JOIN
 
 
 
+
 GO
 print '-- 36. push'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -3235,6 +3319,7 @@ BEGIN
 			, @cols dbo.ColumnTable
 			, @cols_str varchar(4000) 
 			, @attr_cols_str varchar(4000) 
+
 
 
 --			, @nat_prim_keys ColumnTable
@@ -3342,6 +3427,7 @@ BEGIN
 	, @obj_name = [object_name]
 
 
+
 	, @prefix = [prefix]
 	, @obj_name_no_prefix = [object_name_no_prefix]
 	, @default_template_id = default_template_id 
@@ -3422,6 +3508,7 @@ BEGIN
 	 if ( select count(*) from @cols WHERE column_type_id=110 ) = 0  and @template_id=10 -- we need >0 nat_pkey
 
 
+
 	 BEGIN 
 		exec dbo.log 'error',  'natural foreign keys not found for ?. Please set column_type_id 110 in [def].[Col_ext].', @full_object_name
 		goto footer
@@ -3496,6 +3583,7 @@ BEGIN
 		, @has_record_dt = def.get_prop_obj_id('has_record_dt', @trg_schema_id ) 
 
 
+
 		, @has_record_user = def.get_prop_obj_id('has_record_user', @trg_schema_id ) 
 		, @etl_meta_fields = def.get_prop_obj_id('etl_meta_fields', @trg_schema_id) 
 		, @recreate_tables = def.get_prop_obj_id('recreate_tables', @trg_schema_id ) 
@@ -3560,6 +3648,7 @@ BEGIN
 	INNER JOIN def.Col sur_fkey ON sur_fkey.column_id = c.[foreign_sur_pkey] -- get [foreign_sur_pkey] details
 
 
+
 	where 
 		( @template_id IN ( 10)  and c.column_type_id in ( 110) ) -- links sur_fkey
 	order by c.ordinal_position asc
@@ -3622,6 +3711,7 @@ BEGIN
 
 
 
+
 			insert into @trg_cols ( [ordinal_position]					, [column_name]		, [column_value]	, data_type		, max_len , column_type_id ,is_nullable) 
 			values ( (select max(ordinal_position)+1 from @trg_cols)	,  'etl_active_flg'	, 1					, 'bit'			, NULL	  , 999				, 0) 
 
@@ -3679,6 +3769,7 @@ BEGIN
 	 
 	 --set @attribute_match_str=''
 	 --select @attribute_match_str+=case when @attribute_match_str='' then 'src.' else ' AND src.' end 
+
 
 
 	 --+  cols.column_name + ' = trg.' + cols.column_name 
@@ -3758,6 +3849,7 @@ BEGIN
 
 		insert into @trg_cols 
 		select * from def.get_cols(@trg_obj_id)
+
 
 
 --		where column_type_id <> 999 -- skip meta data cols 
@@ -3840,6 +3932,7 @@ select ''<trg_full_obj_name>'' trg_full_obj_name
 
 	EXEC util.apply_params @catch_sql output, @p
 	insert into @p values ('catch_sql'				, @catch_sql) 
+
 
 
 	EXEC util.apply_params @from output, @p
@@ -3949,6 +4042,7 @@ where transfer_id = <transfer_id>
 use <trg_db>;
 insert into <trg_full_obj_name>(<trg_sur_pkey1>, <trg_cols_str>, etl_transfer_id, etl_load_dt)
 
+
 	select trg.<trg_sur_pkey1>, src.*, <transfer_id>, ''<transfer_start_dt>''
 
 	from ( 
@@ -4029,6 +4123,7 @@ INNER JOIN '+ foreign_cols.[full_object_name] + ' as lookup_' + CONVERT(VARCHAR(
 		FROM @cols cols
 		INNER JOIN [def].[Col_ext] [foreign_cols] ON cols.[foreign_sur_pkey] = foreign_cols.column_id
 		WHERE cols.column_type_id = 110 -- nat_fkey 
+
 
 
 		--exec dbo.log 'var', 'lookup_sql ?', @lookup_sql
@@ -4121,6 +4216,7 @@ where trg.<sur_pkey1> is null -- not exist
 			, @transfer_id 
 			, @template_id = 11 -- only sat
 
+
 	-- standard BETL footer code... 
 
     footer:
@@ -4138,10 +4234,12 @@ END
 
 
 
+
 GO
 print '-- 37. refresh_obj_id'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -4216,6 +4314,7 @@ BEGIN
 			, @use_linked_server as bit 
 	--		, @is_localhost as bit 
 
+
 			, @from varchar(255) 
 
 
@@ -4286,12 +4385,12 @@ and  ( (q.object_name is null     and Obj.delete_dt is null ) or
 	  else 
 		set @from =  '<db>.information_schema.SCHEMATA	'
 
-		set @sql2 = ' select distinct <object_type_id> object_type_id, [SCHEMA_NAME] collate Latin1_General_CI_AS as [object_NAME], <parent_id> parent_id
+		set @sql2 = ' select distinct <object_type_id> object_type_id, [SCHEMA_NAME] as [object_NAME], <parent_id> parent_id
 									 from <from> '
   		set @sql = '
 insert into [def].[Obj] (object_type_id, object_name, parent_id) 
 	<sql2>
-where schema_owner = "dbo" and [schema_NAME] collate Latin1_General_CI_AS not in ( 
+where schema_owner = "dbo" and [schema_NAME] not in ( 
 	select object_name from [def].[Obj] where parent_id = <parent_id> )
 					
 update [def].[Obj] 				 			 
@@ -4306,6 +4405,7 @@ where Obj.parent_id = <parent_id>
 
 
 and  ( (q.object_name is null     and Obj.delete_dt is null ) or 
+
 	(q.object_name is not null and Obj.delete_dt is not null ) )
 '
 	end 
@@ -4316,7 +4416,7 @@ and  ( (q.object_name is null     and Obj.delete_dt is null ) or
 	   exec dbo.log 'step', 'refreshing schema ?', @object_name
 	   set @sql3 = ' select distinct table_name object_name, table_type, p.prefix_name prefix
 					 from <db>.information_schema.tables 
-					 left join [def].Prefix p on [util].[prefix_first_underscore](table_name) = p.prefix_name collate Latin1_General_CI_AS 
+					 left join [def].Prefix p on [util].[prefix_first_underscore](table_name) = p.prefix_name 
 					 where table_schema = "<schema>"
 				  '
 
@@ -4333,7 +4433,7 @@ select case when table_type = "VIEW" then def.const("view") else def.const("tabl
 		, case when prefix is not null and len(prefix)>0 then substring(object_name, len(prefix)+2, len(object_name) - len(prefix)-1) else object_name end object_name_no_prefix
 		from 
 	(<sql2>) q 
-where q.object_name collate Latin1_General_CI_AS not in ( 
+where q.object_name not in ( 
 	select object_name  from [def].[Obj] where parent_id = <parent_id> )
 order by q.object_name
 					
@@ -4342,7 +4442,7 @@ set delete_dt = case
 when q.object_name is null and Obj.delete_dt is null then <dt> 
 when q.object_name  is not null and Obj.delete_dt is not null then null end
 from [def].[Obj] 
-left join (<sql2>) q on Obj.object_name = q.object_name collate Latin1_General_CI_AS 
+left join (<sql2>) q on Obj.object_name = q.object_name 
 where Obj.parent_id = <parent_id> 
 and  ( (q.object_name is null     and Obj.delete_dt is null ) or 
 	(q.object_name is not null and Obj.delete_dt is not null ) )
@@ -4356,7 +4456,7 @@ and  ( (q.object_name is null     and Obj.delete_dt is null ) or
 select 
 	<obj_id> object_id 
 , ordinal_position
-, column_name collate Latin1_General_CI_AS column_name
+, column_name column_name
 , case when is_nullable="YES" then 1 when is_nullable="NO" then 0 else NULL end is_nullable
 , data_type 
 , character_maximum_length max_len
@@ -4379,19 +4479,20 @@ select
 			set @cols_sql = '
 <cols_sql_select>
 from openquery( [<srv>], 
-"select ordinal_position, COLUMN_NAME collate Latin1_General_CI_AS column_name
-, IS_NULLABLE, DATA_TYPE collate Latin1_General_CI_AS data_type, CHARACTER_MAXIMUM_LENGTH max_len
+"select ordinal_position, COLUMN_NAME column_name
+
+, IS_NULLABLE, DATA_TYPE data_type, CHARACTER_MAXIMUM_LENGTH max_len
 , numeric_precision
 , numeric_scale
 , derived_column_type_id 
-from <db>.information_schema.columns where TABLE_SCHEMA collate Latin1_General_CI_AS = ""<schema>""
-and table_name collate Latin1_General_CI_AS = ""<object>""
+from <db>.information_schema.columns where TABLE_SCHEMA = ""<schema>""
+and table_name = ""<object>""
 order by ordinal_position asc"
 		'
 		else
 			set @cols_sql = '
 <cols_sql_select>
-from <db>.information_schema.columns where TABLE_SCHEMA collate Latin1_General_CI_AS = "<schema>"
+from <db>.information_schema.columns where TABLE_SCHEMA = "<schema>"
 and table_name = "<object>"
 			'
 
@@ -4465,6 +4566,7 @@ BEGIN TRY
 		      
 		-- new records
 		insert into def.Col_hist ( object_id,column_name, eff_dt,  ordinal_position,is_nullable,data_type,max_len,numeric_precision,numeric_scale, chksum, transfer_id, column_type_id,src_column_id, prefix, entity_name, foreign_column_id) 
+
 		select object_id,column_name, eff_dt, ordinal_position,is_nullable,data_type,max_len,numeric_precision,numeric_scale, chksum, -1 , derived_column_type_id,src_column_id , prefix, entity_name, foreign_column_id from #mut
 		where mutation = "NEW"
   
@@ -4542,6 +4644,7 @@ END CATCH
 	insert into @p values ('tmp_table'				, '#refresh_cols_tmp_'+replace(@object_name, ' ', '_') ) 
 	insert into @p values ('transfer_id'				, util.trim(@transfer_id,0)) 
 	insert into @p values ('date'				    , util.addQuotes(convert(varchar(50), getdate(),109) ) ) 
+
 	insert into @p values ('db-name'				, @db ) 
 	insert into @p values ('current_db'				, @current_db ) 
 	insert into @p values ('from'					, @from ) 
@@ -4602,10 +4705,12 @@ END
 
 
 
+
 GO
 print '-- 38. schema_name'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -4650,10 +4755,12 @@ END
 
 
 
+
 GO
 print '-- 39. start_run'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -4741,6 +4848,7 @@ BEGIN
 	select @cmd = def.trim(  SUBSTRING(@cmd_str,1,@i-1) ,1 )
 
 
+
 	select @src = def.trim(  SUBSTRING(@cmd_str,@i, len(@cmd_str) - @i+1)  ,1 )
 
 
@@ -4804,10 +4912,12 @@ END
 
 
 
+
 GO
 print '-- 40. dec_nesting'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -4844,10 +4954,12 @@ end
 
 
 
+
 GO
 print '-- 41. exec_sql'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -4922,10 +5034,12 @@ END
 
 
 
+
 GO
 print '-- 42. get_prop'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -4959,10 +5073,12 @@ end
 
 
 
+
 GO
 print '-- 43. inc_nesting'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -4999,10 +5115,12 @@ end
 
 
 
+
 GO
 print '-- 44. log'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -5116,6 +5234,7 @@ BEGIN
 		set @msg += ', @i3'
 	if @i4 is not null and CHARINDEX('%4', @msg)=0 
 		set @msg += ', @i4'
+
 	if @i5 is not null and CHARINDEX('%5', @msg)=0 
 
 
@@ -5165,10 +5284,12 @@ END
 
 
 
+
 GO
 print '-- 45. my_info'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -5230,10 +5351,12 @@ END
 
 
 
+
 GO
 print '-- 46. refresh'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -5297,10 +5420,12 @@ END
 
 
 
+
 GO
 print '-- 47. set_target_schema'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -5339,10 +5464,12 @@ end
 
 
 
+
 GO
 print '-- 48. setp'
 
 	  GO
+	  
 	  
 	  
 	  
@@ -5447,6 +5574,7 @@ end
 
 
 
+
 GO
 
 GO
@@ -5495,6 +5623,7 @@ GO
 
 INSERT [def].[Prefix] ([prefix_name], [default_template_id]) VALUES (N'stgd', 12)
 
+
 GO
 INSERT [def].[Prefix] ([prefix_name], [default_template_id]) VALUES (N'stgf', 13)
 GO
@@ -5518,6 +5647,7 @@ INSERT [def].[Property] ([property_id], [property_name], [description], [propert
 GO
 INSERT [def].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (60, N'date_datatype_based_on_suffix', N'if a column ends with the suffix _date then it''s a date datatype column (instead of e.g. datetime)', N'db_object', N'1', NULL, NULL, NULL, NULL, 1, NULL, CAST(N'2015-09-02T13:16:15.733' AS DateTime), N'C2H_PC\BAS')
 
+
 GO
 INSERT [def].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (70, N'is_localhost', N'This server is localhost. For performance reasons we don''t want to access localhost via linked server as we would with external sources', N'db_object', N'0', NULL, NULL, NULL, NULL, 1, NULL, CAST(N'2015-09-24T16:22:45.233' AS DateTime), N'C2H_PC\BAS')
 GO
@@ -5534,6 +5664,7 @@ GO
 INSERT [def].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (120, N'exec_sql', N'set this to 0 to print the generated sql instead of executing it. usefull for debugging', N'user', N'1', NULL, NULL, NULL, NULL, NULL, 1, CAST(N'2017-02-02T15:04:49.867' AS DateTime), N'')
 GO
 INSERT [def].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (130, N'log_level', N'controls the amount of logging. ERROR,INFO, DEBUG, VERBOSE', N'user', N'INFO', NULL, NULL, NULL, NULL, NULL, 1, CAST(N'2017-02-02T15:06:12.167' AS DateTime), N'')
+
 
 GO
 INSERT [def].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (140, N'nesting', N'used by dbo.log in combination with log_level  to determine wheter or not to print a message', N'user', N'0', NULL, NULL, NULL, NULL, NULL, 1, CAST(N'2017-02-02T15:08:02.967' AS DateTime), N'')
@@ -5575,6 +5706,7 @@ INSERT [util].[Log_level] ([log_level_id], [log_level], [log_level_description])
 GO
 INSERT [util].[Log_level] ([log_level_id], [log_level], [log_level_description]) VALUES (30, N'INFO', N'Log headers and footers')
 
+
 GO
 INSERT [util].[Log_level] ([log_level_id], [log_level], [log_level_description]) VALUES (40, N'DEBUG', N'Log everything only at top nesting level')
 GO
@@ -5596,4 +5728,4 @@ INSERT [util].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES 
 GO
 INSERT [util].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES (70, N'Step', 30)
 GO
---END BETL Release version 3.0.68 , date: 2017-09-12 15:52:19
+--END BETL Release version 3.0.69 , date: 2017-12-07 10:12:45
