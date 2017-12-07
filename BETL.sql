@@ -1,5 +1,5 @@
 
--- START BETL Release version 3.0.69 , date: 2017-12-07 10:12:45
+-- START BETL Release version 3.0.71 , date: 2017-12-07 15:47:11
 
 -- schemas
 IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = N'def')
@@ -66,7 +66,7 @@ GO
 CREATE TABLE [def].[Object_type]
 (
 	  [object_type_id] INT NOT NULL
-	, [object_type] VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [object_type] VARCHAR(100) NULL
 	, CONSTRAINT [PK_Object_type] PRIMARY KEY ([object_type_id] ASC)
 )
 
@@ -74,7 +74,7 @@ CREATE TABLE [def].[Object_type]
 GO
 CREATE TABLE [def].[Prefix]
 (
-	  [prefix_name] VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
+	  [prefix_name] VARCHAR(100) NOT NULL
 	, [default_template_id] INT NULL
 )
 
@@ -83,10 +83,10 @@ GO
 CREATE TABLE [def].[Property]
 (
 	  [property_id] INT NOT NULL
-	, [property_name] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
-	, [description] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
-	, [property_scope] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
-	, [default_value] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [property_name] VARCHAR(255) NULL
+	, [description] VARCHAR(255) NULL
+	, [property_scope] VARCHAR(50) NULL
+	, [default_value] VARCHAR(255) NULL
 	, [apply_table] BIT NULL
 	, [apply_view] BIT NULL
 	, [apply_schema] BIT NULL
@@ -94,7 +94,7 @@ CREATE TABLE [def].[Property]
 	, [apply_srv] BIT NULL
 	, [apply_user] BIT NULL
 	, [record_dt] DATETIME NULL DEFAULT(getdate())
-	, [record_user] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL DEFAULT(suser_sname())
+	, [record_user] VARCHAR(255) NULL DEFAULT(suser_sname())
 	, CONSTRAINT [PK_Property_1] PRIMARY KEY ([property_id] ASC)
 )
 
@@ -104,9 +104,9 @@ CREATE TABLE [def].[Property_value]
 (
 	  [property_id] INT NOT NULL
 	, [object_id] INT NOT NULL
-	, [value] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [value] VARCHAR(255) NULL
 	, [record_dt] DATETIME NULL
-	, [record_user] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [record_user] VARCHAR(255) NULL
 	, CONSTRAINT [PK_Property_Value] PRIMARY KEY ([property_id] ASC, [object_id] ASC)
 )
 
@@ -115,9 +115,9 @@ GO
 CREATE TABLE [def].[Template]
 (
 	  [template_id] SMALLINT NOT NULL
-	, [template] VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [template] VARCHAR(100) NULL
 	, [record_dt] DATETIME NULL DEFAULT(getdate())
-	, [record_name] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL DEFAULT(suser_sname())
+	, [record_name] VARCHAR(255) NULL DEFAULT(suser_sname())
 	, CONSTRAINT [PK_Template] PRIMARY KEY ([template_id] ASC)
 )
 
@@ -126,8 +126,8 @@ GO
 CREATE TABLE [util].[Log_level]
 (
 	  [log_level_id] SMALLINT NOT NULL
-	, [log_level] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
-	, [log_level_description] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [log_level] VARCHAR(50) NULL
+	, [log_level_description] VARCHAR(255) NULL
 	, CONSTRAINT [PK_Log_level_1] PRIMARY KEY ([log_level_id] ASC)
 )
 
@@ -136,7 +136,7 @@ GO
 CREATE TABLE [util].[Log_type]
 (
 	  [log_type_id] SMALLINT NOT NULL
-	, [log_type] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [log_type] VARCHAR(50) NULL
 	, [min_log_level_id] INT NULL
 	, CONSTRAINT [PK_Log_type_1] PRIMARY KEY ([log_type_id] ASC)
 )
@@ -160,8 +160,8 @@ CREATE TABLE [dbo].[Transfer]
 	, [batch_id] INT NULL
 	, [start_dt] DATETIME NULL
 	, [end_dt] DATETIME NULL
-	, [src_name] VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
-	, [dest_name] VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [src_name] VARCHAR(100) NULL
+	, [dest_name] VARCHAR(100) NULL
 	, [rec_cnt_src] INT NULL
 	, [rec_cnt_new] INT NULL
 	, [rec_cnt_changed] INT NULL
@@ -177,7 +177,7 @@ GO
 CREATE TABLE [dbo].[Batch]
 (
 	  [batch_id] INT NOT NULL IDENTITY(1,1)
-	, [batch_name] VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [batch_name] VARCHAR(100) NULL
 	, [batch_start_dt] DATETIME NULL DEFAULT(getdate())
 	, [batch_end_dt] DATETIME NULL
 	, [status_id] INT NULL
@@ -191,7 +191,7 @@ CREATE TABLE [dbo].[Transfer_log]
 (
 	  [log_id] INT NOT NULL IDENTITY(1,1)
 	, [log_dt] DATETIME NULL DEFAULT(getdate())
-	, [msg] VARCHAR(MAX) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [msg] VARCHAR(MAX) NULL
 	, [transfer_id] INT NULL
 	, [log_level_id] INT NULL
 	, [log_type_id] INT NULL
@@ -205,21 +205,21 @@ CREATE TABLE [dbo].[Error]
 (
 	  [error_id] INT NOT NULL IDENTITY(1,1)
 	, [error_code] INT NULL
-	, [error_msg] VARCHAR(5000) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [error_msg] VARCHAR(5000) NULL
 	, [error_line] INT NULL
-	, [error_procedure] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
-	, [error_procedure_id] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
-	, [error_execution_id] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
-	, [error_event_name] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [error_procedure] VARCHAR(255) NULL
+	, [error_procedure_id] VARCHAR(255) NULL
+	, [error_execution_id] VARCHAR(255) NULL
+	, [error_event_name] VARCHAR(255) NULL
 	, [error_severity] INT NULL
 	, [error_state] INT NULL
-	, [error_source] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
-	, [error_interactive_mode] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
-	, [error_machine_name] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
-	, [error_user_name] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [error_source] VARCHAR(255) NULL
+	, [error_interactive_mode] VARCHAR(255) NULL
+	, [error_machine_name] VARCHAR(255) NULL
+	, [error_user_name] VARCHAR(255) NULL
 	, [transfer_id] INT NULL
 	, [record_dt] DATETIME NULL DEFAULT(getdate())
-	, [record_user] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [record_user] VARCHAR(50) NULL
 	, CONSTRAINT [PK_error_id] PRIMARY KEY ([error_id] DESC)
 )
 
@@ -228,7 +228,7 @@ GO
 CREATE TABLE [dbo].[Status]
 (
 	  [transfer_status_id] INT NOT NULL
-	, [transfer_status_name] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [transfer_status_name] VARCHAR(50) NULL
 	, CONSTRAINT [PK_Status] PRIMARY KEY ([transfer_status_id] ASC)
 )
 
@@ -239,13 +239,13 @@ CREATE TABLE [def].[Col_hist]
 	  [column_id] INT NOT NULL IDENTITY(1,1)
 	, [eff_dt] DATETIME NOT NULL
 	, [object_id] INT NOT NULL
-	, [column_name] VARCHAR(64) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
-	, [prefix] VARCHAR(64) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
-	, [entity_name] VARCHAR(64) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [column_name] VARCHAR(64) NOT NULL
+	, [prefix] VARCHAR(64) NULL
+	, [entity_name] VARCHAR(64) NULL
 	, [foreign_column_id] INT NULL
 	, [ordinal_position] SMALLINT NULL
 	, [is_nullable] BIT NULL
-	, [data_type] VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [data_type] VARCHAR(100) NULL
 	, [max_len] INT NULL
 	, [numeric_precision] INT NULL
 	, [numeric_scale] INT NULL
@@ -253,7 +253,7 @@ CREATE TABLE [def].[Col_hist]
 	, [src_column_id] INT NULL
 	, [delete_dt] DATETIME NULL
 	, [record_dt] DATETIME NULL
-	, [record_user] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [record_user] VARCHAR(50) NULL
 	, [chksum] INT NOT NULL
 	, [transfer_id] INT NULL
 	, [part_of_unique_index] BIT NULL DEFAULT((0))
@@ -267,10 +267,10 @@ GO
 CREATE TABLE [def].[Column_type]
 (
 	  [column_type_id] INT NOT NULL
-	, [column_type_name] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
-	, [column_type_description] VARCHAR(255) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [column_type_name] VARCHAR(50) NULL
+	, [column_type_description] VARCHAR(255) NULL
 	, [record_dt] DATETIME NULL
-	, [record_user] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [record_user] VARCHAR(50) NULL
 	, CONSTRAINT [PK_Column_type] PRIMARY KEY ([column_type_id] ASC)
 )
 
@@ -280,15 +280,15 @@ CREATE TABLE [def].[Obj]
 (
 	  [object_id] INT NOT NULL IDENTITY(1,1)
 	, [object_type_id] INT NOT NULL
-	, [object_name] VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS NOT NULL
+	, [object_name] VARCHAR(100) NOT NULL
 	, [parent_id] INT NULL
-	, [scope] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [scope] VARCHAR(50) NULL
 	, [template_id] SMALLINT NULL
 	, [delete_dt] DATETIME NULL
 	, [record_dt] DATETIME NULL DEFAULT(getdate())
-	, [record_user] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL DEFAULT(suser_sname())
-	, [prefix] VARCHAR(50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
-	, [object_name_no_prefix] VARCHAR(100) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+	, [record_user] VARCHAR(50) NULL DEFAULT(suser_sname())
+	, [prefix] VARCHAR(50) NULL
+	, [object_name_no_prefix] VARCHAR(100) NULL
 	, CONSTRAINT [PK__Object] PRIMARY KEY ([object_id] DESC)
 )
 
@@ -301,7 +301,7 @@ CREATE UNIQUE NONCLUSTERED INDEX [UIX__Object_id_parent_object_id] ON [def].[Obj
 
 GO
 
-	INSERT [dbo].[Version] ([major_version], [minor_version], [build], build_dt) VALUES (3,0,69,'2017-12-07 10:12:45')
+	INSERT [dbo].[Version] ([major_version], [minor_version], [build], build_dt) VALUES (3,0,71,'2017-12-07 15:47:11')
 	GO
 	
 print '-- 1. Obj_ext'
@@ -1110,7 +1110,7 @@ SELECT @SQL = 'CREATE TABLE ' + @object_name + CHAR(13) + '(' + CHAR(13) + STUFF
                        THEN '(' + CAST(c.[precision] AS VARCHAR(5)) + ',' + CAST(c.scale AS VARCHAR(5)) + ')'
                     ELSE ''
                 END +
-                CASE WHEN c.collation_name IS NOT NULL THEN ' COLLATE ' + c.collation_name ELSE '' END +
+--                CASE WHEN c.collation_name IS NOT NULL THEN ' COLLATE ' + c.collation_name ELSE '' END +
                 CASE WHEN c.is_nullable = 1 THEN ' NULL' ELSE ' NOT NULL' END +
                 CASE WHEN dc.[definition] IS NOT NULL THEN ' DEFAULT' + dc.[definition] ELSE '' END + 
                 CASE WHEN ic.is_identity = 1 THEN ' IDENTITY(' + CAST(ISNULL(ic.seed_value, '0') AS CHAR(1)) + ',' + CAST(ISNULL(ic.increment_value, '1') AS CHAR(1)) + ')' ELSE '' END 
@@ -5728,4 +5728,4 @@ INSERT [util].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES 
 GO
 INSERT [util].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES (70, N'Step', 30)
 GO
---END BETL Release version 3.0.69 , date: 2017-12-07 10:12:45
+--END BETL Release version 3.0.71 , date: 2017-12-07 15:47:11
