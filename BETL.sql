@@ -1,5 +1,5 @@
 
--- START BETL Release version 3.0.71 , date: 2017-12-07 15:47:11
+-- START BETL Release version 3.0.72 , date: 2017-12-07 15:49:31
 
 -- schemas
 IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = N'def')
@@ -301,7 +301,7 @@ CREATE UNIQUE NONCLUSTERED INDEX [UIX__Object_id_parent_object_id] ON [def].[Obj
 
 GO
 
-	INSERT [dbo].[Version] ([major_version], [minor_version], [build], build_dt) VALUES (3,0,71,'2017-12-07 15:47:11')
+	INSERT [dbo].[Version] ([major_version], [minor_version], [build], build_dt) VALUES (3,0,72,'2017-12-07 15:49:31')
 	GO
 	
 print '-- 1. Obj_ext'
@@ -5728,4 +5728,4 @@ INSERT [util].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES 
 GO
 INSERT [util].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES (70, N'Step', 30)
 GO
---END BETL Release version 3.0.71 , date: 2017-12-07 15:47:11
+--END BETL Release version 3.0.72 , date: 2017-12-07 15:49:31
