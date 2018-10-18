@@ -54,8 +54,8 @@ we assume that the schema where A lives has a default target schema which will b
 
 BETL uses extensive logging, so you can see what happens. Debugging is also easy. Just switch on the debugmode and invoke this command in management studio. You will get the SQL that will be executed. 
 
-Please visit our [wiki](wiki) for getting started. 
-go directly to [getting started](wiki/Getting-started)
+Please visit our [wiki](https://github.com/basvdberg/betl/wiki) for getting started. 
+go directly to [getting started](https://github.com/basvdberg/betl/wiki/Getting-started)
 
 ## Latest news
 
