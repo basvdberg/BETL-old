@@ -3,10 +3,6 @@
 set nocount on 
 use betl 
 
--- WARNING: This will clear the betl database !
-IF EXISTS (SELECT * FROM sys.objects WHERE type = 'P' AND name = 'ddl_clear')
-	exec dbo.ddl_clear @execute=1
-
 -- schemas
 IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = N'util')
 begin
