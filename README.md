@@ -1,4 +1,5 @@
-# BETL (http://www.etlautomation.com)
+# BETL 
+Find more about BETL here: http://www.etlautomation.com.
 
 Welcome to BETL, an open source ETL automation engine, written in 100% T-SQL (MS SQL Server). The main reasons for using BETL are:
 
