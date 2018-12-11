@@ -1,0 +1,30 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.136
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{F14B399A-7131-4C87-9E4B-1186C45EF12D}") = "BETL Reporting", "BETL Reporting.rptproj", "{186FAED6-E508-431E-8BB6-29C0495F7DA1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Default = Debug|Default
+		DebugLocal|Default = DebugLocal|Default
+		Release|Default = Release|Default
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{186FAED6-E508-431E-8BB6-29C0495F7DA1}.Debug|Default.ActiveCfg = Debug
+		{186FAED6-E508-431E-8BB6-29C0495F7DA1}.Debug|Default.Build.0 = Debug
+		{186FAED6-E508-431E-8BB6-29C0495F7DA1}.Debug|Default.Deploy.0 = Debug
+		{186FAED6-E508-431E-8BB6-29C0495F7DA1}.DebugLocal|Default.ActiveCfg = DebugLocal
+		{186FAED6-E508-431E-8BB6-29C0495F7DA1}.DebugLocal|Default.Build.0 = DebugLocal
+		{186FAED6-E508-431E-8BB6-29C0495F7DA1}.Release|Default.ActiveCfg = Release
+		{186FAED6-E508-431E-8BB6-29C0495F7DA1}.Release|Default.Build.0 = Release
+		{186FAED6-E508-431E-8BB6-29C0495F7DA1}.Release|Default.Deploy.0 = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B30B20FF-F2ED-4E20-970F-C8D3818EECA9}
+	EndGlobalSection
+EndGlobal
