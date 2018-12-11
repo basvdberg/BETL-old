@@ -8,3 +8,7 @@ Open BETL Reporting.sln using SQL server data tools.
 Next. check the connection in  Batch report.rdl.data. It currently points to localhost\betl.
 Preview the report. 
 If everyting works, you can deploy it to your report server. 
+
+Example report 
+
+![batch report 1](https://raw.githubusercontent.com/basvdberg/BETL/master/Documentation/batch_report_1.png)
