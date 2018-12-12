@@ -8465,5 +8465,3 @@ GO
 exec dbo.setp 'is_localhost', 1 , 'LOCALHOST'
 -- end of ddl_content
 --END BETL Release version 3.1.25 , date: 2018-12-12 09:51:06
-
-(1 row affected)
