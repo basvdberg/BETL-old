@@ -1,5 +1,5 @@
 
--- START BETL Release version 3.1.24 , date: 2018-12-06 23:19:23
+-- START BETL Release version 3.1.25 , date: 2018-12-12 09:51:06
 set nocount on 
 use betl 
 -- WARNING: This will clear the betl database !
@@ -77,6 +77,26 @@ CREATE TYPE [dbo].[SplitList] AS TABLE(
 )
 GO
 -- end user defined tables
+-- create table [dbo].[Batch]
+GO
+CREATE TABLE [dbo].[Batch]
+(
+	  [batch_id] INT NOT NULL IDENTITY(1,1)
+	, [batch_name] VARCHAR(100) NULL
+	, [batch_start_dt] DATETIME NULL DEFAULT(getdate())
+	, [batch_end_dt] DATETIME NULL
+	, [status_id] INT NULL
+	, [last_error_id] INT NULL
+	, [prev_batch_id] INT NULL
+	, [exec_server] VARCHAR(100) NULL DEFAULT(@@servername)
+	, [exec_host] VARCHAR(100) NULL DEFAULT(host_name())
+	, [exec_user] VARCHAR(100) NULL DEFAULT(suser_sname())
+	, [guid] BIGINT NULL
+	, [continue_batch] BIT NULL DEFAULT((0))
+	, [batch_seq] INT NULL
+	, CONSTRAINT [PK_run_id] PRIMARY KEY ([batch_id] DESC)
+)
+
 -- create table [static].[Server_type]
 GO
 CREATE TABLE [static].[Server_type]
@@ -480,60 +500,61 @@ CREATE TABLE [static].[Property]
 	, CONSTRAINT [PK_Property_1] PRIMARY KEY ([property_id] ASC)
 )
 
--- create table [dbo].[Batch]
-GO
-CREATE TABLE [dbo].[Batch]
-(
-	  [batch_id] INT NOT NULL IDENTITY(1,1)
-	, [batch_name] VARCHAR(100) NULL
-	, [batch_start_dt] DATETIME NULL DEFAULT(getdate())
-	, [batch_end_dt] DATETIME NULL
-	, [status_id] INT NULL
-	, [last_error_id] INT NULL
-	, [prev_batch_id] INT NULL
-	, [exec_server] VARCHAR(100) NULL DEFAULT(@@servername)
-	, [exec_host] VARCHAR(100) NULL DEFAULT(host_name())
-	, [exec_user] VARCHAR(100) NULL DEFAULT(suser_sname())
-	, [guid] BIGINT NULL
-	, [continue_batch] BIT NULL DEFAULT((0))
-	, [batch_seq] INT NULL
-	, CONSTRAINT [PK_run_id] PRIMARY KEY ([batch_id] DESC)
-)
-
 GO
 
-INSERT [static].[Version] ([major_version], [minor_version], [build], build_dt) VALUES (3,1,24,'2018-12-06 23:19:23')
+INSERT [static].[Version] ([major_version], [minor_version], [build], build_dt) VALUES (3,1,25,'2018-12-12 09:51:06')
 GO
 	
-print '-- 1. suffix_first_underscore'
-IF object_id('[util].[suffix_first_underscore]' ) is not null 
-  DROP FUNCTION [util].[suffix_first_underscore] 
+print '-- 1. prefix'
+IF object_id('[util].[prefix]' ) is not null 
+  DROP FUNCTION [util].[prefix] 
 GO
 	  
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-01 BvdB returns true if @s ends with @suffix
+select dbo.prefix('gfjhaaaaa_aap', 4) 
+*/
+CREATE FUNCTION [util].[prefix]
+(
+                @s as varchar(255)
+                , @len_suffix as int
+                --, @suffix as varchar(255)
+)
+RETURNS varchar(255)
+AS
+BEGIN
+                declare @n as int=len(@s) 
+                                                --, @n_suffix as int = len(@suffix)
+                declare @result as bit = 0 
+                return SUBSTRING(@s, 1, @n-@len_suffix) 
+END
 
+
+
+
+
+
+GO
+print '-- 2. addQuotes'
+IF object_id('[util].[addQuotes]' ) is not null 
+  DROP FUNCTION [util].[addQuotes] 
+GO
+	  
 /*------------------------------------------------------------------------------------------------
 -- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
 --------------------------------------------------------------------------------------------------
 -- 2017-01-01 BvdB 
-SELECT dbo.guess_foreignCol_id('par_relatie_id')
-SELECT [dbo].[suffix_first_underscore]('relatie_id')
-*/    
-CREATE FUNCTION [util].[suffix_first_underscore]( @column_name VARCHAR(255) ) 
-RETURNS VARCHAR(255) 
+*/
+CREATE FUNCTION [util].[addQuotes]
+(
+	@s varchar(7900) 
+)
+RETURNS varchar(8000) 
 AS
 BEGIN
-	DECLARE @res VARCHAR(255) 
-	,		@pos INT 
-	SET @pos = CHARINDEX('_', @column_name)
-	IF @pos IS NOT NULL
-		SET @res = SUBSTRING(@column_name, @pos+1, LEN(@column_name) - @pos)
-	RETURN @res 
-	/* 
-		declare @n as int=len(@s) 
-			--, @n_suffix as int = len(@suffix)
-	declare @result as bit = 0 
-	return SUBSTRING(@s, 1, @n-@len_suffix) 
-	*/
+	RETURN '''' + isnull(@s , '') + '''' 
 END
 
 
@@ -541,298 +562,7 @@ END
 
 
 GO
-print '-- 2. Transfer_ext'
-IF object_id('[dbo].[Transfer_ext]' ) is not null 
-  DROP VIEW [dbo].[Transfer_ext] 
-GO
-	  
-CREATE view [dbo].[Transfer_ext] as 
-select 
-t.[transfer_id]
-,t.[transfer_name]
-,t.[src_obj_id]
-,t.[target_name]
-,t.[transfer_start_dt]
-,t.[transfer_end_dt]
-,s.status_name status
-,t.[rec_cnt_src]
-,t.[rec_cnt_new]
-,t.[rec_cnt_changed]
-,t.[rec_cnt_deleted]
-,t.[last_error_id]
-,b.batch_id
-, b.[batch_start_dt] 
-,b.[batch_end_dt] 
-, b.batch_name
-, s.status_name batch_status 
-from dbo.Transfer t
-left join dbo.Batch b on t.batch_id = b.batch_id 
-left join static.Status s on s.status_id = t.status_id
-
-
-
-
-
-GO
-print '-- 3. apply_params'
-IF object_id('[util].[apply_params]' ) is not null 
-  DROP PROCEDURE [util].[apply_params] 
-GO
-	  	  
-	  
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB replaces parameters in a string by it's value
-Declare @p as ParamTable
-,	@sql as varchar(8000) = 'select <aap> from <wiz> where <where>="nice" '
-insert into @p values ('aap', 9)
-insert into @p values ('wiz', 'woz')
-print @sql 
-EXEC util.apply_params @sql output , @p
-print @sql 
-*/
-create PROCEDURE [util].[apply_params]
-	@sql as varchar(max) output
-	, @params as ParamTable readonly
-	, @apply_defaults as bit = 1 
-	as
-BEGIN
-	declare 
-		@nl as varchar(2) = CHAR(13) + CHAR(10)
-	declare
-		@tmp as varchar(max) ='-- [apply_params]'+@nl
-	SET NOCOUNT ON;
-
-	--if @progress =1 
-	--begin
-	--	select @tmp += '-- '+ param_name + ' : '+ replace(isnull(convert(varchar(max), p.param_value), '?'), @nl, @nl+'--')   + @nl  
-	--	from @params p
-	--	print @tmp 
-	--end
-		
-	-- insert some default params. 
-	select @sql = REPLACE(@sql, '<'+ p.param_name+ '>', isnull(convert(varchar(max), p.param_value), '<' + isnull(p.param_name, '?') + ' IS NULL>'))
-	from @params  p
-	if @apply_defaults =1 
-	begin 
-		declare @default_params ParamTable
-		insert into @default_params  values ('"', '''' ) 
-		insert into @default_params  values ('<dt>', ''''+ convert(varchar(50), GETDATE(), 121)  + '''' ) 
-		select @sql = REPLACE(@sql, p.param_name, convert(Varchar(255), p.param_value) )
-		from @default_params  p
-	end 
-END
-
-
-
-
-
-GO
-print '-- 4. ddl_clear'
-IF object_id('[dbo].[ddl_clear]' ) is not null 
-  DROP PROCEDURE [dbo].[ddl_clear] 
-GO
-	  
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-21 BvdB Beware: this will clear the entire BETL database (all non ms objects) !
-*/    
-CREATE procedure [dbo].[ddl_clear] @execute as bit = 0  as
-begin 
-	set nocount on 
-	declare @sql as varchar(max) =''
-	select @sql+= 'DROP '+
-	   case 
-	   when q.type ='P' then 'PROCEDURE' 
-	   when q.type='U' then 'TABLE'
-	   when q.type= 'V' then 'VIEW'
-	   when q.type= 'TT' then 'TYPE'
-	   else 'FUNCTION' end + ' ' + 
-	   fullname + '
-	;
-	'
-	from  (
-	select so.object_id, so.name , so.type,  quotename(s.name) + '.' + quotename(so.name)  fullname 
-	from sys.objects so
-	inner join sys.schemas s on so.schema_id = s.schema_id 
-	where     so.type in  ( 'U', 'V', 'P', 'IF' , 'FT', 'FS', 'FN', 'TF')
-						AND so.is_ms_shipped = 0
-     
-	union all 
-		SELECT null, name , 'TT' type ,name fullname
-		FROM sys.types WHERE is_table_type = 1 
-    ) q
-
---select quotename(s.name) + '.' + quotename(so.name), so.type
---from sys.objects so 
---inner join sys.schemas s on so.schema_id = s.schema_id 
---where   --  so.type in  ( 'U', 'V', 'P', 'IF' , 'FT', 'FS', 'FN')
---						 so.is_ms_shipped = 0
---order by 1
-				
-	if @execute = 1  
-	   exec(@sql) 
-	else 	
-		print @sql
-end
-
-
-
-
-GO
-print '-- 5. Batch_ext'
-IF object_id('[dbo].[Batch_ext]' ) is not null 
-  DROP VIEW [dbo].[Batch_ext] 
-GO
-	  
-create view dbo.Batch_ext as 
-select 
-b.[batch_id] 
-,b.[batch_name] 
-,b.[batch_start_dt] 
-,b.[batch_end_dt] 
-, s.status_name batch_status 
-, b.prev_batch_id
-, prev_b.batch_start_dt prev_batch_start_dt
-, prev_b.batch_end_dt prev_batch_end_dt
-, prev_s.status_name prev_batch_status 
-from dbo.Batch b
-inner join static.Status s on s.status_id = b.status_id
-left join dbo.Batch prev_b on b.prev_batch_id = prev_b.batch_id 
-left join static.Status prev_s on prev_s.status_id = prev_b.status_id
-
-
-
-
-
-GO
-print '-- 6. parse_sql'
-IF object_id('[util].[parse_sql]' ) is not null 
-  DROP FUNCTION [util].[parse_sql] 
-GO
-	  
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2018-04-19 BvdB performs a very basic parsing of a sql statement. returns colom clause before first from 
-	and first table after first from.  first record in @List is table, others are columns. 
-declare @sql as varchar(8000) = '--aap
-SELECT rel.naam_parent1 as top_relatie    ,rel.relatie_nummer as relatienummer    ,rel.naam as relatienaam    ,rel.kostenplaats_omschrvijving as kostenplaats    ,rpa as primaire_resource     ,regioteam    ,regioklantmanager as regioklantmanager    ,rel.cp_vz_naam_formeel as cp_naam    ,rel.cp_vz_email as cp_email    ,rel.cp_vz_telefoon as cp_telefoon       ,verzuimgevalnr    ,activiteit_id as activiteitID1       ,kld_herstel.datum as datum_invoer_herstel       ,kld_toegevoegd.datum as datum_toegevoegd    ,kld_verstuurd.datum as datum_versturen_uitnodiging    ,kld_verstuurd.jaar    ,kld_verstuurd.kortmaandnaam as maand       ,uitgenodigd.omschrijving as uitgenodigd       ,niet_uitgenodigd.reden_niet_uitgenodigd       ,ingevuld.ckto_ingevuld       ,kld_ingevuld.datum datum_ckto_ingevuld   FROM [feit_ckto_response] ckto   left outer join dim_Relatie as rel on ckto.dkey_relatie = rel.dkey_relatie --  left outer join dim_professional prof on rel.dkey_primaire_resource = prof.dkey_professional   left outer join dim_kalender as kld_herstel on ckto.dkey_datum_invoer_herstel = kld_herstel.dkey_kalender   left outer join dim_kalender as kld_toegevoegd on ckto.dkey_datum_toegevoegd = kld_toegevoegd.dkey_kalender   left outer join dim_kalender as kld_verstuurd on ckto.dkey_datum_versturen_uitnodiging = kld_verstuurd.dkey_kalender   left outer join dim_kalender as kld_ingevuld on ckto.dkey_datum_ckto_ingevuld = kld_ingevuld.dkey_kalender   left outer join dim_ja_nee as uitgenodigd on ckto.dkey_uitgenodigd_voor_ckto_ja_nee = uitgenodigd.jn_key   left outer join dim_reden_niet_uitgenodigd as niet_uitgenodigd on ckto.dkey_reden_niet_uitgenodigd = niet_uitgenodigd.dkey_reden_niet_uitgenodigd   left outer join dim_ckto_ingevuld as ingevuld on ckto.dkey_ckto_ingevuld = ingevuld.dkey_ckto_ingevuld
-'
-set @sql ='SELECT [hub_relatie_sid]
-      ,[type_account]
-      ,[account_id]
-      ,[account_code]
-           ,[korting5_percentage]
-FROM [feit_totaallijst_bb]
-WHERE aap '
-set @sql = 'SELECT [dkey_functie]       ,[functiegroep]       ,[functie]   FROM [dim_functie] WHERE dkey_functie in (  SELECT [dkey_functie]   FROM [dbo].[dim_professional]   where dkey_professional in (SELECT[dkey_professional_pa]   FROM [dbo].[dim_verzuim]))'
-select * from util.parse_sql(@sql)
-*/
-CREATE function [util].[parse_sql] (@sql VARCHAR(MAX)
-  ) RETURNS @List TABLE (item VARCHAR(8000), i int)
-BEGIN
-	declare @transfer_id as int = -1
-
-	-- END standard BETL header code... 
-	--set nocount on 
-	declare @proc_name as varchar(255) =  OBJECT_NAME(@@PROCID)
-	
-		, @i as int 
-		, @pos_space as int 
-		, @pos_char10 as int 
-		, @pos_char13 as int 
-		, @select_clause as varchar(8000)
-		, @from_clause as varchar(8000)
-	set @sql = util.remove_comments(@sql) 
-	--print @proc_name		
-	set @i = charindex('FROM', @sql, 0) 
-	if isnull(@i,0) =0 
-	begin
-		--exec dbo.log @transfer_id, 'ERROR', 'no from found in sql query ?', @sql
-		--print 'no from found in sql query ?'
-		goto footer
-	end
-	-- split on first occurance of FROM 
-	set @from_clause =substring(@sql,@i+4,len(@sql)-@i-3) 
-	set @select_clause =replace(replace( substring(@sql,0, @i-1) ,'select', '')  , 'as','') 
-	-- parse from clause 
-	set @from_clause = ltrim(@from_clause) 
-	set @pos_space  = charindex(' ', @from_clause,0)  
-	if @pos_space = 0 set @pos_space = null 
-	set @pos_char10 = charindex(char(10), @from_clause,0) 
-	if @pos_char10 = 0 set @pos_char10 = null 
-	set @pos_char13 = charindex(char(13), @from_clause,0) 
-	if @pos_char13 = 0 set @pos_char13 = null 
-	--insert into @List values ( 'pos_space', @pos_space ) 
-	--insert into @List values ( '@pos_char10', @pos_char10 ) 
-	--insert into @List values ( '@pos_char13', @pos_char13 ) 
-	set @i = convert(int, util.udf_min3(@pos_space , @pos_char10 , @pos_char13 ) )
-	if isnull(@i,0) =0 
-			set @i= len(@from_clause) 
-	set @from_clause = substring(@from_clause, 1, @i-1) 
-	insert into @List values (@from_clause,0) 
-	;
-	with q as( 
-		select ltrim(rtrim(util.filter(item,'char(10),char(13)'))) item 
-		,i
-		from util.split( @select_clause, ',') 
-	) 
-	insert into @List 
-	select item
-	, row_number() over (order by i) 
-	from q 
-	where len(item)>0
-	
-	--exec dbo.log @transfer_id, 'VAR', '@from_clause ?', @from_clause
---	exec dbo.log @transfer_id, 'VAR', '@select_clause ?', @select_clause
- 
-	footer:
- 	--exec dbo.log @transfer_id, 'footer', 'DONE ?', @proc_name 
-	return
-END
-
-
-
-
-
-GO
-print '-- 7. parent'
-IF object_id('[util].[parent]' ) is not null 
-  DROP FUNCTION [util].[parent] 
-GO
-	  
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2019-03-21 BvdB returns parent by parsing the string. e.g. localhost.AdventureWorks2014.dbo = localhost.AdventureWorks2014
-select util.parent('localhost.AdventureWorks2014.dbo')
-*/    
-CREATE FUNCTION [util].[parent]( @fullObj_name varchar(255) ) 
-RETURNS varchar(255) 
-AS
-BEGIN
-	declare @rev_str as varchar(255) 
-			, @i as int
-			, @res as varchar(255) 
-	set @rev_str = reverse(@fullObj_name ) 
-	set @i = charindex('.', @rev_str) 
-	
-	if @i = 0 
-		set @res = null 
-	else 
-		set @res =  substring( @fullObj_name, 1, len( @fullObj_name) - @i ) 
-	return @res 
-END
-
-
-
-
-
-GO
-print '-- 8. const'
+print '-- 3. const'
 IF object_id('[dbo].[const]' ) is not null 
   DROP FUNCTION [dbo].[const] 
 GO
@@ -864,405 +594,9 @@ END
 
 
 
-GO
-print '-- 9. udf_min'
-IF object_id('[util].[udf_min]' ) is not null 
-  DROP FUNCTION [util].[udf_min] 
-GO
-	  
-
-	  
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB returns the minimum of two numbers
-select util.udf_min(1,2)
-select util.udf_min(null,2)
-select util.udf_min(2,null)
-select util.udf_min(2,3)
-select util.udf_min(2,2)
-*/
-CREATE FUNCTION [util].[udf_min]
-(
- @a sql_variant,
- @b sql_variant
- 
-)
-RETURNS sql_variant
-AS
-BEGIN
- if @a is null or @b <= @a
-  return @b
- else
-  if @b is null or @a < @b
-   return @a
- return null
-END
-
-
-
 
 GO
-print '-- 10. print_max'
-IF object_id('[util].[print_max]' ) is not null 
-  DROP PROCEDURE [util].[print_max] 
-GO
-/* https://weblogs.asp.net/bdill/sql-server-print-max
-exec util.print_max 'atetew tewtew'
-*/
-CREATE  PROCEDURE util.print_max(@iInput NVARCHAR(MAX) ) 
-AS
-BEGIN
-    IF @iInput IS NULL
-    RETURN;
-    DECLARE @ReversedData NVARCHAR(MAX)
-          , @LineBreakIndex INT
-          , @SearchLength INT;
-    SET @SearchLength = 4000;
-    WHILE LEN(@iInput) > @SearchLength
-    BEGIN
-		SET @ReversedData = LEFT(@iInput COLLATE DATABASE_DEFAULT, @SearchLength);
-		SET @ReversedData = REVERSE(@ReversedData COLLATE DATABASE_DEFAULT);
-		SET @LineBreakIndex = CHARINDEX(CHAR(10) + CHAR(13),
-							  @ReversedData COLLATE DATABASE_DEFAULT);
-		PRINT LEFT(@iInput, @SearchLength - @LineBreakIndex + 1);
-		SET @iInput = RIGHT(@iInput, LEN(@iInput) - @SearchLength 
-							+ @LineBreakIndex - 1);
-    END;
-    IF LEN(@iInput) > 0
-    PRINT @iInput;
-END
-
-
-
-
-
-GO
-print '-- 11. content_type_name'
-IF object_id('[dbo].[content_type_name]' ) is not null 
-  DROP FUNCTION [dbo].[content_type_name] 
-GO
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB get name by id. 
-select dbo.[content_type_name](300) 
-*/
-create FUNCTION [dbo].[content_type_name]
-(
-	@content_type_id int
-)
-RETURNS varchar(255) 
-AS
-BEGIN
-	declare @content_type_name as varchar(255) 
-	select @content_type_name = [content_type_name] from dbo.Content_type where content_type_id = @content_type_id 
-	return @content_type_name + ' (' + convert(varchar(10), @content_type_id ) + ')'
-END
-
-
-
-
-GO
-print '-- 12. refresh_ssas_meta'
-IF object_id('[dbo].[refresh_ssas_meta]' ) is not null 
-  DROP PROCEDURE [dbo].[refresh_ssas_meta] 
-GO
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB reads ssas tabular meta data into repository
-*/
-CREATE procedure [dbo].[refresh_ssas_meta] as 
-begin 
-
-if object_id('tempdb..#ssas_queries') is not null
-	drop table #ssas_queries
-/* 
-disable because : SQL Server blocked access to STATEMENT 'OpenRowset/OpenDatasource' of component 'Ad Hoc Distributed Queries' because this component is turned off as part of the security configuration for this server. A system administrator can enable the use of 'Ad Hoc Distributed Queries' by using sp_configure. For more information about enabling 'Ad Hoc Distributed Queries', search for 'Ad Hoc Distributed Queries' in SQL Server Books Online.
-	 
-select * into #ssas_queries from openrowset('MSOLAP',
- 'DATASOURCE=ssas01.company.nl;Initial Catalog=TAB_CKTO_respons_company;User=company\991371;password=anT1svsrnv'
- , '
-select [name], [QueryDefinition] from 
-[$System].[TMSCHEMA_PARTITIONS]
-' ) 
-	
-select * from 
-#ssas_queries
-*/
-end
-
-
-
-
-GO
-print '-- 13. schema_id'
-IF object_id('[dbo].[schema_id]' ) is not null 
-  DROP FUNCTION [dbo].[schema_id] 
-GO
-	  
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2019-03-21 BvdB return schema_id of this full object name 
---  e.g. LOCALHOST.AdventureWorks2014.Person.Sales -> schema_id(LOCALHOST.AdventureWorks2014.Person)
-select dbo.object('LOCALHOST.AdventureWorks2014.Person.Sales') --> points to table 
-select dbo.object('LOCALHOST.AdventureWorks2014.Person') --> points to schema
-select dbo.object('LOCALHOST.AdventureWorks2014') --> points to db
-select dbo.object('LOCALHOST.BETL') --> points to db
-select dbo.object('LOCALHOST') --> points to srv
-select dbo.object('LOCALHOST.dbo') 
-select dbo.object('dbo') 
-*/
-CREATE FUNCTION [dbo].[schema_id]( @fullObj_name varchar(255), @scope varchar(255) = null  ) 
-RETURNS int
-AS
-BEGIN
-	--declare @fullObj_name varchar(255)= 'AdventureWorks.dbo.Store'
-	declare @t TABLE (item VARCHAR(8000), i int)
-	declare  
-	     @elem1 varchar(255)
-	     ,@elem2 varchar(255)
-	     ,@elem3 varchar(255)
-	     ,@elem4 varchar(255)
-		, @cnt_elems int 
-		, @object_id int 
-		, @remove_chars varchar(255)
-		, @cnt as int 
-		 
-	set @remove_chars = replace(@fullObj_name, '[','')
-	set @remove_chars = replace(@remove_chars , ']','')
-	
-	insert into @t 
-	select * from util.split(@remove_chars , '.') 
-	--select * from @t 
-	-- @t contains elemenents of fullObj_name 
-	-- can be [server].[db].[schema].[table|view]
-	-- as long as it's unique 
-	select @cnt_elems = MAX(i) from @t	
-	select @elem1 = item from @t where i=@cnt_elems
-	select @elem2 = item from @t where i=@cnt_elems-1
-	select @elem3 = item from @t where i=@cnt_elems-2
-	select @elem4 = item from @t where i=@cnt_elems-3
-	select @object_id= max(o.object_id), @cnt = count(*) 
-	from dbo.[Obj] o
-	LEFT OUTER JOIN dbo.[Obj] AS parent_o ON o.parent_id = parent_o.[object_id] 
-	LEFT OUTER JOIN dbo.[Obj] AS grand_parent_o ON parent_o.parent_id = grand_parent_o.[object_id] 
-	LEFT OUTER JOIN dbo.[Obj] AS great_grand_parent_o ON grand_parent_o.parent_id = great_grand_parent_o.[object_id] 
-	where 	o.[object_name] = @elem2
-	and ( @elem3 is null or parent_o.[object_name] = @elem3) 
-	and ( @elem4 is null or grand_parent_o.[object_name] = @elem4) 
-	and ( @scope is null or 
-			@scope = o.scope
-			or @scope = parent_o.scope
-			or @scope = grand_parent_o.scope
-			or @scope = great_grand_parent_o.scope) 
-	declare @res as int
-	if @cnt >1 
-		set @res =  -@cnt
-	else 
-		set @res =@object_id 
-	return @res 
-END
-
-
-
-
-GO
-print '-- 14. suffix'
-IF object_id('[util].[suffix]' ) is not null 
-  DROP FUNCTION [util].[suffix] 
-GO
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB returns true if @s ends with @suffix
-select util.suffix('gfjh_aap', '_aap') 
-select util.suffix('gfjh_aap', 4) 
-select util.suffix('gfjh_aap', '_a3p') 
-*/
-CREATE FUNCTION [util].[suffix]
-(
-	@s as varchar(255)
-	, @len_suffix as int
-	--, @suffix as varchar(255)
-)
-RETURNS varchar(255)
-AS
-BEGIN
-	declare @n as int=len(@s) 
-			--, @n_suffix as int = len(@suffix)
-	declare @result as bit = 0 
-	return SUBSTRING(@s, @n+1-@len_suffix, @len_suffix) 
-END
-
-
-
-
-GO
-print '-- 15. trim'
-IF object_id('[util].[trim]' ) is not null 
-  DROP FUNCTION [util].[trim] 
-GO
-	  
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-21 BvdB remove left and right spaces and double and single quotes. 
-*/    
-CREATE FUNCTION [util].[trim]
-(
-	@s varchar(200)
-	, @return_null bit = 1 
-)
-RETURNS varchar(200)
-AS
-BEGIN
-	declare @result as varchar(max)= replace(replace(convert(varchar(200), ltrim(rtrim(@s))), '"', ''), '''' , '')
-	if @return_null =0 
-		return isnull(@result , '') 
-	return @result 
-END
-
-
-
-
-GO
-print '-- 16. addQuotes'
-IF object_id('[util].[addQuotes]' ) is not null 
-  DROP FUNCTION [util].[addQuotes] 
-GO
-	  
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB 
-*/
-CREATE FUNCTION [util].[addQuotes]
-(
-	@s varchar(7900) 
-)
-RETURNS varchar(8000) 
-AS
-BEGIN
-	RETURN '''' + isnull(@s , '') + '''' 
-END
-
-
-
-
-GO
-print '-- 17. filter'
-IF object_id('[util].[filter]' ) is not null 
-  DROP FUNCTION [util].[filter] 
-GO
-	  
-/*---------------------------------------------------------------------------------------------
-BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL
------------------------------------------------------------------------------------------------
--- 2018-04-19 BvdB filter characters from string
-select util.filter('aap','d')
-select util.filter('
-aap
-', 'char(10),char(13)')
-select util.filter('
-"aap''
-', 'char(10),char(13),",''')
-*/
-CREATE FUNCTION [util].[filter]
-(
-	@s varchar(255)
-	, @filter varchar(200) 
---	, @return_null bit = 1 
-)
-RETURNS varchar(255)
-AS
-BEGIN
-	declare @result as varchar(max)= ''
-		, @i int =1
-		, @n int =len(@s) 
-		, @filter_list as SplitList
-		, @c as char
-	insert into @filter_list
-	select * from  util.split(@filter, ',')
-	
-	update @filter_list
-	set item = char(convert(int, replace(replace(item, 'char(',''), ')','')))  
-	from @filter_list
-	where item like 'char(%'
-	while @i<@n+1
-	begin
-		set @c = substring(@s, @i,1) 
-		if not exists ( select * from @filter_list where item = @c) 
-			set @result+=@c
-		set @i += 1 
-	end
---	if @return_null =0 
-	--	return isnull(@result , '') 
-	return @result 
-END
-
-
-
-
-GO
-print '-- 18. Int2Char'
-IF object_id('[util].[Int2Char]' ) is not null 
-  DROP FUNCTION [util].[Int2Char] 
-GO
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB 
-select util.int2Char(2)
-*/
-CREATE FUNCTION [util].[Int2Char] (     @i int)
-RETURNS varchar(15) AS
-BEGIN
-       RETURN isnull(convert(varchar(15), @i), '')
-END
-
-
-
-
-GO
-print '-- 19. Job_step_ext'
-IF object_id('[dbo].[Job_step_ext]' ) is not null 
-  DROP VIEW [dbo].[Job_step_ext] 
-GO
-	  
--- select * from dbo.Job_ext
-create view [dbo].[Job_step_ext] as 
-SELECT  j.[job_id]
-      ,j.[name] job_name
-      ,j.[description] job_description
-      ,j.[enabled] job_enabled
-      ,j.[category_name]
-      --,[job_schedule_id]
-      ,js.[name] schedule_name 
-      ,js.[enabled] schedule_enabled
-	  ,[step_id]
-      ,[step_name]
-      ,[subsystem]
-      ,[command]
-      ,[on_success_action]
-      ,[on_success_step_id]
-      ,[on_fail_action]
-      ,[on_fail_step_id]
-      ,[database_name]
-      
-  FROM [dbo].[Job] j
-  inner join dbo.Job_schedule  js on j.job_schedule_id = js.job_schedule_id
-  inner join dbo.Job_step s on s.job_id = j.job_id
---  order by j.job_id, s.step_id
-
-
-
-
-
-GO
-print '-- 20. Obj_ext'
+print '-- 4. Obj_ext'
 IF object_id('[dbo].[Obj_ext]' ) is not null 
   DROP VIEW [dbo].[Obj_ext] 
 GO
@@ -1358,277 +692,79 @@ left join dbo.Prefix p on q2_1.prefix = p.prefix_name
 
 
 
+
 GO
-print '-- 21. ddl_table'
-IF object_id('[dbo].[ddl_table]' ) is not null 
-  DROP PROCEDURE [dbo].[ddl_table] 
+print '-- 5. refresh_ssas_meta'
+IF object_id('[dbo].[refresh_ssas_meta]' ) is not null 
+  DROP PROCEDURE [dbo].[refresh_ssas_meta] 
 GO
-	  
 /*------------------------------------------------------------------------------------------------
 -- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
 --------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB print create table ddl (part of ddl_betl). 
-exec dbo.ddl_table '[dbo].[Job]'
+-- 2017-01-01 BvdB reads ssas tabular meta data into repository
 */
-CREATE procedure [dbo].[ddl_table] @table_name SYSNAME
-as 
+CREATE procedure [dbo].[refresh_ssas_meta] as 
 begin 
-DECLARE 
-      @object_name SYSNAME
-    , @object_id INT
-SELECT 
-      @object_name = '[' + s.name + '].[' + o.name + ']'
-    , @object_id = o.[object_id]
-FROM sys.objects o WITH (NOWAIT)
-JOIN sys.schemas s WITH (NOWAIT) ON o.[schema_id] = s.[schema_id]
-WHERE quotename(s.name) + '.' + quotename(o.name) = @table_name
-    AND o.[type] = 'U'
-    AND o.is_ms_shipped = 0
-DECLARE @SQL NVARCHAR(MAX) = ''
-;WITH index_column AS 
-(
-    SELECT 
-          ic.[object_id]
-        , ic.index_id
-        , ic.is_descending_key
-        , ic.is_included_column
-        , c.name
-    FROM sys.index_columns ic WITH (NOWAIT)
-    JOIN sys.columns c WITH (NOWAIT) ON ic.[object_id] = c.[object_id] AND ic.column_id = c.column_id
-    WHERE ic.[object_id] = @object_id
-),
-fk_columns AS 
-(
-     SELECT 
-          k.constraint_object_id
-        , cname = c.name
-        , rcname = rc.name
-    FROM sys.foreign_key_columns k WITH (NOWAIT)
-    JOIN sys.columns rc WITH (NOWAIT) ON rc.[object_id] = k.referenced_object_id AND rc.column_id = k.referenced_column_id 
-    JOIN sys.columns c WITH (NOWAIT) ON c.[object_id] = k.parent_object_id AND c.column_id = k.parent_column_id
-    WHERE k.parent_object_id = @object_id
-)
-SELECT @SQL = 'CREATE TABLE ' + @object_name + CHAR(13) + '(' + CHAR(13) + STUFF((
-    SELECT CHAR(9) + ', [' + c.name + '] ' + 
-        CASE WHEN c.is_computed = 1
-            THEN 'AS ' + cc.[definition] 
-            ELSE UPPER(tp.name) + 
-                CASE WHEN tp.name IN ('varchar', 'char', 'varbinary', 'binary', 'text')
-                       THEN '(' + CASE WHEN c.max_length = -1 THEN 'MAX' ELSE CAST(c.max_length AS VARCHAR(5)) END + ')'
-                     WHEN tp.name IN ('nvarchar', 'nchar', 'ntext')
-                       THEN '(' + CASE WHEN c.max_length = -1 THEN 'MAX' ELSE CAST(c.max_length / 2 AS VARCHAR(5)) END + ')'
-                     WHEN tp.name IN ('datetime2', 'time2', 'datetimeoffset') 
-                       THEN '(' + CAST(c.scale AS VARCHAR(5)) + ')'
-                     WHEN tp.name = 'decimal' 
-                       THEN '(' + CAST(c.[precision] AS VARCHAR(5)) + ',' + CAST(c.scale AS VARCHAR(5)) + ')'
-                    ELSE ''
-                END +
---                CASE WHEN c.collation_name IS NOT NULL THEN ' COLLATE ' + c.collation_name ELSE '' END +
-                CASE WHEN c.is_nullable = 1 THEN ' NULL' ELSE ' NOT NULL' END +
-                CASE WHEN dc.[definition] IS NOT NULL THEN ' DEFAULT' + dc.[definition] ELSE '' END + 
 
-                CASE WHEN ic.is_identity = 1 THEN ' IDENTITY(' + CAST(ISNULL(ic.seed_value, '0') AS varCHAR(5)) + ',' + CAST(ISNULL(ic.increment_value, '1') AS varCHAR(5)) + ')' ELSE '' END 
-        END + CHAR(13)
-    FROM sys.columns c WITH (NOWAIT)
-    JOIN sys.types tp WITH (NOWAIT) ON c.user_type_id = tp.user_type_id
-    LEFT JOIN sys.computed_columns cc WITH (NOWAIT) ON c.[object_id] = cc.[object_id] AND c.column_id = cc.column_id
-    LEFT JOIN sys.default_constraints dc WITH (NOWAIT) ON c.default_object_id != 0 AND c.[object_id] = dc.parent_object_id AND c.column_id = dc.parent_column_id
-    LEFT JOIN sys.identity_columns ic WITH (NOWAIT) ON c.is_identity = 1 AND c.[object_id] = ic.[object_id] AND c.column_id = ic.column_id
-    WHERE c.[object_id] = @object_id
-    ORDER BY c.column_id
-    FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, CHAR(9) + ' ')
-    + ISNULL((SELECT CHAR(9) + ', CONSTRAINT [' + k.name + '] PRIMARY KEY (' + 
-                    (SELECT STUFF((
-                         SELECT ', [' + c.name + '] ' + CASE WHEN ic.is_descending_key = 1 THEN 'DESC' ELSE 'ASC' END
-                         FROM sys.index_columns ic WITH (NOWAIT)
-                         JOIN sys.columns c WITH (NOWAIT) ON c.[object_id] = ic.[object_id] AND c.column_id = ic.column_id
-                         WHERE ic.is_included_column = 0
-                             AND ic.[object_id] = k.parent_object_id 
-                             AND ic.index_id = k.unique_index_id     
-                         FOR XML PATH(N''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, ''))
-            + ')' + CHAR(13)
-            FROM sys.key_constraints k WITH (NOWAIT)
-            WHERE k.parent_object_id = @object_id 
-                AND k.[type] = 'PK'), '') + ')'  + CHAR(13)
-    + ISNULL((SELECT (
-        SELECT CHAR(13) +
-             'ALTER TABLE ' + @object_name + ' WITH' 
-            + CASE WHEN fk.is_not_trusted = 1 
-                THEN ' NOCHECK' 
-                ELSE ' CHECK' 
-              END + 
-              ' ADD CONSTRAINT [' + fk.name  + '] FOREIGN KEY(' 
-              + STUFF((
-                SELECT ', [' + k.cname + ']'
-                FROM fk_columns k
-                WHERE k.constraint_object_id = fk.[object_id]
-                FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, '')
-               + ')' +
-              ' REFERENCES [' + SCHEMA_NAME(ro.[schema_id]) + '].[' + ro.name + '] ('
-              + STUFF((
-                SELECT ', [' + k.rcname + ']'
-                FROM fk_columns k
-                WHERE k.constraint_object_id = fk.[object_id]
-                FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, '')
-               + ')'
-            + CASE 
-                WHEN fk.delete_referential_action = 1 THEN ' ON DELETE CASCADE' 
-                WHEN fk.delete_referential_action = 2 THEN ' ON DELETE SET NULL'
-                WHEN fk.delete_referential_action = 3 THEN ' ON DELETE SET DEFAULT' 
-
-                ELSE '' 
-              END
-            + CASE 
-                WHEN fk.update_referential_action = 1 THEN ' ON UPDATE CASCADE'
-                WHEN fk.update_referential_action = 2 THEN ' ON UPDATE SET NULL'
-                WHEN fk.update_referential_action = 3 THEN ' ON UPDATE SET DEFAULT'  
-                ELSE '' 
-              END 
-            + CHAR(13) + 'ALTER TABLE ' + @object_name + ' CHECK CONSTRAINT [' + fk.name  + ']' + CHAR(13)
-        FROM sys.foreign_keys fk WITH (NOWAIT)
-        JOIN sys.objects ro WITH (NOWAIT) ON ro.[object_id] = fk.referenced_object_id
-        WHERE fk.parent_object_id = @object_id
-        FOR XML PATH(N''), TYPE).value('.', 'NVARCHAR(MAX)')), '')
-    + ISNULL(((SELECT
-         CHAR(13) + 'CREATE' + CASE WHEN i.is_unique = 1 THEN ' UNIQUE' ELSE '' END 
-                + ' NONCLUSTERED INDEX [' + i.name + '] ON ' + @object_name + ' (' +
-                STUFF((
-                SELECT ', [' + c.name + ']' + CASE WHEN c.is_descending_key = 1 THEN ' DESC' ELSE ' ASC' END
-                FROM index_column c
-                WHERE c.is_included_column = 0
-                    AND c.index_id = i.index_id
-                FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, '') + ')'  
-                + ISNULL(CHAR(13) + 'INCLUDE (' + 
-                    STUFF((
-                    SELECT ', [' + c.name + ']'
-                    FROM index_column c
-                    WHERE c.is_included_column = 1
-                        AND c.index_id = i.index_id
-                    FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, '') + ')', '')  + CHAR(13)
-        FROM sys.indexes i WITH (NOWAIT)
-        WHERE i.[object_id] = @object_id
-            AND i.is_primary_key = 0
-            AND i.[type] = 2
-        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)')
-    ), '')
-PRINT @SQL
---EXEC sys.sp_executesql @SQL
-end 
-
-
-
-
-GO
-print '-- 22. column_type_name'
-IF object_id('[dbo].[column_type_name]' ) is not null 
-  DROP FUNCTION [dbo].[column_type_name] 
-GO
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB 
-select dbo.[column_type_name](300) 
+if object_id('tempdb..#ssas_queries') is not null
+	drop table #ssas_queries
+/* 
+disable because : SQL Server blocked access to STATEMENT 'OpenRowset/OpenDatasource' of component 'Ad Hoc Distributed Queries' because this component is turned off as part of the security configuration for this server. A system administrator can enable the use of 'Ad Hoc Distributed Queries' by using sp_configure. For more information about enabling 'Ad Hoc Distributed Queries', search for 'Ad Hoc Distributed Queries' in SQL Server Books Online.
+	 
+select * into #ssas_queries from openrowset('MSOLAP',
+ 'DATASOURCE=ssas01.company.nl;Initial Catalog=TAB_CKTO_respons_company;User=company\991371;password=anT1svsrnv'
+ , '
+select [name], [QueryDefinition] from 
+[$System].[TMSCHEMA_PARTITIONS]
+' ) 
+	
+select * from 
+#ssas_queries
 */
-CREATE FUNCTION [dbo].[column_type_name]
-(
-	@column_type_id int
-)
-RETURNS varchar(255) 
-AS
-BEGIN
-	declare @column_type_name as varchar(255) 
-	select @column_type_name = [column_type_name] from static.Column_type where column_type_id = @column_type_id 
-	return @column_type_name + ' (' + convert(varchar(10), @column_type_id ) + ')'
-END
+end
+
 
 
 
 
 GO
-print '-- 23. obj_id'
-IF object_id('[dbo].[obj_id]' ) is not null 
-  DROP FUNCTION [dbo].[obj_id] 
+print '-- 6. udf_max'
+IF object_id('[util].[udf_max]' ) is not null 
+  DROP FUNCTION [util].[udf_max] 
 GO
 	  
-
 /*------------------------------------------------------------------------------------------------
 -- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
 --------------------------------------------------------------------------------------------------
--- 2017-09-06 BvdB Return meta data id for a full object name
-select dbo.obj_id('AdventureWorks2014.Person.Person', null) --> points to table 
-select dbo.obj_id('AdventureWorks2014.Person', null) --> points to schema
-select dbo.obj_id('AdventureWorks2014', null) --> points to db
-select dbo.obj_id('BETL', null) --> points to db
-select dbo.obj_id('MicrosoftAccount\swjvdberg@outlook.com', null) --> points to db
-select * from dbo.Obj
+-- 2014-02-25 BvdB returns the maximum of two ordinal types (e.g. int or date). 
+select util.udf_max(1,2)
+select util.udf_max(null,2)
+select util.udf_max(2,null)
+select util.udf_max(2,3)
 */
-CREATE FUNCTION [dbo].[obj_id]( @fullObj_name varchar(255) , @scope varchar(255) = null ) 
-RETURNS int
+CREATE FUNCTION [util].[udf_max]
+(
+ @a sql_variant,
+ @b sql_variant
+ 
+)
+RETURNS sql_variant
 AS
 BEGIN
-	declare @t TABLE (item VARCHAR(8000), i int)
-	declare  
-	     @elem1 varchar(255)
-	     ,@elem2 varchar(255)
-	     ,@elem3 varchar(255)
-	     ,@elem4 varchar(255)
-		, @cnt_elems int 
-		, @object_id int 
---		, @remove_chars varchar(255)
-		, @cnt as int 
-	
-	insert into @t 
-	select replace(replace(item, '[',''),']','') item, i 
-	from util.split(@fullObj_name , '.') 
-	--select * from @t 
-	-- @t contains elemenents of fullObj_name 
-	-- can be [server].[db].[schema].[table|view]
-	-- as long as it's unique 
-	select @cnt_elems = MAX(i) from @t	
-	select @elem1 = item from @t where i=@cnt_elems
-	select @elem2 = item from @t where i=@cnt_elems-1
-	select @elem3 = item from @t where i=@cnt_elems-2
-	select @elem4 = item from @t where i=@cnt_elems-3
-	select @object_id= max(o.object_id), @cnt = count(*) 
-	from dbo.[Obj] o
-	LEFT OUTER JOIN dbo.[Obj] AS parent_o ON o.parent_id = parent_o.[object_id] 
-	LEFT OUTER JOIN dbo.[Obj] AS grand_parent_o ON parent_o.parent_id = grand_parent_o.[object_id] 
-	LEFT OUTER JOIN dbo.[Obj] AS great_grand_parent_o ON grand_parent_o.parent_id = great_grand_parent_o.[object_id] 
-	where 
-	(
-		o.object_type_id<> 60 -- not a user
-		and o.[object_name] = @elem1 
-		and ( @elem2 is null or parent_o.[object_name] = @elem2 ) 
-		and ( @elem3 is null or grand_parent_o.[object_name] = @elem3) 
-		and ( @elem4 is null or great_grand_parent_o.[object_name] = @elem4) 
-		and ( @scope is null 
-				or @scope = o.scope 
-				or @scope = parent_o.scope 
-				or @scope = grand_parent_o.scope 
-				or @scope = great_grand_parent_o.scope 
-				or o.object_type_id= 50 -- scope not relevant for servers. 
-			)  
-	) 
-	or 
-	(
-		o.object_type_id=60 -- user
-		and o.object_name = @fullObj_name
-	) 
-	and o.delete_dt is null 
-	
-	declare @res as int
-	if @cnt >1 
-		set @res =  -@cnt
-	else 
-		set @res =@object_id 
-	return @res 
+ if @a is null or @b >= @a
+  return @b
+ else
+  if @b is null or @a > @b
+   return @a
+  return @a
 END
 
 
 
 
+
 GO
-print '-- 24. ddl_content'
+print '-- 7. ddl_content'
 IF object_id('[dbo].[ddl_content]' ) is not null 
   DROP PROCEDURE [dbo].[ddl_content] 
 GO
@@ -1826,8 +962,1161 @@ end
 
 
 
+
 GO
-print '-- 25. refresh_views'
+print '-- 8. ddl_clear'
+IF object_id('[dbo].[ddl_clear]' ) is not null 
+  DROP PROCEDURE [dbo].[ddl_clear] 
+GO
+	  
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-21 BvdB Beware: this will clear the entire BETL database (all non ms objects) !
+*/    
+CREATE procedure [dbo].[ddl_clear] @execute as bit = 0  as
+begin 
+	set nocount on 
+	declare @sql as varchar(max) =''
+	select @sql+= 'DROP '+
+	   case 
+	   when q.type ='P' then 'PROCEDURE' 
+	   when q.type='U' then 'TABLE'
+	   when q.type= 'V' then 'VIEW'
+	   when q.type= 'TT' then 'TYPE'
+	   else 'FUNCTION' end + ' ' + 
+	   fullname + '
+	;
+	'
+	from  (
+	select so.object_id, so.name , so.type,  quotename(s.name) + '.' + quotename(so.name)  fullname 
+	from sys.objects so
+	inner join sys.schemas s on so.schema_id = s.schema_id 
+	where     so.type in  ( 'U', 'V', 'P', 'IF' , 'FT', 'FS', 'FN', 'TF')
+						AND so.is_ms_shipped = 0
+     
+	union all 
+		SELECT null, name , 'TT' type ,name fullname
+		FROM sys.types WHERE is_table_type = 1 
+    ) q
+
+--select quotename(s.name) + '.' + quotename(so.name), so.type
+--from sys.objects so 
+--inner join sys.schemas s on so.schema_id = s.schema_id 
+--where   --  so.type in  ( 'U', 'V', 'P', 'IF' , 'FT', 'FS', 'FN')
+--						 so.is_ms_shipped = 0
+--order by 1
+				
+	if @execute = 1  
+	   exec(@sql) 
+	else 	
+		print @sql
+end
+
+
+
+
+
+GO
+print '-- 9. apply_params'
+IF object_id('[util].[apply_params]' ) is not null 
+  DROP PROCEDURE [util].[apply_params] 
+GO
+	  	  
+	  
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-01 BvdB replaces parameters in a string by it's value
+Declare @p as ParamTable
+,	@sql as varchar(8000) = 'select <aap> from <wiz> where <where>="nice" '
+insert into @p values ('aap', 9)
+insert into @p values ('wiz', 'woz')
+print @sql 
+EXEC util.apply_params @sql output , @p
+print @sql 
+*/
+create PROCEDURE [util].[apply_params]
+	@sql as varchar(max) output
+	, @params as ParamTable readonly
+	, @apply_defaults as bit = 1 
+	as
+BEGIN
+	declare 
+		@nl as varchar(2) = CHAR(13) + CHAR(10)
+	declare
+		@tmp as varchar(max) ='-- [apply_params]'+@nl
+	SET NOCOUNT ON;
+
+	--if @progress =1 
+	--begin
+	--	select @tmp += '-- '+ param_name + ' : '+ replace(isnull(convert(varchar(max), p.param_value), '?'), @nl, @nl+'--')   + @nl  
+	--	from @params p
+	--	print @tmp 
+	--end
+		
+	-- insert some default params. 
+	select @sql = REPLACE(@sql, '<'+ p.param_name+ '>', isnull(convert(varchar(max), p.param_value), '<' + isnull(p.param_name, '?') + ' IS NULL>'))
+	from @params  p
+	if @apply_defaults =1 
+	begin 
+		declare @default_params ParamTable
+		insert into @default_params  values ('"', '''' ) 
+		insert into @default_params  values ('<dt>', ''''+ convert(varchar(50), GETDATE(), 121)  + '''' ) 
+		select @sql = REPLACE(@sql, p.param_name, convert(Varchar(255), p.param_value) )
+		from @default_params  p
+	end 
+END
+
+
+
+
+
+
+GO
+print '-- 10. trim'
+IF object_id('[util].[trim]' ) is not null 
+  DROP FUNCTION [util].[trim] 
+GO
+	  
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-21 BvdB remove left and right spaces and double and single quotes. 
+*/    
+CREATE FUNCTION [util].[trim]
+(
+	@s varchar(200)
+	, @return_null bit = 1 
+)
+RETURNS varchar(200)
+AS
+BEGIN
+	declare @result as varchar(max)= replace(replace(convert(varchar(200), ltrim(rtrim(@s))), '"', ''), '''' , '')
+	if @return_null =0 
+		return isnull(@result , '') 
+	return @result 
+END
+
+
+
+
+
+GO
+print '-- 11. obj_id'
+IF object_id('[dbo].[obj_id]' ) is not null 
+  DROP FUNCTION [dbo].[obj_id] 
+GO
+	  
+
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-09-06 BvdB Return meta data id for a full object name
+select dbo.obj_id('AdventureWorks2014.Person.Person', null) --> points to table 
+select dbo.obj_id('AdventureWorks2014.Person', null) --> points to schema
+select dbo.obj_id('AdventureWorks2014', null) --> points to db
+select dbo.obj_id('BETL', null) --> points to db
+select dbo.obj_id('MicrosoftAccount\swjvdberg@outlook.com', null) --> points to db
+select * from dbo.Obj
+*/
+CREATE FUNCTION [dbo].[obj_id]( @fullObj_name varchar(255) , @scope varchar(255) = null ) 
+RETURNS int
+AS
+BEGIN
+	declare @t TABLE (item VARCHAR(8000), i int)
+	declare  
+	     @elem1 varchar(255)
+	     ,@elem2 varchar(255)
+	     ,@elem3 varchar(255)
+	     ,@elem4 varchar(255)
+		, @cnt_elems int 
+		, @object_id int 
+--		, @remove_chars varchar(255)
+		, @cnt as int 
+	
+	insert into @t 
+	select replace(replace(item, '[',''),']','') item, i 
+	from util.split(@fullObj_name , '.') 
+	--select * from @t 
+	-- @t contains elemenents of fullObj_name 
+	-- can be [server].[db].[schema].[table|view]
+	-- as long as it's unique 
+	select @cnt_elems = MAX(i) from @t	
+	select @elem1 = item from @t where i=@cnt_elems
+	select @elem2 = item from @t where i=@cnt_elems-1
+	select @elem3 = item from @t where i=@cnt_elems-2
+	select @elem4 = item from @t where i=@cnt_elems-3
+	select @object_id= max(o.object_id), @cnt = count(*) 
+	from dbo.[Obj] o
+	LEFT OUTER JOIN dbo.[Obj] AS parent_o ON o.parent_id = parent_o.[object_id] 
+	LEFT OUTER JOIN dbo.[Obj] AS grand_parent_o ON parent_o.parent_id = grand_parent_o.[object_id] 
+	LEFT OUTER JOIN dbo.[Obj] AS great_grand_parent_o ON grand_parent_o.parent_id = great_grand_parent_o.[object_id] 
+	where 
+	(
+		o.object_type_id<> 60 -- not a user
+		and o.[object_name] = @elem1 
+		and ( @elem2 is null or parent_o.[object_name] = @elem2 ) 
+		and ( @elem3 is null or grand_parent_o.[object_name] = @elem3) 
+		and ( @elem4 is null or great_grand_parent_o.[object_name] = @elem4) 
+		and ( @scope is null 
+				or @scope = o.scope 
+				or @scope = parent_o.scope 
+				or @scope = grand_parent_o.scope 
+				or @scope = great_grand_parent_o.scope 
+				or o.object_type_id= 50 -- scope not relevant for servers. 
+			)  
+	) 
+	or 
+	(
+		o.object_type_id=60 -- user
+		and o.object_name = @fullObj_name
+	) 
+	and o.delete_dt is null 
+	
+	declare @res as int
+	if @cnt >1 
+		set @res =  -@cnt
+	else 
+		set @res =@object_id 
+	return @res 
+END
+
+
+
+
+
+GO
+print '-- 12. parent'
+IF object_id('[util].[parent]' ) is not null 
+  DROP FUNCTION [util].[parent] 
+GO
+	  
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2019-03-21 BvdB returns parent by parsing the string. e.g. localhost.AdventureWorks2014.dbo = localhost.AdventureWorks2014
+select util.parent('localhost.AdventureWorks2014.dbo')
+*/    
+CREATE FUNCTION [util].[parent]( @fullObj_name varchar(255) ) 
+RETURNS varchar(255) 
+AS
+BEGIN
+	declare @rev_str as varchar(255) 
+			, @i as int
+			, @res as varchar(255) 
+	set @rev_str = reverse(@fullObj_name ) 
+	set @i = charindex('.', @rev_str) 
+	
+	if @i = 0 
+		set @res = null 
+	else 
+		set @res =  substring( @fullObj_name, 1, len( @fullObj_name) - @i ) 
+	return @res 
+END
+
+
+
+
+
+
+GO
+print '-- 13. Job_step_ext'
+IF object_id('[dbo].[Job_step_ext]' ) is not null 
+  DROP VIEW [dbo].[Job_step_ext] 
+GO
+	  
+-- select * from dbo.Job_ext
+create view [dbo].[Job_step_ext] as 
+SELECT  j.[job_id]
+      ,j.[name] job_name
+      ,j.[description] job_description
+      ,j.[enabled] job_enabled
+      ,j.[category_name]
+      --,[job_schedule_id]
+      ,js.[name] schedule_name 
+      ,js.[enabled] schedule_enabled
+	  ,[step_id]
+      ,[step_name]
+      ,[subsystem]
+      ,[command]
+      ,[on_success_action]
+      ,[on_success_step_id]
+      ,[on_fail_action]
+      ,[on_fail_step_id]
+      ,[database_name]
+      
+  FROM [dbo].[Job] j
+  inner join dbo.Job_schedule  js on j.job_schedule_id = js.job_schedule_id
+  inner join dbo.Job_step s on s.job_id = j.job_id
+--  order by j.job_id, s.step_id
+
+
+
+
+
+
+GO
+print '-- 14. content_type_name'
+IF object_id('[dbo].[content_type_name]' ) is not null 
+  DROP FUNCTION [dbo].[content_type_name] 
+GO
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-01 BvdB get name by id. 
+select dbo.[content_type_name](300) 
+*/
+create FUNCTION [dbo].[content_type_name]
+(
+	@content_type_id int
+)
+RETURNS varchar(255) 
+AS
+BEGIN
+	declare @content_type_name as varchar(255) 
+	select @content_type_name = [content_type_name] from dbo.Content_type where content_type_id = @content_type_id 
+	return @content_type_name + ' (' + convert(varchar(10), @content_type_id ) + ')'
+END
+
+
+
+
+
+GO
+print '-- 15. prefix_first_underscore'
+IF object_id('[util].[prefix_first_underscore]' ) is not null 
+  DROP FUNCTION [util].[prefix_first_underscore] 
+GO
+	  
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-01 BvdB extract prefix from string
+SELECT dbo.guess_foreignCol_id('par_relatie_id')
+SELECT [dbo].[prefix_first_underscore]('relatie_id')
+*/    
+CREATE FUNCTION [util].[prefix_first_underscore]( @column_name VARCHAR(255) ) 
+RETURNS VARCHAR(255) 
+AS
+BEGIN
+	DECLARE @res VARCHAR(255) 
+	,		@pos INT 
+	SET @pos = CHARINDEX('_', @column_name)
+	IF @pos IS NOT NULL and @pos>1
+		SET @res = SUBSTRING(@column_name, 1, @pos-1)
+	RETURN @res 
+	/* 
+		declare @n as int=len(@s) 
+			--, @n_suffix as int = len(@suffix)
+	declare @result as bit = 0 
+	return SUBSTRING(@s, 1, @n-@len_suffix) 
+	*/
+END
+
+
+
+
+
+
+GO
+print '-- 16. Col'
+IF object_id('[dbo].[Col]' ) is not null 
+  DROP VIEW [dbo].[Col] 
+GO
+	  
+CREATE VIEW [dbo].[Col] AS
+	SELECT     * 
+	FROM  [dbo].[Col_hist] AS h
+	WHERE     (eff_dt =
+                      ( SELECT     MAX(eff_dt) max_eff_dt
+                        FROM       [dbo].[Col_hist] h2
+                        WHERE      h.column_id = h2.column_id
+                       )
+              )
+		AND delete_dt IS NULL 
+
+
+
+
+
+GO
+print '-- 17. Int2Char'
+IF object_id('[util].[Int2Char]' ) is not null 
+  DROP FUNCTION [util].[Int2Char] 
+GO
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-01 BvdB 
+select util.int2Char(2)
+*/
+CREATE FUNCTION [util].[Int2Char] (     @i int)
+RETURNS varchar(15) AS
+BEGIN
+       RETURN isnull(convert(varchar(15), @i), '')
+END
+
+
+
+
+
+GO
+print '-- 18. print_max'
+IF object_id('[util].[print_max]' ) is not null 
+  DROP PROCEDURE [util].[print_max] 
+GO
+/* https://weblogs.asp.net/bdill/sql-server-print-max
+exec util.print_max 'atetew tewtew'
+*/
+CREATE  PROCEDURE util.print_max(@iInput NVARCHAR(MAX) ) 
+AS
+BEGIN
+    IF @iInput IS NULL
+    RETURN;
+    DECLARE @ReversedData NVARCHAR(MAX)
+          , @LineBreakIndex INT
+          , @SearchLength INT;
+    SET @SearchLength = 4000;
+    WHILE LEN(@iInput) > @SearchLength
+    BEGIN
+		SET @ReversedData = LEFT(@iInput COLLATE DATABASE_DEFAULT, @SearchLength);
+		SET @ReversedData = REVERSE(@ReversedData COLLATE DATABASE_DEFAULT);
+		SET @LineBreakIndex = CHARINDEX(CHAR(10) + CHAR(13),
+							  @ReversedData COLLATE DATABASE_DEFAULT);
+		PRINT LEFT(@iInput, @SearchLength - @LineBreakIndex + 1);
+		SET @iInput = RIGHT(@iInput, LEN(@iInput) - @SearchLength 
+							+ @LineBreakIndex - 1);
+    END;
+    IF LEN(@iInput) > 0
+    PRINT @iInput;
+END
+
+
+
+
+
+
+GO
+print '-- 19. split'
+IF object_id('[util].[split]' ) is not null 
+  DROP FUNCTION [util].[split] 
+GO
+	  
+	  
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-01 BvdB splits strings. Keeps string together when surrounded by [ ] 
+CREATE TYPE SplitListType AS TABLE 	(item VARCHAR(8000), i int)
+select * from util.split('AAP,NOOT', ',')
+select * from util.split('[AAP,NOOT],VIS,[NOOT,MIES],OLIFANT', ',')
+*/
+CREATE  FUNCTION [util].[split](
+    @s VARCHAR(8000) -- List of delimited items
+  , @del VARCHAR(16) = ',' -- delimiter that separates items
+) RETURNS @List TABLE (item VARCHAR(8000), i int)
+BEGIN
+	DECLARE 
+		@item VARCHAR(8000)
+		, @i int =1
+		, @n int 
+		, @del_index int
+		, @bracket_index_open int
+		, @bracket_index_close int
+	
+	set @del_index = CHARINDEX(@del,@s,0)
+	set @bracket_index_open = CHARINDEX('[',@s,0)
+	WHILE @del_index <> 0 -- while there is a delimiter
+	BEGIN
+		if @del_index < @bracket_index_open or @bracket_index_open=0 -- delimeter occurs before [ or there is no [
+		begin 
+			set @n = @del_index-1
+			SELECT
+				@item=RTRIM(LTRIM(SUBSTRING(@s,1,@n))),
+				-- set @s= tail 
+				@s=RTRIM(LTRIM(SUBSTRING(@s,@del_index+LEN(@del),LEN(@s)-@n)))
+		end 
+		else -- [ occurs before delimiter
+		begin
+			set @bracket_index_close = CHARINDEX(']',@s,@bracket_index_open)
+			set @n = case when @bracket_index_close=0 then len(@s) else  @bracket_index_close end
+			
+			SELECT
+				@item=RTRIM(LTRIM(SUBSTRING(@s,1,@n))),
+				-- set @s= tail 
+				@s=RTRIM(LTRIM(SUBSTRING(@s,@n+1,LEN(@s)-@n)))
+		end
+		IF LEN(@item) > 0
+		begin
+			INSERT INTO @List SELECT @item, @i
+			set @i += 1
+		end 
+		set @del_index= CHARINDEX(@del,@s,0)
+		set @bracket_index_open= CHARINDEX('[',@s,0)
+	END
+	IF LEN(@s) > 0
+	 INSERT INTO @List SELECT @s , @i-- Put the last item in
+	RETURN
+END
+
+
+
+
+
+
+GO
+print '-- 20. Transfer_ext'
+IF object_id('[dbo].[Transfer_ext]' ) is not null 
+  DROP VIEW [dbo].[Transfer_ext] 
+GO
+	  
+CREATE view [dbo].[Transfer_ext] as 
+select 
+t.[transfer_id]
+,t.[transfer_name]
+,t.[src_obj_id]
+,t.[target_name]
+,t.[transfer_start_dt]
+,t.[transfer_end_dt]
+,s.status_name status
+,t.[rec_cnt_src]
+,t.[rec_cnt_new]
+,t.[rec_cnt_changed]
+,t.[rec_cnt_deleted]
+,t.[last_error_id]
+,b.batch_id
+, b.[batch_start_dt] 
+,b.[batch_end_dt] 
+, b.batch_name
+, s.status_name batch_status 
+from dbo.Transfer t
+left join dbo.Batch b on t.batch_id = b.batch_id 
+left join static.Status s on s.status_id = t.status_id
+
+
+
+
+
+
+GO
+print '-- 21. column_type_name'
+IF object_id('[dbo].[column_type_name]' ) is not null 
+  DROP FUNCTION [dbo].[column_type_name] 
+GO
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-01 BvdB 
+select dbo.[column_type_name](300) 
+*/
+CREATE FUNCTION [dbo].[column_type_name]
+(
+	@column_type_id int
+)
+RETURNS varchar(255) 
+AS
+BEGIN
+	declare @column_type_name as varchar(255) 
+	select @column_type_name = [column_type_name] from static.Column_type where column_type_id = @column_type_id 
+	return @column_type_name + ' (' + convert(varchar(10), @column_type_id ) + ')'
+END
+
+
+
+
+
+GO
+print '-- 22. Job_ext'
+IF object_id('[dbo].[Job_ext]' ) is not null 
+  DROP VIEW [dbo].[Job_ext] 
+GO
+	  
+
+-- select * from dbo.Job_ext
+CREATE view [dbo].[Job_ext] as 
+SELECT  j.[job_id]
+      ,j.[name] job_name
+      ,j.[description] job_description
+      ,j.[enabled] job_enabled
+      ,j.[category_name]
+      ,j.[job_schedule_id]
+      ,js.[name] schedule_name 
+      ,js.[enabled] schedule_enabled
+      ,[freq_type]
+      ,[freq_interval]
+      ,[freq_subday_type]
+      ,[freq_subday_interval]
+      ,[freq_relative_interval]
+      ,[freq_recurrence_factor]
+      ,[active_start_date]
+      ,[active_end_date]
+      ,[active_start_time]
+      ,[active_end_time]
+  FROM [dbo].[Job] j
+  inner join dbo.Job_schedule  js on j.job_schedule_id = js.job_schedule_id
+  --inner join dbo.Job_step s on s.job_id = j.job_id
+--  order by j.job_id, s.step_id
+
+
+
+
+
+
+GO
+print '-- 23. get_cols'
+IF object_id('[dbo].[get_cols]' ) is not null 
+  DROP FUNCTION [dbo].[get_cols] 
+GO
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-01 BvdB returns a table with all column meta data 
+-- Unfortunately we have to re-define the columTable type here... 
+-- see http://stackoverflow.com/questions/2501324/can-t-sql-function-return-user-defined-table-type
+select * from dbo.get_cols(32)
+exec dbo.info
+*/
+CREATE FUNCTION [dbo].[get_cols]
+(
+	@object_id int
+)
+RETURNS @cols TABLE(
+	[ordinal_position] [int] NOT NULL PRIMARY KEY,
+	[column_name] [varchar](255) NULL,
+	[column_value] [varchar](255) NULL,
+	[data_type] [varchar](255) NULL,
+	[max_len] [int] NULL,
+	[column_type_id] [int] NULL,
+	[is_nullable] [bit] NULL,
+	[prefix] [varchar](64) NULL,
+	[entity_name] [varchar](64) NULL,
+	[foreignCol_name] [varchar](64) NULL,
+	[foreign_sur_pkey] int NULL,
+	[numeric_precision] [int] NULL,
+	[numeric_scale] [int] NULL,
+	part_of_unique_index BIT NULL,
+	[identity] [bit] NULL,
+	[src_mapping] varchar(255) null
+)  as
+begin 
+	--SET IDENTITY_INSERT @cols ON 
+	insert into @cols(
+		ordinal_position
+		, column_name
+		, column_value
+		, data_type 
+		, max_len
+		, [column_type_id] 
+		, is_nullable
+		, [prefix] 
+		, [entity_name]
+		, [foreignCol_name] 
+		, [foreign_sur_pkey] 
+		  ,[numeric_precision]
+		  ,[numeric_scale]
+		  ,part_of_unique_index 
+		  ,[identity]
+		) 
+		select 
+			ordinal_position
+			, column_name
+			, null column_value
+			, data_type 
+			, max_len
+			, [column_type_id] 
+			, is_nullable
+			, prefix
+			, [entity_name]
+			, [foreign_column_name]
+			, [foreign_sur_pkey] 
+			  ,[numeric_precision]
+			  ,[numeric_scale]
+			  ,part_of_unique_index 
+			  ,null [identity]
+		from dbo.Col_ext
+		where [object_id] = @object_id 
+	--SET IDENTITY_INSERT @cols OFF
+	RETURN
+end
+
+--SELECT * from vwCol
+
+
+
+
+
+GO
+print '-- 24. parse_sql'
+IF object_id('[util].[parse_sql]' ) is not null 
+  DROP FUNCTION [util].[parse_sql] 
+GO
+	  
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2018-04-19 BvdB performs a very basic parsing of a sql statement. returns colom clause before first from 
+	and first table after first from.  first record in @List is table, others are columns. 
+declare @sql as varchar(8000) = '--aap
+SELECT rel.naam_parent1 as top_relatie    ,rel.relatie_nummer as relatienummer    ,rel.naam as relatienaam    ,rel.kostenplaats_omschrvijving as kostenplaats    ,rpa as primaire_resource     ,regioteam    ,regioklantmanager as regioklantmanager    ,rel.cp_vz_naam_formeel as cp_naam    ,rel.cp_vz_email as cp_email    ,rel.cp_vz_telefoon as cp_telefoon       ,verzuimgevalnr    ,activiteit_id as activiteitID1       ,kld_herstel.datum as datum_invoer_herstel       ,kld_toegevoegd.datum as datum_toegevoegd    ,kld_verstuurd.datum as datum_versturen_uitnodiging    ,kld_verstuurd.jaar    ,kld_verstuurd.kortmaandnaam as maand       ,uitgenodigd.omschrijving as uitgenodigd       ,niet_uitgenodigd.reden_niet_uitgenodigd       ,ingevuld.ckto_ingevuld       ,kld_ingevuld.datum datum_ckto_ingevuld   FROM [feit_ckto_response] ckto   left outer join dim_Relatie as rel on ckto.dkey_relatie = rel.dkey_relatie --  left outer join dim_professional prof on rel.dkey_primaire_resource = prof.dkey_professional   left outer join dim_kalender as kld_herstel on ckto.dkey_datum_invoer_herstel = kld_herstel.dkey_kalender   left outer join dim_kalender as kld_toegevoegd on ckto.dkey_datum_toegevoegd = kld_toegevoegd.dkey_kalender   left outer join dim_kalender as kld_verstuurd on ckto.dkey_datum_versturen_uitnodiging = kld_verstuurd.dkey_kalender   left outer join dim_kalender as kld_ingevuld on ckto.dkey_datum_ckto_ingevuld = kld_ingevuld.dkey_kalender   left outer join dim_ja_nee as uitgenodigd on ckto.dkey_uitgenodigd_voor_ckto_ja_nee = uitgenodigd.jn_key   left outer join dim_reden_niet_uitgenodigd as niet_uitgenodigd on ckto.dkey_reden_niet_uitgenodigd = niet_uitgenodigd.dkey_reden_niet_uitgenodigd   left outer join dim_ckto_ingevuld as ingevuld on ckto.dkey_ckto_ingevuld = ingevuld.dkey_ckto_ingevuld
+'
+set @sql ='SELECT [hub_relatie_sid]
+      ,[type_account]
+      ,[account_id]
+      ,[account_code]
+           ,[korting5_percentage]
+FROM [feit_totaallijst_bb]
+WHERE aap '
+set @sql = 'SELECT [dkey_functie]       ,[functiegroep]       ,[functie]   FROM [dim_functie] WHERE dkey_functie in (  SELECT [dkey_functie]   FROM [dbo].[dim_professional]   where dkey_professional in (SELECT[dkey_professional_pa]   FROM [dbo].[dim_verzuim]))'
+select * from util.parse_sql(@sql)
+*/
+CREATE function [util].[parse_sql] (@sql VARCHAR(MAX)
+  ) RETURNS @List TABLE (item VARCHAR(8000), i int)
+BEGIN
+	declare @transfer_id as int = -1
+
+	-- END standard BETL header code... 
+	--set nocount on 
+	declare @proc_name as varchar(255) =  OBJECT_NAME(@@PROCID)
+	
+		, @i as int 
+		, @pos_space as int 
+		, @pos_char10 as int 
+		, @pos_char13 as int 
+		, @select_clause as varchar(8000)
+		, @from_clause as varchar(8000)
+	set @sql = util.remove_comments(@sql) 
+	--print @proc_name		
+	set @i = charindex('FROM', @sql, 0) 
+	if isnull(@i,0) =0 
+	begin
+		--exec dbo.log @transfer_id, 'ERROR', 'no from found in sql query ?', @sql
+		--print 'no from found in sql query ?'
+		goto footer
+	end
+	-- split on first occurance of FROM 
+	set @from_clause =substring(@sql,@i+4,len(@sql)-@i-3) 
+	set @select_clause =replace(replace( substring(@sql,0, @i-1) ,'select', '')  , 'as','') 
+	-- parse from clause 
+	set @from_clause = ltrim(@from_clause) 
+	set @pos_space  = charindex(' ', @from_clause,0)  
+	if @pos_space = 0 set @pos_space = null 
+	set @pos_char10 = charindex(char(10), @from_clause,0) 
+	if @pos_char10 = 0 set @pos_char10 = null 
+	set @pos_char13 = charindex(char(13), @from_clause,0) 
+	if @pos_char13 = 0 set @pos_char13 = null 
+	--insert into @List values ( 'pos_space', @pos_space ) 
+	--insert into @List values ( '@pos_char10', @pos_char10 ) 
+	--insert into @List values ( '@pos_char13', @pos_char13 ) 
+	set @i = convert(int, util.udf_min3(@pos_space , @pos_char10 , @pos_char13 ) )
+	if isnull(@i,0) =0 
+			set @i= len(@from_clause) 
+	set @from_clause = substring(@from_clause, 1, @i-1) 
+	insert into @List values (@from_clause,0) 
+	;
+	with q as( 
+		select ltrim(rtrim(util.filter(item,'char(10),char(13)'))) item 
+		,i
+		from util.split( @select_clause, ',') 
+	) 
+	insert into @List 
+	select item
+	, row_number() over (order by i) 
+	from q 
+	where len(item)>0
+	
+	--exec dbo.log @transfer_id, 'VAR', '@from_clause ?', @from_clause
+--	exec dbo.log @transfer_id, 'VAR', '@select_clause ?', @select_clause
+ 
+	footer:
+ 	--exec dbo.log @transfer_id, 'footer', 'DONE ?', @proc_name 
+	return
+END
+
+
+
+
+
+
+GO
+print '-- 25. suffix'
+IF object_id('[util].[suffix]' ) is not null 
+  DROP FUNCTION [util].[suffix] 
+GO
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-01 BvdB returns true if @s ends with @suffix
+select util.suffix('gfjh_aap', '_aap') 
+select util.suffix('gfjh_aap', 4) 
+select util.suffix('gfjh_aap', '_a3p') 
+*/
+CREATE FUNCTION [util].[suffix]
+(
+	@s as varchar(255)
+	, @len_suffix as int
+	--, @suffix as varchar(255)
+)
+RETURNS varchar(255)
+AS
+BEGIN
+	declare @n as int=len(@s) 
+			--, @n_suffix as int = len(@suffix)
+	declare @result as bit = 0 
+	return SUBSTRING(@s, @n+1-@len_suffix, @len_suffix) 
+END
+
+
+
+
+
+GO
+print '-- 26. object_name'
+IF object_id('[util].[object_name]' ) is not null 
+  DROP FUNCTION [util].[object_name] 
+GO
+
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-01 BvdB return schema name of this full object name 
+-- e.g. My_PC.AdventureWorks2014.Person.Sales ->My_PC.AdventureWorks2014.Person
+select util.object_name('My_PC.AdventureWorks2014.Person.Sales') --> points to table 
+*/
+CREATE FUNCTION [util].[object_name]( @fullObj_name varchar(255) ) 
+RETURNS varchar(255) 
+AS
+BEGIN
+-- standard BETL header code... 
+--set nocount on 
+--declare   @debug as bit =1
+--		, @progress as bit =1
+--		, @proc_name as varchar(255) =  OBJECT_NAME(@@PROCID);
+--exec dbo.get_var 'debug', @debug output
+--exec dbo.get_var 'progress', @progress output
+--exec progress @progress, '? ?,?', @proc_name , @fullObj_name
+-- END standard BETL header code... 
+	--declare @fullObj_name varchar(255)= 'Tim_DWH.L2.Location'
+	declare @t TABLE (item VARCHAR(8000), i int)
+	declare  
+	     @elem1 varchar(255)
+	     ,@elem2 varchar(255)
+	     ,@elem3 varchar(255)
+	     ,@elem4 varchar(255)
+		, @cnt_elems int 
+		, @object_id int 
+		, @remove_chars varchar(255)
+		, @cnt as int 
+		 
+	set @remove_chars = replace(@fullObj_name, '[','')
+	set @remove_chars = replace(@remove_chars , ']','')
+	
+	insert into @t 
+	select * from util.split(@remove_chars , '.') 
+	--select * from @t 
+	-- @t contains elemenents of fullObj_name 
+	-- can be [server].[db].[schema].[table|view]
+	-- as long as it's unique 
+	select @cnt_elems = MAX(i) from @t	
+	select @elem1 = item from @t where i=@cnt_elems
+	select @elem2 = item from @t where i=@cnt_elems-1
+	select @elem3 = item from @t where i=@cnt_elems-2
+	select @elem4 = item from @t where i=@cnt_elems-3
+	--select @object_id= max(o.object_id), @cnt = count(*) 
+	--from dbo.[Obj] o
+	--LEFT OUTER JOIN dbo.[Obj] AS parent_o ON o.parent_id = parent_o.[object_id] 
+	--LEFT OUTER JOIN dbo.[Obj] AS grand_parent_o ON parent_o.parent_id = grand_parent_o.[object_id] 
+	--LEFT OUTER JOIN dbo.[Obj] AS great_grand_parent_o ON grand_parent_o.parent_id = great_grand_parent_o.[object_id] 
+	--where 	o.[object_name] = @elem2
+	--and ( @elem3 is null or parent_o.[object_name] = @elem3) 
+	--and ( @elem4 is null or grand_parent_o.[object_name] = @elem4) 
+	declare @res as varchar(255) 
+	--if @cnt >1 
+	--	set @res =  -@cnt
+	--else 
+	--	set @res =@object_id 
+	set @res = '[' + @elem1 + ']'
+	return @res 
+END
+
+
+
+
+
+GO
+print '-- 27. suffix_first_underscore'
+IF object_id('[util].[suffix_first_underscore]' ) is not null 
+  DROP FUNCTION [util].[suffix_first_underscore] 
+GO
+	  
+
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-01 BvdB 
+SELECT dbo.guess_foreignCol_id('par_relatie_id')
+SELECT [dbo].[suffix_first_underscore]('relatie_id')
+*/    
+CREATE FUNCTION [util].[suffix_first_underscore]( @column_name VARCHAR(255) ) 
+RETURNS VARCHAR(255) 
+AS
+BEGIN
+	DECLARE @res VARCHAR(255) 
+	,		@pos INT 
+	SET @pos = CHARINDEX('_', @column_name)
+	IF @pos IS NOT NULL
+		SET @res = SUBSTRING(@column_name, @pos+1, LEN(@column_name) - @pos)
+	RETURN @res 
+	/* 
+		declare @n as int=len(@s) 
+			--, @n_suffix as int = len(@suffix)
+	declare @result as bit = 0 
+	return SUBSTRING(@s, 1, @n-@len_suffix) 
+	*/
+END
+
+
+
+
+
+
+GO
+print '-- 28. schema_id'
+IF object_id('[dbo].[schema_id]' ) is not null 
+  DROP FUNCTION [dbo].[schema_id] 
+GO
+	  
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2019-03-21 BvdB return schema_id of this full object name 
+--  e.g. LOCALHOST.AdventureWorks2014.Person.Sales -> schema_id(LOCALHOST.AdventureWorks2014.Person)
+select dbo.object('LOCALHOST.AdventureWorks2014.Person.Sales') --> points to table 
+select dbo.object('LOCALHOST.AdventureWorks2014.Person') --> points to schema
+select dbo.object('LOCALHOST.AdventureWorks2014') --> points to db
+select dbo.object('LOCALHOST.BETL') --> points to db
+select dbo.object('LOCALHOST') --> points to srv
+select dbo.object('LOCALHOST.dbo') 
+select dbo.object('dbo') 
+*/
+CREATE FUNCTION [dbo].[schema_id]( @fullObj_name varchar(255), @scope varchar(255) = null  ) 
+RETURNS int
+AS
+BEGIN
+	--declare @fullObj_name varchar(255)= 'AdventureWorks.dbo.Store'
+	declare @t TABLE (item VARCHAR(8000), i int)
+	declare  
+	     @elem1 varchar(255)
+	     ,@elem2 varchar(255)
+	     ,@elem3 varchar(255)
+	     ,@elem4 varchar(255)
+		, @cnt_elems int 
+		, @object_id int 
+		, @remove_chars varchar(255)
+		, @cnt as int 
+		 
+	set @remove_chars = replace(@fullObj_name, '[','')
+	set @remove_chars = replace(@remove_chars , ']','')
+	
+	insert into @t 
+	select * from util.split(@remove_chars , '.') 
+	--select * from @t 
+	-- @t contains elemenents of fullObj_name 
+	-- can be [server].[db].[schema].[table|view]
+	-- as long as it's unique 
+	select @cnt_elems = MAX(i) from @t	
+	select @elem1 = item from @t where i=@cnt_elems
+	select @elem2 = item from @t where i=@cnt_elems-1
+	select @elem3 = item from @t where i=@cnt_elems-2
+	select @elem4 = item from @t where i=@cnt_elems-3
+	select @object_id= max(o.object_id), @cnt = count(*) 
+	from dbo.[Obj] o
+	LEFT OUTER JOIN dbo.[Obj] AS parent_o ON o.parent_id = parent_o.[object_id] 
+	LEFT OUTER JOIN dbo.[Obj] AS grand_parent_o ON parent_o.parent_id = grand_parent_o.[object_id] 
+	LEFT OUTER JOIN dbo.[Obj] AS great_grand_parent_o ON grand_parent_o.parent_id = great_grand_parent_o.[object_id] 
+	where 	o.[object_name] = @elem2
+	and ( @elem3 is null or parent_o.[object_name] = @elem3) 
+	and ( @elem4 is null or grand_parent_o.[object_name] = @elem4) 
+	and ( @scope is null or 
+			@scope = o.scope
+			or @scope = parent_o.scope
+			or @scope = grand_parent_o.scope
+			or @scope = great_grand_parent_o.scope) 
+	declare @res as int
+	if @cnt >1 
+		set @res =  -@cnt
+	else 
+		set @res =@object_id 
+	return @res 
+END
+
+
+
+
+
+GO
+print '-- 29. ddl_table'
+IF object_id('[dbo].[ddl_table]' ) is not null 
+  DROP PROCEDURE [dbo].[ddl_table] 
+GO
+	  
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-01 BvdB print create table ddl (part of ddl_betl). 
+exec dbo.ddl_table '[dbo].[Job]'
+*/
+CREATE procedure [dbo].[ddl_table] @table_name SYSNAME
+as 
+begin 
+DECLARE 
+      @object_name SYSNAME
+    , @object_id INT
+SELECT 
+      @object_name = '[' + s.name + '].[' + o.name + ']'
+    , @object_id = o.[object_id]
+FROM sys.objects o WITH (NOWAIT)
+JOIN sys.schemas s WITH (NOWAIT) ON o.[schema_id] = s.[schema_id]
+WHERE quotename(s.name) + '.' + quotename(o.name) = @table_name
+    AND o.[type] = 'U'
+    AND o.is_ms_shipped = 0
+DECLARE @SQL NVARCHAR(MAX) = ''
+;WITH index_column AS 
+(
+    SELECT 
+          ic.[object_id]
+        , ic.index_id
+        , ic.is_descending_key
+        , ic.is_included_column
+        , c.name
+    FROM sys.index_columns ic WITH (NOWAIT)
+    JOIN sys.columns c WITH (NOWAIT) ON ic.[object_id] = c.[object_id] AND ic.column_id = c.column_id
+    WHERE ic.[object_id] = @object_id
+),
+fk_columns AS 
+(
+     SELECT 
+          k.constraint_object_id
+        , cname = c.name
+        , rcname = rc.name
+    FROM sys.foreign_key_columns k WITH (NOWAIT)
+    JOIN sys.columns rc WITH (NOWAIT) ON rc.[object_id] = k.referenced_object_id AND rc.column_id = k.referenced_column_id 
+    JOIN sys.columns c WITH (NOWAIT) ON c.[object_id] = k.parent_object_id AND c.column_id = k.parent_column_id
+    WHERE k.parent_object_id = @object_id
+)
+SELECT @SQL = 'CREATE TABLE ' + @object_name + CHAR(13) + '(' + CHAR(13) + STUFF((
+    SELECT CHAR(9) + ', [' + c.name + '] ' + 
+        CASE WHEN c.is_computed = 1
+            THEN 'AS ' + cc.[definition] 
+            ELSE UPPER(tp.name) + 
+                CASE WHEN tp.name IN ('varchar', 'char', 'varbinary', 'binary', 'text')
+                       THEN '(' + CASE WHEN c.max_length = -1 THEN 'MAX' ELSE CAST(c.max_length AS VARCHAR(5)) END + ')'
+                     WHEN tp.name IN ('nvarchar', 'nchar', 'ntext')
+                       THEN '(' + CASE WHEN c.max_length = -1 THEN 'MAX' ELSE CAST(c.max_length / 2 AS VARCHAR(5)) END + ')'
+                     WHEN tp.name IN ('datetime2', 'time2', 'datetimeoffset') 
+                       THEN '(' + CAST(c.scale AS VARCHAR(5)) + ')'
+                     WHEN tp.name = 'decimal' 
+                       THEN '(' + CAST(c.[precision] AS VARCHAR(5)) + ',' + CAST(c.scale AS VARCHAR(5)) + ')'
+                    ELSE ''
+                END +
+--                CASE WHEN c.collation_name IS NOT NULL THEN ' COLLATE ' + c.collation_name ELSE '' END +
+                CASE WHEN c.is_nullable = 1 THEN ' NULL' ELSE ' NOT NULL' END +
+                CASE WHEN dc.[definition] IS NOT NULL THEN ' DEFAULT' + dc.[definition] ELSE '' END + 
+
+                CASE WHEN ic.is_identity = 1 THEN ' IDENTITY(' + CAST(ISNULL(ic.seed_value, '0') AS varCHAR(5)) + ',' + CAST(ISNULL(ic.increment_value, '1') AS varCHAR(5)) + ')' ELSE '' END 
+        END + CHAR(13)
+    FROM sys.columns c WITH (NOWAIT)
+    JOIN sys.types tp WITH (NOWAIT) ON c.user_type_id = tp.user_type_id
+    LEFT JOIN sys.computed_columns cc WITH (NOWAIT) ON c.[object_id] = cc.[object_id] AND c.column_id = cc.column_id
+    LEFT JOIN sys.default_constraints dc WITH (NOWAIT) ON c.default_object_id != 0 AND c.[object_id] = dc.parent_object_id AND c.column_id = dc.parent_column_id
+    LEFT JOIN sys.identity_columns ic WITH (NOWAIT) ON c.is_identity = 1 AND c.[object_id] = ic.[object_id] AND c.column_id = ic.column_id
+    WHERE c.[object_id] = @object_id
+    ORDER BY c.column_id
+    FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, CHAR(9) + ' ')
+    + ISNULL((SELECT CHAR(9) + ', CONSTRAINT [' + k.name + '] PRIMARY KEY (' + 
+                    (SELECT STUFF((
+                         SELECT ', [' + c.name + '] ' + CASE WHEN ic.is_descending_key = 1 THEN 'DESC' ELSE 'ASC' END
+                         FROM sys.index_columns ic WITH (NOWAIT)
+                         JOIN sys.columns c WITH (NOWAIT) ON c.[object_id] = ic.[object_id] AND c.column_id = ic.column_id
+                         WHERE ic.is_included_column = 0
+                             AND ic.[object_id] = k.parent_object_id 
+                             AND ic.index_id = k.unique_index_id     
+                         FOR XML PATH(N''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, ''))
+            + ')' + CHAR(13)
+            FROM sys.key_constraints k WITH (NOWAIT)
+            WHERE k.parent_object_id = @object_id 
+                AND k.[type] = 'PK'), '') + ')'  + CHAR(13)
+    + ISNULL((SELECT (
+        SELECT CHAR(13) +
+             'ALTER TABLE ' + @object_name + ' WITH' 
+            + CASE WHEN fk.is_not_trusted = 1 
+                THEN ' NOCHECK' 
+                ELSE ' CHECK' 
+              END + 
+              ' ADD CONSTRAINT [' + fk.name  + '] FOREIGN KEY(' 
+              + STUFF((
+                SELECT ', [' + k.cname + ']'
+                FROM fk_columns k
+                WHERE k.constraint_object_id = fk.[object_id]
+                FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, '')
+               + ')' +
+              ' REFERENCES [' + SCHEMA_NAME(ro.[schema_id]) + '].[' + ro.name + '] ('
+              + STUFF((
+                SELECT ', [' + k.rcname + ']'
+                FROM fk_columns k
+                WHERE k.constraint_object_id = fk.[object_id]
+                FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, '')
+               + ')'
+            + CASE 
+                WHEN fk.delete_referential_action = 1 THEN ' ON DELETE CASCADE' 
+                WHEN fk.delete_referential_action = 2 THEN ' ON DELETE SET NULL'
+                WHEN fk.delete_referential_action = 3 THEN ' ON DELETE SET DEFAULT' 
+
+                ELSE '' 
+              END
+            + CASE 
+                WHEN fk.update_referential_action = 1 THEN ' ON UPDATE CASCADE'
+                WHEN fk.update_referential_action = 2 THEN ' ON UPDATE SET NULL'
+                WHEN fk.update_referential_action = 3 THEN ' ON UPDATE SET DEFAULT'  
+                ELSE '' 
+              END 
+            + CHAR(13) + 'ALTER TABLE ' + @object_name + ' CHECK CONSTRAINT [' + fk.name  + ']' + CHAR(13)
+        FROM sys.foreign_keys fk WITH (NOWAIT)
+        JOIN sys.objects ro WITH (NOWAIT) ON ro.[object_id] = fk.referenced_object_id
+        WHERE fk.parent_object_id = @object_id
+        FOR XML PATH(N''), TYPE).value('.', 'NVARCHAR(MAX)')), '')
+    + ISNULL(((SELECT
+         CHAR(13) + 'CREATE' + CASE WHEN i.is_unique = 1 THEN ' UNIQUE' ELSE '' END 
+                + ' NONCLUSTERED INDEX [' + i.name + '] ON ' + @object_name + ' (' +
+                STUFF((
+                SELECT ', [' + c.name + ']' + CASE WHEN c.is_descending_key = 1 THEN ' DESC' ELSE ' ASC' END
+                FROM index_column c
+                WHERE c.is_included_column = 0
+                    AND c.index_id = i.index_id
+                FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, '') + ')'  
+                + ISNULL(CHAR(13) + 'INCLUDE (' + 
+                    STUFF((
+                    SELECT ', [' + c.name + ']'
+                    FROM index_column c
+                    WHERE c.is_included_column = 1
+                        AND c.index_id = i.index_id
+                    FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)'), 1, 2, '') + ')', '')  + CHAR(13)
+        FROM sys.indexes i WITH (NOWAIT)
+        WHERE i.[object_id] = @object_id
+            AND i.is_primary_key = 0
+            AND i.[type] = 2
+        FOR XML PATH(''), TYPE).value('.', 'NVARCHAR(MAX)')
+    ), '')
+PRINT @SQL
+--EXEC sys.sp_executesql @SQL
+end 
+
+
+
+
+
+GO
+print '-- 30. refresh_views'
 IF object_id('[util].[refresh_views]' ) is not null 
   DROP PROCEDURE [util].[refresh_views] 
 GO
@@ -1904,126 +2193,36 @@ END
 
 
 
-GO
-print '-- 26. split'
-IF object_id('[util].[split]' ) is not null 
-  DROP FUNCTION [util].[split] 
-GO
-	  
-	  
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB splits strings. Keeps string together when surrounded by [ ] 
-CREATE TYPE SplitListType AS TABLE 	(item VARCHAR(8000), i int)
-select * from util.split('AAP,NOOT', ',')
-select * from util.split('[AAP,NOOT],VIS,[NOOT,MIES],OLIFANT', ',')
-*/
-CREATE  FUNCTION [util].[split](
-    @s VARCHAR(8000) -- List of delimited items
-  , @del VARCHAR(16) = ',' -- delimiter that separates items
-) RETURNS @List TABLE (item VARCHAR(8000), i int)
-BEGIN
-	DECLARE 
-		@item VARCHAR(8000)
-		, @i int =1
-		, @n int 
-		, @del_index int
-		, @bracket_index_open int
-		, @bracket_index_close int
-	
-	set @del_index = CHARINDEX(@del,@s,0)
-	set @bracket_index_open = CHARINDEX('[',@s,0)
-	WHILE @del_index <> 0 -- while there is a delimiter
-	BEGIN
-		if @del_index < @bracket_index_open or @bracket_index_open=0 -- delimeter occurs before [ or there is no [
-		begin 
-			set @n = @del_index-1
-			SELECT
-				@item=RTRIM(LTRIM(SUBSTRING(@s,1,@n))),
-				-- set @s= tail 
-				@s=RTRIM(LTRIM(SUBSTRING(@s,@del_index+LEN(@del),LEN(@s)-@n)))
-		end 
-		else -- [ occurs before delimiter
-		begin
-			set @bracket_index_close = CHARINDEX(']',@s,@bracket_index_open)
-			set @n = case when @bracket_index_close=0 then len(@s) else  @bracket_index_close end
-			
-			SELECT
-				@item=RTRIM(LTRIM(SUBSTRING(@s,1,@n))),
-				-- set @s= tail 
-				@s=RTRIM(LTRIM(SUBSTRING(@s,@n+1,LEN(@s)-@n)))
-		end
-		IF LEN(@item) > 0
-		begin
-			INSERT INTO @List SELECT @item, @i
-			set @i += 1
-		end 
-		set @del_index= CHARINDEX(@del,@s,0)
-		set @bracket_index_open= CHARINDEX('[',@s,0)
-	END
-	IF LEN(@s) > 0
-	 INSERT INTO @List SELECT @s , @i-- Put the last item in
-	RETURN
-END
-
-
-
-
 
 GO
-print '-- 27. Col'
-IF object_id('[dbo].[Col]' ) is not null 
-  DROP VIEW [dbo].[Col] 
+print '-- 31. Batch_ext'
+IF object_id('[dbo].[Batch_ext]' ) is not null 
+  DROP VIEW [dbo].[Batch_ext] 
 GO
 	  
-CREATE VIEW [dbo].[Col] AS
-	SELECT     * 
-	FROM  [dbo].[Col_hist] AS h
-	WHERE     (eff_dt =
-                      ( SELECT     MAX(eff_dt) max_eff_dt
-                        FROM       [dbo].[Col_hist] h2
-                        WHERE      h.column_id = h2.column_id
-                       )
-              )
-		AND delete_dt IS NULL 
+create view dbo.Batch_ext as 
+select 
+b.[batch_id] 
+,b.[batch_name] 
+,b.[batch_start_dt] 
+,b.[batch_end_dt] 
+, s.status_name batch_status 
+, b.prev_batch_id
+, prev_b.batch_start_dt prev_batch_start_dt
+, prev_b.batch_end_dt prev_batch_end_dt
+, prev_s.status_name prev_batch_status 
+from dbo.Batch b
+inner join static.Status s on s.status_id = b.status_id
+left join dbo.Batch prev_b on b.prev_batch_id = prev_b.batch_id 
+left join static.Status prev_s on prev_s.status_id = prev_b.status_id
 
-
-
-
-GO
-print '-- 28. prefix'
-IF object_id('[util].[prefix]' ) is not null 
-  DROP FUNCTION [util].[prefix] 
-GO
-	  
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB returns true if @s ends with @suffix
-select dbo.prefix('gfjhaaaaa_aap', 4) 
-*/
-CREATE FUNCTION [util].[prefix]
-(
-                @s as varchar(255)
-                , @len_suffix as int
-                --, @suffix as varchar(255)
-)
-RETURNS varchar(255)
-AS
-BEGIN
-                declare @n as int=len(@s) 
-                                                --, @n_suffix as int = len(@suffix)
-                declare @result as bit = 0 
-                return SUBSTRING(@s, 1, @n-@len_suffix) 
-END
 
 
 
 
 
 GO
-print '-- 29. remove_comments'
+print '-- 32. remove_comments'
 IF object_id('[util].[remove_comments]' ) is not null 
   DROP FUNCTION [util].[remove_comments] 
 GO
@@ -2105,104 +2304,26 @@ end
 
 
 
-GO
-print '-- 30. get_cols'
-IF object_id('[dbo].[get_cols]' ) is not null 
-  DROP FUNCTION [dbo].[get_cols] 
-GO
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB returns a table with all column meta data 
--- Unfortunately we have to re-define the columTable type here... 
--- see http://stackoverflow.com/questions/2501324/can-t-sql-function-return-user-defined-table-type
-select * from dbo.get_cols(32)
-exec dbo.info
-*/
-CREATE FUNCTION [dbo].[get_cols]
-(
-	@object_id int
-)
-RETURNS @cols TABLE(
-	[ordinal_position] [int] NOT NULL PRIMARY KEY,
-	[column_name] [varchar](255) NULL,
-	[column_value] [varchar](255) NULL,
-	[data_type] [varchar](255) NULL,
-	[max_len] [int] NULL,
-	[column_type_id] [int] NULL,
-	[is_nullable] [bit] NULL,
-	[prefix] [varchar](64) NULL,
-	[entity_name] [varchar](64) NULL,
-	[foreignCol_name] [varchar](64) NULL,
-	[foreign_sur_pkey] int NULL,
-	[numeric_precision] [int] NULL,
-	[numeric_scale] [int] NULL,
-	part_of_unique_index BIT NULL,
-	[identity] [bit] NULL,
-	[src_mapping] varchar(255) null
-)  as
-begin 
-	--SET IDENTITY_INSERT @cols ON 
-	insert into @cols(
-		ordinal_position
-		, column_name
-		, column_value
-		, data_type 
-		, max_len
-		, [column_type_id] 
-		, is_nullable
-		, [prefix] 
-		, [entity_name]
-		, [foreignCol_name] 
-		, [foreign_sur_pkey] 
-		  ,[numeric_precision]
-		  ,[numeric_scale]
-		  ,part_of_unique_index 
-		  ,[identity]
-		) 
-		select 
-			ordinal_position
-			, column_name
-			, null column_value
-			, data_type 
-			, max_len
-			, [column_type_id] 
-			, is_nullable
-			, prefix
-			, [entity_name]
-			, [foreign_column_name]
-			, [foreign_sur_pkey] 
-			  ,[numeric_precision]
-			  ,[numeric_scale]
-			  ,part_of_unique_index 
-			  ,null [identity]
-		from dbo.Col_ext
-		where [object_id] = @object_id 
-	--SET IDENTITY_INSERT @cols OFF
-	RETURN
-end
-
---SELECT * from vwCol
-
-
-
 
 GO
-print '-- 31. udf_max'
-IF object_id('[util].[udf_max]' ) is not null 
-  DROP FUNCTION [util].[udf_max] 
+print '-- 33. udf_min'
+IF object_id('[util].[udf_min]' ) is not null 
+  DROP FUNCTION [util].[udf_min] 
 GO
+	  
+
 	  
 /*------------------------------------------------------------------------------------------------
 -- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
 --------------------------------------------------------------------------------------------------
--- 2014-02-25 BvdB returns the maximum of two ordinal types (e.g. int or date). 
-select util.udf_max(1,2)
-select util.udf_max(null,2)
-select util.udf_max(2,null)
-select util.udf_max(2,3)
+-- 2017-01-01 BvdB returns the minimum of two numbers
+select util.udf_min(1,2)
+select util.udf_min(null,2)
+select util.udf_min(2,null)
+select util.udf_min(2,3)
+select util.udf_min(2,2)
 */
-CREATE FUNCTION [util].[udf_max]
+CREATE FUNCTION [util].[udf_min]
 (
  @a sql_variant,
  @b sql_variant
@@ -2211,154 +2332,67 @@ CREATE FUNCTION [util].[udf_max]
 RETURNS sql_variant
 AS
 BEGIN
- if @a is null or @b >= @a
+ if @a is null or @b <= @a
   return @b
  else
-  if @b is null or @a > @b
+  if @b is null or @a < @b
    return @a
-  return @a
+ return null
 END
 
 
 
 
-GO
-print '-- 32. object_name'
-IF object_id('[util].[object_name]' ) is not null 
-  DROP FUNCTION [util].[object_name] 
-GO
 
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB return schema name of this full object name 
--- e.g. My_PC.AdventureWorks2014.Person.Sales ->My_PC.AdventureWorks2014.Person
-select util.object_name('My_PC.AdventureWorks2014.Person.Sales') --> points to table 
+GO
+print '-- 34. filter'
+IF object_id('[util].[filter]' ) is not null 
+  DROP FUNCTION [util].[filter] 
+GO
+	  
+/*---------------------------------------------------------------------------------------------
+BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL
+-----------------------------------------------------------------------------------------------
+-- 2018-04-19 BvdB filter characters from string
+select util.filter('aap','d')
+select util.filter('
+aap
+', 'char(10),char(13)')
+select util.filter('
+"aap''
+', 'char(10),char(13),",''')
 */
-CREATE FUNCTION [util].[object_name]( @fullObj_name varchar(255) ) 
-RETURNS varchar(255) 
+CREATE FUNCTION [util].[filter]
+(
+	@s varchar(255)
+	, @filter varchar(200) 
+--	, @return_null bit = 1 
+)
+RETURNS varchar(255)
 AS
 BEGIN
--- standard BETL header code... 
---set nocount on 
---declare   @debug as bit =1
---		, @progress as bit =1
---		, @proc_name as varchar(255) =  OBJECT_NAME(@@PROCID);
---exec dbo.get_var 'debug', @debug output
---exec dbo.get_var 'progress', @progress output
---exec progress @progress, '? ?,?', @proc_name , @fullObj_name
--- END standard BETL header code... 
-	--declare @fullObj_name varchar(255)= 'Tim_DWH.L2.Location'
-	declare @t TABLE (item VARCHAR(8000), i int)
-	declare  
-	     @elem1 varchar(255)
-	     ,@elem2 varchar(255)
-	     ,@elem3 varchar(255)
-	     ,@elem4 varchar(255)
-		, @cnt_elems int 
-		, @object_id int 
-		, @remove_chars varchar(255)
-		, @cnt as int 
-		 
-	set @remove_chars = replace(@fullObj_name, '[','')
-	set @remove_chars = replace(@remove_chars , ']','')
+	declare @result as varchar(max)= ''
+		, @i int =1
+		, @n int =len(@s) 
+		, @filter_list as SplitList
+		, @c as char
+	insert into @filter_list
+	select * from  util.split(@filter, ',')
 	
-	insert into @t 
-	select * from util.split(@remove_chars , '.') 
-	--select * from @t 
-	-- @t contains elemenents of fullObj_name 
-	-- can be [server].[db].[schema].[table|view]
-	-- as long as it's unique 
-	select @cnt_elems = MAX(i) from @t	
-	select @elem1 = item from @t where i=@cnt_elems
-	select @elem2 = item from @t where i=@cnt_elems-1
-	select @elem3 = item from @t where i=@cnt_elems-2
-	select @elem4 = item from @t where i=@cnt_elems-3
-	--select @object_id= max(o.object_id), @cnt = count(*) 
-	--from dbo.[Obj] o
-	--LEFT OUTER JOIN dbo.[Obj] AS parent_o ON o.parent_id = parent_o.[object_id] 
-	--LEFT OUTER JOIN dbo.[Obj] AS grand_parent_o ON parent_o.parent_id = grand_parent_o.[object_id] 
-	--LEFT OUTER JOIN dbo.[Obj] AS great_grand_parent_o ON grand_parent_o.parent_id = great_grand_parent_o.[object_id] 
-	--where 	o.[object_name] = @elem2
-	--and ( @elem3 is null or parent_o.[object_name] = @elem3) 
-	--and ( @elem4 is null or grand_parent_o.[object_name] = @elem4) 
-	declare @res as varchar(255) 
-	--if @cnt >1 
-	--	set @res =  -@cnt
-	--else 
-	--	set @res =@object_id 
-	set @res = '[' + @elem1 + ']'
-	return @res 
-END
-
-
-
-
-GO
-print '-- 33. Job_ext'
-IF object_id('[dbo].[Job_ext]' ) is not null 
-  DROP VIEW [dbo].[Job_ext] 
-GO
-	  
-
--- select * from dbo.Job_ext
-CREATE view [dbo].[Job_ext] as 
-SELECT  j.[job_id]
-      ,j.[name] job_name
-      ,j.[description] job_description
-      ,j.[enabled] job_enabled
-      ,j.[category_name]
-      ,j.[job_schedule_id]
-      ,js.[name] schedule_name 
-      ,js.[enabled] schedule_enabled
-      ,[freq_type]
-      ,[freq_interval]
-      ,[freq_subday_type]
-      ,[freq_subday_interval]
-      ,[freq_relative_interval]
-      ,[freq_recurrence_factor]
-      ,[active_start_date]
-      ,[active_end_date]
-      ,[active_start_time]
-      ,[active_end_time]
-  FROM [dbo].[Job] j
-  inner join dbo.Job_schedule  js on j.job_schedule_id = js.job_schedule_id
-  --inner join dbo.Job_step s on s.job_id = j.job_id
---  order by j.job_id, s.step_id
-
-
-
-
-
-GO
-print '-- 34. prefix_first_underscore'
-IF object_id('[util].[prefix_first_underscore]' ) is not null 
-  DROP FUNCTION [util].[prefix_first_underscore] 
-GO
-	  
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB extract prefix from string
-SELECT dbo.guess_foreignCol_id('par_relatie_id')
-SELECT [dbo].[prefix_first_underscore]('relatie_id')
-*/    
-CREATE FUNCTION [util].[prefix_first_underscore]( @column_name VARCHAR(255) ) 
-RETURNS VARCHAR(255) 
-AS
-BEGIN
-	DECLARE @res VARCHAR(255) 
-	,		@pos INT 
-	SET @pos = CHARINDEX('_', @column_name)
-	IF @pos IS NOT NULL and @pos>1
-		SET @res = SUBSTRING(@column_name, 1, @pos-1)
-	RETURN @res 
-	/* 
-		declare @n as int=len(@s) 
-			--, @n_suffix as int = len(@suffix)
-	declare @result as bit = 0 
-	return SUBSTRING(@s, 1, @n-@len_suffix) 
-	*/
+	update @filter_list
+	set item = char(convert(int, replace(replace(item, 'char(',''), ')','')))  
+	from @filter_list
+	where item like 'char(%'
+	while @i<@n+1
+	begin
+		set @c = substring(@s, @i,1) 
+		if not exists ( select * from @filter_list where item = @c) 
+			set @result+=@c
+		set @i += 1 
+	end
+--	if @return_null =0 
+	--	return isnull(@result , '') 
+	return @result 
 END
 
 
@@ -2404,6 +2438,7 @@ SELECT *
 FROM vw_column
 WHERE column_id IN ( 1140) 
 */
+
 
 
 
@@ -2666,6 +2701,7 @@ end
 
 
 
+
 GO
 print '-- 37. create_jobs'
 IF object_id('[dbo].[create_jobs]' ) is not null 
@@ -2698,6 +2734,7 @@ select '''+ job_name + ''' as job_name
 	--print @sql 
 	exec [dbo].[exec_sql] @transfer_id, @sql
 end
+
 
 
 
@@ -2782,6 +2819,7 @@ begin
 	-- standard BETL footer code... 
 	exec dbo.log @transfer_id, 'footer', '? ?(?) ', @proc_name , @object_name, @object_type_id
 end
+
 
 
 
@@ -2982,6 +3020,7 @@ END
 
 
 
+
 GO
 print '-- 40. create_view'
 IF object_id('[dbo].[create_view]' ) is not null 
@@ -3122,6 +3161,7 @@ SET @refresh_sql = '
 	exec dbo.log @transfer_id, 'footer', 'DONE ? ? ? ?', @proc_name , @trg_obj_name, @transfer_id
 	-- END standard BETL footer code... 
 END
+
 
 
 
@@ -3271,6 +3311,7 @@ GO
 	set nocount on 
 	print '--END BETL Release version ' + @version_str
 end
+
 
 
 
@@ -3435,6 +3476,7 @@ GO
 		set @i+=1
 	end
 end
+
 
 
 
@@ -3724,6 +3766,7 @@ end
 
 
 
+
 GO
 print '-- 44. get_obj_id'
 IF object_id('[dbo].[get_obj_id]' ) is not null 
@@ -3838,6 +3881,7 @@ END
 
 
 
+
 GO
 print '-- 45. get_prop_obj_id'
 IF object_id('[dbo].[get_prop_obj_id]' ) is not null 
@@ -3899,6 +3943,7 @@ begin
 	where seq_nr = 1
 	return @res
 end
+
 
 
 
@@ -4000,6 +4045,7 @@ end
 
 
 
+
 GO
 print '-- 47. guess_entity_name'
 IF object_id('[dbo].[guess_entity_name]' ) is not null 
@@ -4032,6 +4078,7 @@ BEGIN
 	WHERE column_id = @foreignCol_id  
 	RETURN @res 
 END
+
 
 
 
@@ -4123,6 +4170,7 @@ END
 
 
 
+
 GO
 print '-- 49. guess_prefix'
 IF object_id('[dbo].[guess_prefix]' ) is not null 
@@ -4169,6 +4217,7 @@ BEGIN
 	-- Return the result of the function
 	RETURN @prefix
 END
+
 
 
 
@@ -4263,6 +4312,7 @@ END
 
 
 
+
 GO
 print '-- 51. log_error'
 IF object_id('[dbo].[log_error]' ) is not null 
@@ -4322,6 +4372,7 @@ END
 
 
 
+
 GO
 print '-- 52. Obj_dep_ext'
 IF object_id('[dbo].[Obj_dep_ext]' ) is not null 
@@ -4341,6 +4392,7 @@ obj.object_id obj_id
 from dbo.Obj_dep dep 
 inner join dbo.obj_ext obj on dep.obj_id = obj.object_id
 inner join dbo.obj_ext dep_obj on dep.dep_obj_id = dep_obj.object_id
+
 
 
 
@@ -4366,6 +4418,7 @@ where
 and object_type in ('view', 'table') 
 and [schema] in ( 'idv', 'rdv') 
 --order by [schema], o.scope, full_object_name
+
 
 
 
@@ -4471,6 +4524,7 @@ end
 
 
 
+
 GO
 print '-- 55. Prop_ext'
 IF object_id('[dbo].[Prop_ext]' ) is not null 
@@ -4492,6 +4546,7 @@ INNER JOIN static.Property AS p ON o.object_type = 'table' AND p.apply_table = 1
 						 OR o.object_type = 'user' AND p.apply_user = 1 
 LEFT OUTER JOIN
                          dbo.Property_Value AS pv ON pv.property_id = p.property_id AND pv.object_id = o.object_id
+
 
 
 
@@ -5567,6 +5622,7 @@ END
 
 
 
+
 GO
 print '-- 57. push_all'
 IF object_id('[dbo].[push_all]' ) is not null 
@@ -5599,17 +5655,22 @@ BEGIN
 	exec dbo.log @transfer_id, 'header', '? ?(?) batch_id ? transfer_id ? template_id ?', @proc_name , @full_object_names, @scope, @batch_id, @transfer_id, @template_id
 	exec dbo.log @transfer_id, '-------', '--------------------------------------------------------------------------------'
 	-- END standard BETL header code... 
+	
 	if not isnull(@transfer_id,0)  > 0 and isnull(@batch_id,0)  > 0 
 	begin
 		exec dbo.log @transfer_id, 'ERROR', '? needs to be called via dbo.push', @proc_name
 		goto footer
 	end
+	
 	if not charindex('%', @full_object_names )  >0 
 	begin
 		exec dbo.log @transfer_id, 'ERROR', '? needs % sign in @full_object_names: ?', @proc_name, @full_object_names
 		goto footer
 	end
 	
+	-- refresh @full_object_names..  it will fail at %, but then it will try to refresh the parent ( without %)
+	exec betl.[dbo].refresh @full_object_names
+
 	declare @sql as varchar(max)
 			, @p as ParamTable
 			, @betl varchar(100) =db_name() 
@@ -5674,6 +5735,7 @@ BEGIN
 	exec dbo.log @transfer_id, 'footer', 'DONE ? ? scope ? transfer_id ?', @proc_name , @full_object_names, @scope, @transfer_id
 	return @result
 end
+
 
 
 
@@ -6189,6 +6251,7 @@ END
 
 
 
+
 GO
 print '-- 59. reset_col'
 IF object_id('[dbo].[reset_col]' ) is not null 
@@ -6271,6 +6334,7 @@ end
 
 
 
+
 GO
 print '-- 60. schema_name'
 IF object_id('[dbo].[schema_name]' ) is not null 
@@ -6297,6 +6361,7 @@ BEGIN
 	where [object_id] = @schema_id
 	return @res 
 END
+
 
 
 
@@ -6564,6 +6629,7 @@ END
 
 
 
+
 GO
 print '-- 62. set_scope'
 IF object_id('[dbo].[set_scope]' ) is not null 
@@ -6614,6 +6680,7 @@ begin
 		exec dbo.log @transfer_id, 'footer', 'DONE ? ? ', @proc_name , @full_object_name, @scope
 	-- END standard BETL footer code... 
 end
+
 
 
 
@@ -6681,6 +6748,7 @@ end
 
 
 
+
 GO
 print '-- 64. udf_max3'
 IF object_id('[util].[udf_max3]' ) is not null 
@@ -6703,6 +6771,7 @@ as
 begin
 	return util.udf_max(dbo.udf_max(@a, @b) , @c) 
 end
+
 
 
 
@@ -6736,6 +6805,7 @@ end
 
 
 
+
 GO
 print '-- 66. dec_nesting'
 IF object_id('[dbo].[dec_nesting]' ) is not null 
@@ -6759,6 +6829,7 @@ begin
 	set @nesting = isnull(@nesting-1, 0) 
 	exec dbo.setp  'nesting', @nesting
 end
+
 
 
 
@@ -6843,6 +6914,7 @@ END
 
 
 
+
 GO
 print '-- 68. get_dep'
 IF object_id('[dbo].[get_dep]' ) is not null 
@@ -6895,6 +6967,7 @@ end
 
 
 
+
 GO
 print '-- 69. get_prop'
 IF object_id('[dbo].[get_prop]' ) is not null 
@@ -6924,6 +6997,7 @@ end
 
 
 
+
 GO
 print '-- 70. inc_nesting'
 IF object_id('[dbo].[inc_nesting]' ) is not null 
@@ -6946,6 +7020,7 @@ begin
 	set @nesting = isnull(@nesting+1 , 1) 
 	exec dbo.setp 'nesting', @nesting
 end
+
 
 
 
@@ -7100,6 +7175,7 @@ END
 
 
 
+
 GO
 print '-- 72. my_info'
 IF object_id('[dbo].[my_info]' ) is not null 
@@ -7140,6 +7216,7 @@ END
 
 
 
+
 GO
 print '-- 73. onError'
 IF object_id('[dbo].[onError]' ) is not null 
@@ -7169,6 +7246,7 @@ begin
 	footer: 
 	
 end
+
 
 
 
@@ -7226,6 +7304,7 @@ BEGIN
 	exec dbo.log @transfer_id, 'footer', 'DONE ? ? ? ?', @proc_name , @full_object_name, @object_tree_depth, @transfer_id
 	-- END standard BETL footer code... 
 END
+
 
 
 
@@ -7301,6 +7380,7 @@ end
 
 
 
+
 GO
 print '-- 76. set_target_schema'
 IF object_id('[dbo].[set_target_schema]' ) is not null 
@@ -7332,6 +7412,7 @@ begin
 	exec dbo.log @transfer_id, 'footer', 'DONE ? ? , ? (?)', @proc_name , @full_object_name, @target_schema_name, @schema_id 
 	-- END standard BETL footer code... 
 end 
+
 
 
 
@@ -7436,6 +7517,7 @@ end
 
 
 
+
 GO
 print '-- 78. sp_start'
 IF object_id('[dbo].[sp_start]' ) is not null 
@@ -7499,6 +7581,7 @@ begin
 		RAISERROR(@msg , 15 , 0)  WITH NOWAIT
 	end 
 end
+
 
 
 
@@ -7646,6 +7729,7 @@ begin
 	end 
 	exec dbo.log 0, 'footer', '? ?(?)..? (?)', @proc_name , @batch_name, @batch_id, @prev_batch_id, @status
 end
+
 
 
 
@@ -7820,6 +7904,7 @@ end
 
 
 
+
 GO
 print '-- 81. drop_batch'
 IF object_id('[dbo].[drop_batch]' ) is not null 
@@ -7851,6 +7936,7 @@ begin
 	--where batch_id = @batch_id 
 	--exec dbo.end_transfer @transfer_id
 end
+
 
 
 
@@ -7890,6 +7976,7 @@ begin
 	and status_id <> 200 -- never overwrite error batch status
 	footer:
 end
+
 
 
 
@@ -7966,6 +8053,7 @@ end
 
 
 
+
 GO
 print '-- 84. process_stack'
 IF object_id('[dbo].[process_stack]' ) is not null 
@@ -7999,6 +8087,7 @@ begin
 end
 
  
+
 
 
 
@@ -8046,6 +8135,7 @@ end
 
 
 
+
 GO
 print '-- 86. reset'
 IF object_id('[dbo].[reset]' ) is not null 
@@ -8079,6 +8169,7 @@ begin
 	exec dbo.log @transfer_id, 'footer', 'DONE ? ', @proc_name 
 	-- END standard BETL footer code... 
 end
+
 
 
 
@@ -8139,6 +8230,7 @@ end
 
 
 
+
 GO
 print '-- 88. end_transfer'
 IF object_id('[dbo].[end_transfer]' ) is not null 
@@ -8191,6 +8283,7 @@ begin
 		exec dbo.end_batch @batch_id, @status, @transfer_id
 	footer: 
 end
+
 
 
 
@@ -8371,5 +8464,6 @@ values ( 50, 'LOCALHOST')
 GO
 exec dbo.setp 'is_localhost', 1 , 'LOCALHOST'
 -- end of ddl_content
---END BETL Release version 3.1.24 , date: 2018-12-06 23:19:23
+--END BETL Release version 3.1.25 , date: 2018-12-12 09:51:06
 
+(1 row affected)
