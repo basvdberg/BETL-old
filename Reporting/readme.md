@@ -12,3 +12,6 @@ If everyting works, you can deploy it to your report server.
 Example report 
 
 ![batch report 1](https://raw.githubusercontent.com/basvdberg/BETL/master/Documentation/batch_report_1.png)
+
+
+![batch report 2](https://raw.githubusercontent.com/basvdberg/BETL/master/Documentation/batch_report_2.png)
