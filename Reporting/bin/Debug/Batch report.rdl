@@ -70,7 +70,7 @@ select
 , datediff(second, trend.transfer_start_dt, trend.transfer_end_dt) duration
 , 'sec' duration_uom
 , trend.transfer_start_dt trend_start_dt
-, src_obj.object_and_schema_name source_name
+, src_obj.obj_and_schema_name source_name
 , t.target_name
 , trend.rec_cnt_src
 , trend.rec_cnt_new
@@ -112,8 +112,8 @@ inner  join [dbo].[Transfer] trend WITH (NOLOCK) on
 	and trend.transfer_seq between t.transfer_seq - @trend_depth+1 and t.transfer_seq 
 
 left join static.[Status] trend_status WITH (NOLOCK) on trend.status_id = trend_status.status_id 
-left join dbo.property_value pv WITH (NOLOCK) on pv.object_id = t.src_obj_id and pv.property_id = 180 -- property_id	property_name180	filter_delete_detection
-left join dbo.obj_ext src_obj WITH (NOLOCK) on t.src_obj_id = src_obj.[object_id] 
+left join dbo.property_value pv WITH (NOLOCK) on pv.obj_id = t.src_obj_id and pv.property_id = 180 -- property_id	property_name180	filter_delete_detection
+left join dbo.obj_ext src_obj WITH (NOLOCK) on t.src_obj_id = src_obj.obj_id 
 -- left join ssisdb.catalog.executions e WITH (NOLOCK) on e.execution_id = b.guid
 where b.batch_start_dt between @t0 and @t1
 and ( @only_ssisdb=0 or b.guid is not null) 
