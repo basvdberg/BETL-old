@@ -1,5 +1,5 @@
 
--- START BETL Release version 3.1.28 , date: 2018-12-19 13:51:37
+-- START BETL Release version 3.2.1 , date: 2019-01-25 13:52:33
 set nocount on 
 use betl 
 -- WARNING: This will clear the betl database !
@@ -77,997 +77,87 @@ CREATE TYPE [dbo].[SplitList] AS TABLE(
 )
 GO
 -- end user defined tables
--- create table [static].[obj_type]
-GO
-CREATE TABLE [static].[obj_type]
-(
-	  [obj_type_id] INT NOT NULL
-	, [obj_type] VARCHAR(100) NULL
-	, [obj_type_level] INT NULL
-	, CONSTRAINT [PK_obj_type] PRIMARY KEY ([obj_type_id] ASC)
-)
-
--- create table [static].[Property]
-GO
-CREATE TABLE [static].[Property]
-(
-	  [property_id] INT NOT NULL
-	, [property_name] VARCHAR(255) NULL
-	, [description] VARCHAR(255) NULL
-	, [property_scope] VARCHAR(50) NULL
-	, [default_value] VARCHAR(255) NULL
-	, [apply_table] BIT NULL
-	, [apply_view] BIT NULL
-	, [apply_schema] BIT NULL
-	, [apply_db] BIT NULL
-	, [apply_srv] BIT NULL
-	, [apply_user] BIT NULL
-	, [record_dt] DATETIME NULL DEFAULT(getdate())
-	, [record_user] VARCHAR(255) NULL DEFAULT(suser_sname())
-	, CONSTRAINT [PK_Property_1] PRIMARY KEY ([property_id] ASC)
-)
-
--- create table [dbo].[Obj_dep]
-GO
-CREATE TABLE [dbo].[Obj_dep]
-(
-	  [from_obj_id] INT NOT NULL
-	, [to_obj_id] INT NOT NULL
-	, [data_source] VARCHAR(50) NOT NULL
-	, [record_dt] DATETIME NULL DEFAULT(getdate())
-	, [record_user] VARCHAR(50) NULL DEFAULT(suser_sname())
-	, CONSTRAINT [PK__Obj_dep__7C69C680D927C550] PRIMARY KEY ([from_obj_id] ASC, [to_obj_id] ASC)
-)
-
--- create table [dbo].[Batch]
-GO
-CREATE TABLE [dbo].[Batch]
-(
-	  [batch_id] INT NOT NULL IDENTITY(1,1)
-	, [batch_name] VARCHAR(100) NULL
-	, [batch_start_dt] DATETIME NULL DEFAULT(getdate())
-	, [batch_end_dt] DATETIME NULL
-	, [status_id] INT NULL
-	, [last_error_id] INT NULL
-	, [prev_batch_id] INT NULL
-	, [exec_server] VARCHAR(100) NULL DEFAULT(@@servername)
-	, [exec_host] VARCHAR(100) NULL DEFAULT(host_name())
-	, [exec_user] VARCHAR(100) NULL DEFAULT(suser_sname())
-	, [guid] BIGINT NULL
-	, [continue_batch] BIT NULL DEFAULT((0))
-	, [batch_seq] INT NULL
-	, CONSTRAINT [PK_run_id] PRIMARY KEY ([batch_id] DESC)
-)
-
--- create table [static].[Server_type]
-GO
-CREATE TABLE [static].[Server_type]
-(
-	  [server_type_id] INT NOT NULL
-	, [server_type] VARCHAR(100) NULL
-	, [compatibility] VARCHAR(255) NULL
-	, CONSTRAINT [PK_Server_type] PRIMARY KEY ([server_type_id] ASC)
-)
-
--- create table [dbo].[Property_value]
-GO
-CREATE TABLE [dbo].[Property_value]
-(
-	  [property_id] INT NOT NULL
-	, [obj_id] INT NOT NULL
-	, [value] VARCHAR(255) NULL
-	, [record_dt] DATETIME NULL DEFAULT(getdate())
-	, [record_user] VARCHAR(255) NULL DEFAULT(suser_sname())
-	, CONSTRAINT [PK_Property_Value] PRIMARY KEY ([property_id] ASC, [obj_id] ASC)
-)
-
--- create table [static].[Log_level]
-GO
-CREATE TABLE [static].[Log_level]
-(
-	  [log_level_id] SMALLINT NOT NULL
-	, [log_level] VARCHAR(50) NULL
-	, [log_level_description] VARCHAR(255) NULL
-	, CONSTRAINT [PK_Log_level_1] PRIMARY KEY ([log_level_id] ASC)
-)
-
--- create table [static].[Log_type]
-GO
-CREATE TABLE [static].[Log_type]
-(
-	  [log_type_id] SMALLINT NOT NULL
-	, [log_type] VARCHAR(50) NULL
-	, [min_log_level_id] INT NULL
-	, CONSTRAINT [PK_Log_type_1] PRIMARY KEY ([log_type_id] ASC)
-)
-
--- create table [static].[Version]
-GO
-CREATE TABLE [static].[Version]
-(
-	  [major_version] INT NOT NULL
-	, [minor_version] INT NOT NULL
-	, [build] INT NOT NULL
-	, [build_dt] DATETIME NULL
-	, CONSTRAINT [PK_Version] PRIMARY KEY ([major_version] ASC, [minor_version] ASC, [build] ASC)
-)
-
 -- create table [dbo].[Transfer_log]
 GO
-CREATE TABLE [dbo].[Transfer_log]
-(
-	  [log_id] INT NOT NULL IDENTITY(1,1)
-	, [log_dt] DATETIME NULL DEFAULT(getdate())
-	, [msg] VARCHAR(MAX) NULL
-	, [transfer_id] INT NULL
-	, [log_level_id] INT NULL
-	, [log_type_id] INT NULL
-	, [exec_sql] BIT NULL
-	, CONSTRAINT [PK_log_id] PRIMARY KEY ([log_id] DESC)
-)
-
+CREATE TABLE [dbo].[Transfer_log](	  [log_id] INT NOT NULL IDENTITY(1,1)	, [log_dt] DATETIME NULL DEFAULT(getdate())	, [msg] VARCHAR(MAX) NULL	, [transfer_id] INT NULL	, [log_level_id] INT NULL	, [log_type_id] INT NULL	, [exec_sql] BIT NULL	, CONSTRAINT [PK_log_id] PRIMARY KEY ([log_id] DESC))
 -- create table [dbo].[Error]
 GO
-CREATE TABLE [dbo].[Error]
-(
-	  [error_id] INT NOT NULL IDENTITY(1,1)
-	, [error_code] INT NULL
-	, [error_msg] VARCHAR(5000) NULL
-	, [error_line] INT NULL
-	, [error_procedure] VARCHAR(255) NULL
-	, [error_procedure_id] VARCHAR(255) NULL
-	, [error_execution_id] VARCHAR(255) NULL
-	, [error_event_name] VARCHAR(255) NULL
-	, [error_severity] INT NULL
-	, [error_state] INT NULL
-	, [error_source] VARCHAR(255) NULL
-	, [error_interactive_mode] VARCHAR(255) NULL
-	, [error_machine_name] VARCHAR(255) NULL
-	, [error_user_name] VARCHAR(255) NULL
-	, [transfer_id] INT NULL
-	, [record_dt] DATETIME NULL DEFAULT(getdate())
-	, [record_user] VARCHAR(50) NULL
-	, CONSTRAINT [PK_error_id] PRIMARY KEY ([error_id] DESC)
-)
-
+CREATE TABLE [dbo].[Error](	  [error_id] INT NOT NULL IDENTITY(1,1)	, [error_code] INT NULL	, [error_msg] VARCHAR(5000) NULL	, [error_line] INT NULL	, [error_procedure] VARCHAR(255) NULL	, [error_procedure_id] VARCHAR(255) NULL	, [error_execution_id] VARCHAR(255) NULL	, [error_event_name] VARCHAR(255) NULL	, [error_severity] INT NULL	, [error_state] INT NULL	, [error_source] VARCHAR(255) NULL	, [error_interactive_mode] VARCHAR(255) NULL	, [error_machine_name] VARCHAR(255) NULL	, [error_user_name] VARCHAR(255) NULL	, [transfer_id] INT NULL	, [record_dt] DATETIME NULL DEFAULT(getdate())	, [record_user] VARCHAR(50) NULL	, CONSTRAINT [PK_error_id] PRIMARY KEY ([error_id] DESC))
 -- create table [dbo].[Col_hist]
 GO
-CREATE TABLE [dbo].[Col_hist]
-(
-	  [column_id] INT NOT NULL IDENTITY(1,1)
-	, [eff_dt] DATETIME NOT NULL
-	, [obj_id] INT NOT NULL
-	, [column_name] VARCHAR(64) NOT NULL
-	, [prefix] VARCHAR(64) NULL
-	, [entity_name] VARCHAR(64) NULL
-	, [foreign_column_id] INT NULL
-	, [ordinal_position] SMALLINT NULL
-	, [is_nullable] BIT NULL
-	, [data_type] VARCHAR(100) NULL
-	, [max_len] INT NULL
-	, [numeric_precision] INT NULL
-	, [numeric_scale] INT NULL
-	, [column_type_id] INT NULL
-	, [src_column_id] INT NULL
-	, [delete_dt] DATETIME NULL
-	, [record_dt] DATETIME NULL DEFAULT(getdate())
-	, [record_user] VARCHAR(50) NULL DEFAULT(suser_sname())
-	, [chksum] INT NOT NULL
-	, [transfer_id] INT NULL
-	, [part_of_unique_index] BIT NULL DEFAULT((0))
-	, CONSTRAINT [PK__Hst_column] PRIMARY KEY ([column_id] ASC, [eff_dt] DESC)
-)
-
-CREATE UNIQUE NONCLUSTERED INDEX [IX_Unique__Column_obj_col_eff] ON [dbo].[Col_hist] ([obj_id] ASC, [column_name] ASC, [eff_dt] ASC)
-
+CREATE TABLE [dbo].[Col_hist](	  [column_id] INT NOT NULL IDENTITY(1,1)	, [eff_dt] DATETIME NOT NULL	, [obj_id] INT NOT NULL	, [column_name] VARCHAR(64) NOT NULL	, [prefix] VARCHAR(64) NULL	, [entity_name] VARCHAR(64) NULL	, [foreign_column_id] INT NULL	, [ordinal_position] SMALLINT NULL	, [is_nullable] BIT NULL	, [data_type] VARCHAR(100) NULL	, [max_len] INT NULL	, [numeric_precision] INT NULL	, [numeric_scale] INT NULL	, [column_type_id] INT NULL	, [src_column_id] INT NULL	, [delete_dt] DATETIME NULL	, [record_dt] DATETIME NULL DEFAULT(getdate())	, [record_user] VARCHAR(50) NULL DEFAULT(suser_sname())	, [chksum] INT NOT NULL	, [transfer_id] INT NULL	, [part_of_unique_index] BIT NULL DEFAULT((0))	, CONSTRAINT [PK__Hst_column] PRIMARY KEY ([column_id] ASC, [eff_dt] DESC))CREATE UNIQUE NONCLUSTERED INDEX [IX_Unique__Column_obj_col_eff] ON [dbo].[Col_hist] ([obj_id] ASC, [column_name] ASC, [eff_dt] ASC)
 -- create table [static].[Column_type]
 GO
-CREATE TABLE [static].[Column_type]
-(
-	  [column_type_id] INT NOT NULL
-	, [column_type_name] VARCHAR(50) NULL
-	, [column_type_description] VARCHAR(255) NULL
-	, [record_dt] DATETIME NULL
-	, [record_user] VARCHAR(50) NULL
-	, CONSTRAINT [PK_Column_type] PRIMARY KEY ([column_type_id] ASC)
-)
-
+CREATE TABLE [static].[Column_type](	  [column_type_id] INT NOT NULL	, [column_type_name] VARCHAR(50) NULL	, [column_type_description] VARCHAR(255) NULL	, [record_dt] DATETIME NULL	, [record_user] VARCHAR(50) NULL	, CONSTRAINT [PK_Column_type] PRIMARY KEY ([column_type_id] ASC))
 -- create table [dbo].[Prefix]
 GO
-CREATE TABLE [dbo].[Prefix]
-(
-	  [prefix_name] VARCHAR(100) NOT NULL
-	, [default_template_id] INT NULL
-	, CONSTRAINT [PK_Prefix_1] PRIMARY KEY ([prefix_name] ASC)
-)
-
+CREATE TABLE [dbo].[Prefix](	  [prefix_name] VARCHAR(100) NOT NULL	, [default_template_id] INT NULL	, CONSTRAINT [PK_Prefix_1] PRIMARY KEY ([prefix_name] ASC))
 -- create table [dbo].[Key_domain]
 GO
-CREATE TABLE [dbo].[Key_domain]
-(
-	  [key_domain_name] VARCHAR(255) NOT NULL
-	, [key_domain_id] INT NOT NULL
-	, CONSTRAINT [PK_Key_domain] PRIMARY KEY ([key_domain_name] ASC)
-)
-
+CREATE TABLE [dbo].[Key_domain](	  [key_domain_name] VARCHAR(255) NOT NULL	, [key_domain_id] INT NOT NULL	, CONSTRAINT [PK_Key_domain] PRIMARY KEY ([key_domain_name] ASC))
 -- create table [dbo].[Job]
 GO
-CREATE TABLE [dbo].[Job]
-(
-	  [job_id] INT NOT NULL IDENTITY(10,10)
-	, [name] VARCHAR(255) NULL
-	, [description] VARCHAR(255) NULL
-	, [enabled] BIT NULL DEFAULT((1))
-	, [category_name] VARCHAR(255) NULL
-	, [job_schedule_id] INT NULL
-	, CONSTRAINT [PK_Job] PRIMARY KEY ([job_id] ASC)
-)
-
-CREATE UNIQUE NONCLUSTERED INDEX [IX_Job] ON [dbo].[Job] ([name] ASC)
-
+CREATE TABLE [dbo].[Job](	  [job_id] INT NOT NULL IDENTITY(10,10)	, [name] VARCHAR(255) NULL	, [description] VARCHAR(255) NULL	, [enabled] BIT NULL DEFAULT((1))	, [category_name] VARCHAR(255) NULL	, [job_schedule_id] INT NULL	, CONSTRAINT [PK_Job] PRIMARY KEY ([job_id] ASC))CREATE UNIQUE NONCLUSTERED INDEX [IX_Job] ON [dbo].[Job] ([name] ASC)
 -- create table [dbo].[Query]
 GO
-CREATE TABLE [dbo].[Query]
-(
-	  [column_id] INT NOT NULL
-	, [column_name] VARCHAR(64) NOT NULL
-	, [schema] VARCHAR(100) NULL
-	, [db] VARCHAR(100) NULL
-	, [full_obj_name] VARCHAR(411) NOT NULL
-	, [Column_type_id] INT NULL
-	, [Column_type_name] VARCHAR(50) NULL
-	, [prefix] VARCHAR(64) NULL
-	, [entity_name] VARCHAR(64) NULL
-	, [foreign_column_id] INT NULL
-	, [foreign_column_name] VARCHAR(64) NULL
-	, [foreign_sur_pkey] INT NULL
-	, [foreign_sur_pkey_name] VARCHAR(64) NULL
-	, [is_nullable] BIT NULL
-	, [ordinal_position] SMALLINT NULL
-	, [data_type] VARCHAR(100) NULL
-	, [max_len] INT NULL
-	, [numeric_precision] INT NULL
-	, [numeric_scale] INT NULL
-	, [src_column_id] INT NULL
-	, [obj_id] INT NOT NULL
-	, [obj_name] VARCHAR(100) NOT NULL
-	, [chksum] INT NOT NULL
-	, [part_of_unique_index] BIT NULL
-	, [server_type_id] INT NULL
-)
-
+CREATE TABLE [dbo].[Query](	  [column_id] INT NOT NULL	, [column_name] VARCHAR(64) NOT NULL	, [schema] VARCHAR(100) NULL	, [db] VARCHAR(100) NULL	, [full_obj_name] VARCHAR(411) NOT NULL	, [Column_type_id] INT NULL	, [Column_type_name] VARCHAR(50) NULL	, [prefix] VARCHAR(64) NULL	, [entity_name] VARCHAR(64) NULL	, [foreign_column_id] INT NULL	, [foreign_column_name] VARCHAR(64) NULL	, [foreign_sur_pkey] INT NULL	, [foreign_sur_pkey_name] VARCHAR(64) NULL	, [is_nullable] BIT NULL	, [ordinal_position] SMALLINT NULL	, [data_type] VARCHAR(100) NULL	, [max_len] INT NULL	, [numeric_precision] INT NULL	, [numeric_scale] INT NULL	, [src_column_id] INT NULL	, [obj_id] INT NOT NULL	, [obj_name] VARCHAR(100) NOT NULL	, [chksum] INT NOT NULL	, [part_of_unique_index] BIT NULL	, [server_type_id] INT NULL)
 -- create table [dbo].[Transfer]
 GO
-CREATE TABLE [dbo].[Transfer]
-(
-	  [transfer_id] INT NOT NULL IDENTITY(1,1)
-	, [batch_id] INT NULL
-	, [transfer_name] VARCHAR(100) NULL
-	, [src_obj_id] INT NULL
-	, [target_name] VARCHAR(255) NULL
-	, [transfer_start_dt] DATETIME NULL
-	, [transfer_end_dt] DATETIME NULL
-	, [status_id] INT NULL
-	, [rec_cnt_src] INT NULL
-	, [rec_cnt_new] INT NULL
-	, [rec_cnt_changed] INT NULL
-	, [rec_cnt_deleted] INT NULL
-	, [last_error_id] INT NULL
-	, [prev_transfer_id] INT NULL
-	, [transfer_seq] INT NULL
-	, CONSTRAINT [PK_transfer_id] PRIMARY KEY ([transfer_id] DESC)
-)
-
-CREATE UNIQUE NONCLUSTERED INDEX [ix_Transfer_batch_transfer_name_unique] ON [dbo].[Transfer] ([batch_id] ASC, [transfer_name] ASC)
-
-CREATE NONCLUSTERED INDEX [ix_transfer_transfer_name_seq_nr] ON [dbo].[Transfer] ([transfer_name] ASC, [transfer_seq] ASC)
-
+CREATE TABLE [dbo].[Transfer](	  [transfer_id] INT NOT NULL IDENTITY(1,1)	, [batch_id] INT NULL	, [transfer_name] VARCHAR(100) NULL	, [src_obj_id] INT NULL	, [target_name] VARCHAR(255) NULL	, [transfer_start_dt] DATETIME NULL	, [transfer_end_dt] DATETIME NULL	, [status_id] INT NULL	, [rec_cnt_src] INT NULL	, [rec_cnt_new] INT NULL	, [rec_cnt_changed] INT NULL	, [rec_cnt_deleted] INT NULL	, [last_error_id] INT NULL	, [prev_transfer_id] INT NULL	, [transfer_seq] INT NULL	, CONSTRAINT [PK_transfer_id] PRIMARY KEY ([transfer_id] DESC))CREATE UNIQUE NONCLUSTERED INDEX [ix_Transfer_batch_transfer_name_unique] ON [dbo].[Transfer] ([batch_id] ASC, [transfer_name] ASC)CREATE NONCLUSTERED INDEX [ix_transfer_transfer_name_seq_nr] ON [dbo].[Transfer] ([transfer_name] ASC, [transfer_seq] ASC)
 -- create table [static].[Status]
 GO
-CREATE TABLE [static].[Status]
-(
-	  [status_id] INT NOT NULL
-	, [status_name] VARCHAR(50) NULL
-	, [description] VARCHAR(255) NULL
-	, CONSTRAINT [PK_Status] PRIMARY KEY ([status_id] ASC)
-)
-
+CREATE TABLE [static].[Status](	  [status_id] INT NOT NULL	, [status_name] VARCHAR(50) NULL	, [description] VARCHAR(255) NULL	, CONSTRAINT [PK_Status] PRIMARY KEY ([status_id] ASC))
 -- create table [dbo].[Job_schedule]
 GO
-CREATE TABLE [dbo].[Job_schedule]
-(
-	  [job_schedule_id] INT NOT NULL IDENTITY(10,10)
-	, [name] SYSNAME NOT NULL
-	, [enabled] INT NOT NULL
-	, [freq_type] INT NOT NULL
-	, [freq_interval] INT NOT NULL
-	, [freq_subday_type] INT NOT NULL
-	, [freq_subday_interval] INT NOT NULL
-	, [freq_relative_interval] INT NOT NULL
-	, [freq_recurrence_factor] INT NOT NULL
-	, [active_start_date] INT NOT NULL
-	, [active_end_date] INT NOT NULL
-	, [active_start_time] INT NOT NULL
-	, [active_end_time] INT NOT NULL
-	, CONSTRAINT [PK_Job_schedule] PRIMARY KEY ([job_schedule_id] ASC)
-)
-
-CREATE UNIQUE NONCLUSTERED INDEX [IX_Job_schedule] ON [dbo].[Job_schedule] ([job_schedule_id] ASC)
-
+CREATE TABLE [dbo].[Job_schedule](	  [job_schedule_id] INT NOT NULL IDENTITY(10,10)	, [name] SYSNAME NOT NULL	, [enabled] INT NOT NULL	, [freq_type] INT NOT NULL	, [freq_interval] INT NOT NULL	, [freq_subday_type] INT NOT NULL	, [freq_subday_interval] INT NOT NULL	, [freq_relative_interval] INT NOT NULL	, [freq_recurrence_factor] INT NOT NULL	, [active_start_date] INT NOT NULL	, [active_end_date] INT NOT NULL	, [active_start_time] INT NOT NULL	, [active_end_time] INT NOT NULL	, CONSTRAINT [PK_Job_schedule] PRIMARY KEY ([job_schedule_id] ASC))CREATE UNIQUE NONCLUSTERED INDEX [IX_Job_schedule] ON [dbo].[Job_schedule] ([job_schedule_id] ASC)
 -- create table [dbo].[Privacy]
 GO
-CREATE TABLE [dbo].[Privacy]
-(
-	  [db] VARCHAR(50) NULL
-	, [table_name] NVARCHAR(255) NULL
-	, [sensitive] NVARCHAR(255) NULL
-	, [column_name] NVARCHAR(255) NULL
-	, [personal] NVARCHAR(255) NULL
-)
-
+CREATE TABLE [dbo].[Privacy](	  [db] VARCHAR(50) NULL	, [table_name] NVARCHAR(255) NULL	, [sensitive] NVARCHAR(255) NULL	, [column_name] NVARCHAR(255) NULL	, [personal] NVARCHAR(255) NULL)
 -- create table [dbo].[Stack]
 GO
-CREATE TABLE [dbo].[Stack]
-(
-	  [stack_id] INT NOT NULL IDENTITY(1,1)
-	, [value] VARCHAR(4000) NULL
-	, [record_dt] DATETIME NULL DEFAULT(getdate())
-	, [record_user] VARCHAR(255) NULL DEFAULT(suser_sname())
-	, CONSTRAINT [PK_Stack] PRIMARY KEY ([stack_id] DESC)
-)
-
+CREATE TABLE [dbo].[Stack](	  [stack_id] INT NOT NULL IDENTITY(1,1)	, [value] VARCHAR(4000) NULL	, [record_dt] DATETIME NULL DEFAULT(getdate())	, [record_user] VARCHAR(255) NULL DEFAULT(suser_sname())	, CONSTRAINT [PK_Stack] PRIMARY KEY ([stack_id] DESC))
 -- create table [dbo].[Job_step]
 GO
-CREATE TABLE [dbo].[Job_step]
-(
-	  [job_step_id] INT NOT NULL IDENTITY(1,1)
-	, [step_id] INT NULL DEFAULT((1))
-	, [step_name] VARCHAR(255) NULL
-	, [subsystem] VARCHAR(255) NULL DEFAULT('SSIS')
-	, [command] NVARCHAR(4000) NULL
-	, [on_success_action] INT NULL DEFAULT((3))
-	, [on_success_step_id] INT NULL DEFAULT((0))
-	, [on_fail_action] INT NULL DEFAULT((2))
-	, [on_fail_step_id] INT NULL
-	, [database_name] VARCHAR(255) NULL DEFAULT('master')
-	, [job_id] INT NULL
-	, CONSTRAINT [PK_job_step] PRIMARY KEY ([job_step_id] ASC)
-)
-
+CREATE TABLE [dbo].[Job_step](	  [job_step_id] INT NOT NULL IDENTITY(1,1)	, [step_id] INT NULL DEFAULT((1))	, [step_name] VARCHAR(255) NULL	, [subsystem] VARCHAR(255) NULL DEFAULT('SSIS')	, [command] NVARCHAR(4000) NULL	, [on_success_action] INT NULL DEFAULT((3))	, [on_success_step_id] INT NULL DEFAULT((0))	, [on_fail_action] INT NULL DEFAULT((2))	, [on_fail_step_id] INT NULL	, [database_name] VARCHAR(255) NULL DEFAULT('master')	, [job_id] INT NULL	, CONSTRAINT [PK_job_step] PRIMARY KEY ([job_step_id] ASC))
 -- create table [dbo].[Obj]
 GO
-CREATE TABLE [dbo].[Obj]
-(
-	  [obj_id] INT NOT NULL IDENTITY(1,1)
-	, [obj_type_id] INT NOT NULL
-	, [server_type_id] INT NULL DEFAULT((10))
-	, [obj_name] VARCHAR(100) NOT NULL
-	, [parent_id] INT NULL
-	, [scope] VARCHAR(50) NULL
-	, [identifier] INT NULL
-	, [template_id] SMALLINT NULL
-	, [delete_dt] DATETIME NULL
-	, [record_dt] DATETIME NULL DEFAULT(getdate())
-	, [record_user] VARCHAR(50) NULL DEFAULT(suser_sname())
-	, [prefix] VARCHAR(50) NULL
-	, [obj_name_no_prefix] VARCHAR(100) NULL
-	, CONSTRAINT [PK__Obj] PRIMARY KEY ([obj_id] DESC)
-)
-
-ALTER TABLE [dbo].[Obj] WITH CHECK ADD CONSTRAINT [FK__obj__obj] FOREIGN KEY([parent_id]) REFERENCES [dbo].[Obj] ([obj_id])
-ALTER TABLE [dbo].[Obj] CHECK CONSTRAINT [FK__obj__obj]
-
+CREATE TABLE [dbo].[Obj](	  [obj_id] INT NOT NULL IDENTITY(1,1)	, [obj_type_id] INT NOT NULL	, [server_type_id] INT NULL DEFAULT((10))	, [obj_name] VARCHAR(100) NOT NULL	, [parent_id] INT NULL	, [scope] VARCHAR(50) NULL	, [identifier] INT NULL	, [template_id] SMALLINT NULL	, [delete_dt] DATETIME NULL	, [record_dt] DATETIME NULL DEFAULT(getdate())	, [record_user] VARCHAR(50) NULL DEFAULT(suser_sname())	, [prefix] VARCHAR(50) NULL	, [obj_name_no_prefix] VARCHAR(100) NULL	, CONSTRAINT [PK__Obj] PRIMARY KEY ([obj_id] DESC))ALTER TABLE [dbo].[Obj] WITH CHECK ADD CONSTRAINT [FK__obj__obj] FOREIGN KEY([parent_id]) REFERENCES [dbo].[Obj] ([obj_id])ALTER TABLE [dbo].[Obj] CHECK CONSTRAINT [FK__obj__obj]
 -- create table [static].[Template]
 GO
-CREATE TABLE [static].[Template]
-(
-	  [template_id] SMALLINT NOT NULL
-	, [template] VARCHAR(100) NULL
-	, [template_description] VARCHAR(100) NULL
-	, [record_dt] DATETIME NULL DEFAULT(getdate())
-	, [record_name] VARCHAR(255) NULL DEFAULT(suser_sname())
-	, CONSTRAINT [PK_Template] PRIMARY KEY ([template_id] ASC)
-)
-
+CREATE TABLE [static].[Template](	  [template_id] SMALLINT NOT NULL	, [template] VARCHAR(100) NULL	, [template_description] VARCHAR(100) NULL	, [record_dt] DATETIME NULL DEFAULT(getdate())	, [record_name] VARCHAR(255) NULL DEFAULT(suser_sname())	, CONSTRAINT [PK_Template] PRIMARY KEY ([template_id] ASC))
+-- create table [static].[obj_type]
+GO
+CREATE TABLE [static].[obj_type](	  [obj_type_id] INT NOT NULL	, [obj_type] VARCHAR(100) NULL	, [obj_type_level] INT NULL	, CONSTRAINT [PK_obj_type] PRIMARY KEY ([obj_type_id] ASC))
+-- create table [static].[Property]
+GO
+CREATE TABLE [static].[Property](	  [property_id] INT NOT NULL	, [property_name] VARCHAR(255) NULL	, [description] VARCHAR(255) NULL	, [property_scope] VARCHAR(50) NULL	, [default_value] VARCHAR(255) NULL	, [apply_table] BIT NULL	, [apply_view] BIT NULL	, [apply_schema] BIT NULL	, [apply_db] BIT NULL	, [apply_srv] BIT NULL	, [apply_user] BIT NULL	, [record_dt] DATETIME NULL DEFAULT(getdate())	, [record_user] VARCHAR(255) NULL DEFAULT(suser_sname())	, CONSTRAINT [PK_Property_1] PRIMARY KEY ([property_id] ASC))
+-- create table [dbo].[Obj_dep]
+GO
+CREATE TABLE [dbo].[Obj_dep](	  [from_obj_id] INT NOT NULL	, [to_obj_id] INT NOT NULL	, [data_source] VARCHAR(50) NOT NULL	, [record_dt] DATETIME NULL DEFAULT(getdate())	, [record_user] VARCHAR(50) NULL DEFAULT(suser_sname())	, CONSTRAINT [PK__Obj_dep__7C69C680D927C550] PRIMARY KEY ([from_obj_id] ASC, [to_obj_id] ASC))
+-- create table [dbo].[Batch]
+GO
+CREATE TABLE [dbo].[Batch](	  [batch_id] INT NOT NULL IDENTITY(1,1)	, [batch_name] VARCHAR(100) NULL	, [batch_start_dt] DATETIME NULL DEFAULT(getdate())	, [batch_end_dt] DATETIME NULL	, [status_id] INT NULL	, [last_error_id] INT NULL	, [prev_batch_id] INT NULL	, [exec_server] VARCHAR(100) NULL DEFAULT(@@servername)	, [exec_host] VARCHAR(100) NULL DEFAULT(host_name())	, [exec_user] VARCHAR(100) NULL DEFAULT(suser_sname())	, [guid] BIGINT NULL	, [continue_batch] BIT NULL DEFAULT((0))	, [batch_seq] INT NULL	, CONSTRAINT [PK_run_id] PRIMARY KEY ([batch_id] DESC))
+-- create table [static].[Server_type]
+GO
+CREATE TABLE [static].[Server_type](	  [server_type_id] INT NOT NULL	, [server_type] VARCHAR(100) NULL	, [compatibility] VARCHAR(255) NULL	, CONSTRAINT [PK_Server_type] PRIMARY KEY ([server_type_id] ASC))
+-- create table [dbo].[Property_value]
+GO
+CREATE TABLE [dbo].[Property_value](	  [property_id] INT NOT NULL	, [obj_id] INT NOT NULL	, [value] VARCHAR(255) NULL	, [record_dt] DATETIME NULL DEFAULT(getdate())	, [record_user] VARCHAR(255) NULL DEFAULT(suser_sname())	, CONSTRAINT [PK_Property_Value] PRIMARY KEY ([property_id] ASC, [obj_id] ASC))
+-- create table [static].[Log_level]
+GO
+CREATE TABLE [static].[Log_level](	  [log_level_id] SMALLINT NOT NULL	, [log_level] VARCHAR(50) NULL	, [log_level_description] VARCHAR(255) NULL	, CONSTRAINT [PK_Log_level_1] PRIMARY KEY ([log_level_id] ASC))
+-- create table [static].[Log_type]
+GO
+CREATE TABLE [static].[Log_type](	  [log_type_id] SMALLINT NOT NULL	, [log_type] VARCHAR(50) NULL	, [min_log_level_id] INT NULL	, CONSTRAINT [PK_Log_type_1] PRIMARY KEY ([log_type_id] ASC))
+-- create table [static].[Version]
+GO
+CREATE TABLE [static].[Version](	  [major_version] INT NOT NULL	, [minor_version] INT NOT NULL	, [build] INT NOT NULL	, [build_dt] DATETIME NULL	, CONSTRAINT [PK_Version] PRIMARY KEY ([major_version] ASC, [minor_version] ASC, [build] ASC))
 GO
 
-INSERT [static].[Version] ([major_version], [minor_version], [build], build_dt) VALUES (3,1,28,'2018-12-19 13:51:37')
+INSERT [static].[Version] ([major_version], [minor_version], [build], build_dt) VALUES (3,2,1,'2019-01-25 13:52:33')
 GO
 	
-print '-- 1. obj_id'
-IF object_id('[dbo].[obj_id]' ) is not null 
-  DROP FUNCTION [dbo].[obj_id] 
-GO
-	  
-
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-09-06 BvdB Return meta data id for a full object name
-select dbo.obj_id'AdventureWorks2014.Person.Person', null) --> points to table 
-select dbo.obj_id'AdventureWorks2014.Person', null) --> points to schema
-select dbo.obj_id'AdventureWorks2014', null) --> points to db
-select dbo.obj_id'BETL', null) --> points to db
-select dbo.obj_id'MicrosoftAccount\swjvdberg@outlook.com', null) --> points to db
-select * from dbo.Obj
-*/
-CREATE FUNCTION [dbo].[obj_id]( @fullObj_name varchar(255) , @scope varchar(255) = null ) 
-RETURNS int
-AS
-BEGIN
-	declare @t TABLE (item VARCHAR(8000), i int)
-	declare  
-	     @elem1 varchar(255)
-	     ,@elem2 varchar(255)
-	     ,@elem3 varchar(255)
-	     ,@elem4 varchar(255)
-		, @cnt_elems int 
-		, @obj_id int 
---		, @remove_chars varchar(255)
-		, @cnt as int 
-	
-	insert into @t 
-	select replace(replace(item, '[',''),']','') item, i 
-	from util.split(@fullObj_name , '.') 
-	--select * from @t 
-	-- @t contains elemenents of fullObj_name 
-	-- can be [server].[db].[schema].[table|view]
-	-- as long as it's unique 
-	select @cnt_elems = MAX(i) from @t	
-	select @elem1 = item from @t where i=@cnt_elems
-	select @elem2 = item from @t where i=@cnt_elems-1
-	select @elem3 = item from @t where i=@cnt_elems-2
-	select @elem4 = item from @t where i=@cnt_elems-3
-	select @obj_id= max(o.obj_id), @cnt = count(*) 
-	from dbo.[Obj] o
-	LEFT OUTER JOIN dbo.[Obj] AS parent_o ON o.parent_id = parent_o.[obj_id] 
-	LEFT OUTER JOIN dbo.[Obj] AS grand_parent_o ON parent_o.parent_id = grand_parent_o.[obj_id] 
-	LEFT OUTER JOIN dbo.[Obj] AS great_grand_parent_o ON grand_parent_o.parent_id = great_grand_parent_o.[obj_id] 
-	where 
-	(
-		o.obj_type_id<> 60 -- not a user
-		and o.[obj_name] = @elem1 
-		and ( @elem2 is null or parent_o.[obj_name] = @elem2 ) 
-		and ( @elem3 is null or grand_parent_o.[obj_name] = @elem3) 
-		and ( @elem4 is null or great_grand_parent_o.[obj_name] = @elem4) 
-		and ( @scope is null 
-				or @scope = o.scope 
-				or @scope = parent_o.scope 
-				or @scope = grand_parent_o.scope 
-				or @scope = great_grand_parent_o.scope 
-				or o.obj_type_id= 50 -- scope not relevant for servers. 
-			)  
-	) 
-	or 
-	(
-		o.obj_type_id=60 -- user
-		and o.obj_name = @fullObj_name
-	) 
-	and o.delete_dt is null 
-	
-	declare @res as int
-	if @cnt >1 
-		set @res =  -@cnt
-	else 
-		set @res =@obj_id 
-	return @res 
-END
-
-
-
-
-
-
-
-GO
-print '-- 2. current_db'
-IF object_id('[dbo].[current_db]' ) is not null 
-  DROP FUNCTION [dbo].[current_db] 
-GO
-
-	  
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2015-08-31 BvdB returns current database in kind of dirty way... 
-
-use [AW_Staging]
-select betl.dbo.current_db()
-
-*/
-CREATE FUNCTION [dbo].current_db() RETURNS varchar(1000) 
-AS
-BEGIN
-	declare @db_name  as varchar(1000) 
-
-	SELECT @db_name = d.name
-	FROM sys.dm_tran_locks
-	inner join sys.databases d with(nolock) on resource_database_id  = d.database_id
-	WHERE request_session_id = @@SPID and resource_type = 'DATABASE' and request_owner_type = 'SHARED_TRANSACTION_WORKSPACE'
---	and d.name<>db_name() 
-
-	RETURN @db_name  
-END
-
-
-
-
-
-
-
-
-GO
-print '-- 3. content_type_name'
-IF object_id('[dbo].[content_type_name]' ) is not null 
-  DROP FUNCTION [dbo].[content_type_name] 
-GO
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB get name by id. 
-select dbo.[content_type_name](300) 
-*/
-create FUNCTION [dbo].[content_type_name]
-(
-	@content_type_id int
-)
-RETURNS varchar(255) 
-AS
-BEGIN
-	declare @content_type_name as varchar(255) 
-	select @content_type_name = [content_type_name] from dbo.Content_type where content_type_id = @content_type_id 
-	return @content_type_name + ' (' + convert(varchar(10), @content_type_id ) + ')'
-END
-
-
-
-
-
-
-
-GO
-print '-- 4. Batch_ext'
-IF object_id('[dbo].[Batch_ext]' ) is not null 
-  DROP VIEW [dbo].[Batch_ext] 
-GO
-	  
-create view dbo.Batch_ext as 
-select 
-b.[batch_id] 
-,b.[batch_name] 
-,b.[batch_start_dt] 
-,b.[batch_end_dt] 
-, s.status_name batch_status 
-, b.prev_batch_id
-, prev_b.batch_start_dt prev_batch_start_dt
-, prev_b.batch_end_dt prev_batch_end_dt
-, prev_s.status_name prev_batch_status 
-from dbo.Batch b
-inner join static.Status s on s.status_id = b.status_id
-left join dbo.Batch prev_b on b.prev_batch_id = prev_b.batch_id 
-left join static.Status prev_s on prev_s.status_id = prev_b.status_id
-
-
-
-
-
-
-
-
-GO
-print '-- 5. refresh_ssas_meta'
-IF object_id('[dbo].[refresh_ssas_meta]' ) is not null 
-  DROP PROCEDURE [dbo].[refresh_ssas_meta] 
-GO
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB reads ssas tabular meta data into repository
-*/
-CREATE procedure [dbo].[refresh_ssas_meta] as 
-begin 
-
-if object_id('tempdb..#ssas_queries') is not null
-	drop table #ssas_queries
-/* 
-disable because : SQL Server blocked access to STATEMENT 'OpenRowset/OpenDatasource' of component 'Ad Hoc Distributed Queries' because this component is turned off as part of the security configuration for this server. A system administrator can enable the use of 'Ad Hoc Distributed Queries' by using sp_configure. For more information about enabling 'Ad Hoc Distributed Queries', search for 'Ad Hoc Distributed Queries' in SQL Server Books Online.
-	 
-select * into #ssas_queries from openrowset('MSOLAP',
- 'DATASOURCE=ssas01.company.nl;Initial Catalog=TAB_CKTO_respons_company;User=company\991371;password=anT1svsrnv'
- , '
-select [name], [QueryDefinition] from 
-[$System].[TMSCHEMA_PARTITIONS]
-' ) 
-	
-select * from 
-#ssas_queries
-*/
-end
-
-
-
-
-
-
-
-GO
-print '-- 6. Job_ext'
-IF object_id('[dbo].[Job_ext]' ) is not null 
-  DROP VIEW [dbo].[Job_ext] 
-GO
-	  
-
--- select * from dbo.Job_ext
-CREATE view [dbo].[Job_ext] as 
-SELECT  j.[job_id]
-      ,j.[name] job_name
-      ,j.[description] job_description
-      ,j.[enabled] job_enabled
-      ,j.[category_name]
-      ,j.[job_schedule_id]
-      ,js.[name] schedule_name 
-      ,js.[enabled] schedule_enabled
-      ,[freq_type]
-      ,[freq_interval]
-      ,[freq_subday_type]
-      ,[freq_subday_interval]
-      ,[freq_relative_interval]
-      ,[freq_recurrence_factor]
-      ,[active_start_date]
-      ,[active_end_date]
-      ,[active_start_time]
-      ,[active_end_time]
-  FROM [dbo].[Job] j
-  inner join dbo.Job_schedule  js on j.job_schedule_id = js.job_schedule_id
-  --inner join dbo.Job_step s on s.job_id = j.job_id
---  order by j.job_id, s.step_id
-
-
-
-
-
-
-
-
-GO
-print '-- 7. Col'
-IF object_id('[dbo].[Col]' ) is not null 
-  DROP VIEW [dbo].[Col] 
-GO
-	  
-CREATE VIEW [dbo].[Col] AS
-	SELECT     * 
-	FROM  [dbo].[Col_hist] AS h
-	WHERE     (eff_dt =
-                      ( SELECT     MAX(eff_dt) max_eff_dt
-                        FROM       [dbo].[Col_hist] h2
-                        WHERE      h.column_id = h2.column_id
-                       )
-              )
-		AND delete_dt IS NULL 
-
-
-
-
-
-
-
-GO
-print '-- 8. refresh_views'
-IF object_id('[util].[refresh_views]' ) is not null 
-  DROP PROCEDURE [util].[refresh_views] 
-GO
-	  
-	  
-	  
-
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-21 BvdB The meta data of views can get outdated when underlying tables change. Use this proc to refresh all views meta data. 
-exec util.refresh_views 'AdventureWorks2014'
-*/    
-CREATE PROCEDURE [util].[refresh_views]
-	@db_name as varchar(255)  
-AS
-BEGIN
-/*
-	SET NOCOUNT ON;
-	DECLARE @sql AS VARCHAR(MAX) 
-		, @cur_db as varchar(255) 
-    set @cur_db = DB_NAME()
-	SET @sql = '
-DECLARE @sql AS VARCHAR(MAX) =''use '+@db_name + ';
-''
-use '+@db_name+ ';
-SELECT @sql += ''EXEC sp_refreshview '''''' + schema_name(schema_id)+ ''.''+ name + '''''' ;
-''
-  FROM sys.views
-set @sql+= ''USE '+@Cur_db+ '''
-PRINT @sql 
-exec(@sql)
-use ' +@cur_db+ '
-'
-	exec [dbo].[exec_sql] @sql
-	--PRINT @sql 
---   EXEC(@sql)
-   
-   */
-
-   declare @cur_db as varchar(255) 
-			,@sql as varchar(255) 
-   select @cur_db = DB_NAME()
-   set @sql = 'use '+@db_name
-   exec (@sql) 
-   select DB_NAME()
-	DECLARE @view_name AS NVARCHAR(500);
-	DECLARE views_cursor CURSOR FOR 
-		SELECT TABLE_SCHEMA + '.' +TABLE_NAME FROM INFORMATION_SCHEMA.TABLES 
-		WHERE	TABLE_TYPE = 'VIEW' 
-		ORDER BY TABLE_SCHEMA,TABLE_NAME 
-	
-	OPEN views_cursor 
-	FETCH NEXT FROM views_cursor 
-	INTO @view_name 
-	WHILE (@@FETCH_STATUS <> -1) 
-	BEGIN
-		BEGIN TRY
-			EXEC sp_refreshview @view_name;
-			PRINT @view_name;
-		END TRY
-		BEGIN CATCH
-			PRINT 'Error during refreshing view "' + @view_name + '".'+ + convert(varchar(255), isnull(ERROR_MESSAGE(),''))	;
-		END CATCH;
-		FETCH NEXT FROM views_cursor 
-		INTO @view_name 
-	END 
-	CLOSE views_cursor; 
-	DEALLOCATE views_cursor;
-   set @sql = 'use '+@cur_db
-   exec (@sql) 
-END
-
-
-
-
-
-
-
-GO
-print '-- 9. parent'
-IF object_id('[util].[parent]' ) is not null 
-  DROP FUNCTION [util].[parent] 
-GO
-	  
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2019-03-21 BvdB returns parent by parsing the string. e.g. localhost.AdventureWorks2014.dbo = localhost.AdventureWorks2014
-select util.parent('localhost.AdventureWorks2014.dbo')
-*/    
-CREATE FUNCTION [util].[parent]( @fullObj_name varchar(255) ) 
-RETURNS varchar(255) 
-AS
-BEGIN
-	declare @rev_str as varchar(255) 
-			, @i as int
-			, @res as varchar(255) 
-	set @rev_str = reverse(@fullObj_name ) 
-	set @i = charindex('.', @rev_str) 
-	
-	if @i = 0 
-		set @res = null 
-	else 
-		set @res =  substring( @fullObj_name, 1, len( @fullObj_name) - @i ) 
-	return @res 
-END
-
-
-
-
-
-
-
-
-GO
-print '-- 10. Int2Char'
-IF object_id('[util].[Int2Char]' ) is not null 
-  DROP FUNCTION [util].[Int2Char] 
-GO
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB 
-select util.int2Char(2)
-*/
-CREATE FUNCTION [util].[Int2Char] (     @i int)
-RETURNS varchar(15) AS
-BEGIN
-       RETURN isnull(convert(varchar(15), @i), '')
-END
-
-
-
-
-
-
-
-GO
-print '-- 11. addQuotes'
-IF object_id('[util].[addQuotes]' ) is not null 
-  DROP FUNCTION [util].[addQuotes] 
-GO
-	  
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB 
-*/
-CREATE FUNCTION [util].[addQuotes]
-(
-	@s varchar(7900) 
-)
-RETURNS varchar(8000) 
-AS
-BEGIN
-	RETURN '''' + isnull(@s , '') + '''' 
-END
-
-
-
-
-
-
-
-GO
-print '-- 12. prefix_first_underscore'
-IF object_id('[util].[prefix_first_underscore]' ) is not null 
-  DROP FUNCTION [util].[prefix_first_underscore] 
-GO
-	  
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB extract prefix from string
-SELECT dbo.guess_foreignCol_id('par_relatie_id')
-SELECT [dbo].[prefix_first_underscore]('relatie_id')
-*/    
-CREATE FUNCTION [util].[prefix_first_underscore]( @column_name VARCHAR(255) ) 
-RETURNS VARCHAR(255) 
-AS
-BEGIN
-	DECLARE @res VARCHAR(255) 
-	,		@pos INT 
-	SET @pos = CHARINDEX('_', @column_name)
-	IF @pos IS NOT NULL and @pos>1
-		SET @res = SUBSTRING(@column_name, 1, @pos-1)
-	RETURN @res 
-	/* 
-		declare @n as int=len(@s) 
-			--, @n_suffix as int = len(@suffix)
-	declare @result as bit = 0 
-	return SUBSTRING(@s, 1, @n-@len_suffix) 
-	*/
-END
-
-
-
-
-
-
-
-
-GO
-print '-- 13. suffix_first_underscore'
-IF object_id('[util].[suffix_first_underscore]' ) is not null 
-  DROP FUNCTION [util].[suffix_first_underscore] 
-GO
-	  
-
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB 
-SELECT dbo.guess_foreignCol_id('par_relatie_id')
-SELECT [dbo].[suffix_first_underscore]('relatie_id')
-*/    
-CREATE FUNCTION [util].[suffix_first_underscore]( @column_name VARCHAR(255) ) 
-RETURNS VARCHAR(255) 
-AS
-BEGIN
-	DECLARE @res VARCHAR(255) 
-	,		@pos INT 
-	SET @pos = CHARINDEX('_', @column_name)
-	IF @pos IS NOT NULL
-		SET @res = SUBSTRING(@column_name, @pos+1, LEN(@column_name) - @pos)
-	RETURN @res 
-	/* 
-		declare @n as int=len(@s) 
-			--, @n_suffix as int = len(@suffix)
-	declare @result as bit = 0 
-	return SUBSTRING(@s, 1, @n-@len_suffix) 
-	*/
-END
-
-
-
-
-
-
-
-
-GO
-print '-- 14. split'
-IF object_id('[util].[split]' ) is not null 
-  DROP FUNCTION [util].[split] 
-GO
-	  
-	  
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB splits strings. Keeps string together when surrounded by [ ] 
-CREATE TYPE SplitListType AS TABLE 	(item VARCHAR(8000), i int)
-select * from util.split('AAP,NOOT', ',')
-select * from util.split('[AAP,NOOT],VIS,[NOOT,MIES],OLIFANT', ',')
-*/
-CREATE  FUNCTION [util].[split](
-    @s VARCHAR(8000) -- List of delimited items
-  , @del VARCHAR(16) = ',' -- delimiter that separates items
-) RETURNS @List TABLE (item VARCHAR(8000), i int)
-BEGIN
-	DECLARE 
-		@item VARCHAR(8000)
-		, @i int =1
-		, @n int 
-		, @del_index int
-		, @bracket_index_open int
-		, @bracket_index_close int
-	
-	set @del_index = CHARINDEX(@del,@s,0)
-	set @bracket_index_open = CHARINDEX('[',@s,0)
-	WHILE @del_index <> 0 -- while there is a delimiter
-	BEGIN
-		if @del_index < @bracket_index_open or @bracket_index_open=0 -- delimeter occurs before [ or there is no [
-		begin 
-			set @n = @del_index-1
-			SELECT
-				@item=RTRIM(LTRIM(SUBSTRING(@s,1,@n))),
-				-- set @s= tail 
-				@s=RTRIM(LTRIM(SUBSTRING(@s,@del_index+LEN(@del),LEN(@s)-@n)))
-		end 
-		else -- [ occurs before delimiter
-		begin
-			set @bracket_index_close = CHARINDEX(']',@s,@bracket_index_open)
-			set @n = case when @bracket_index_close=0 then len(@s) else  @bracket_index_close end
-			
-			SELECT
-				@item=RTRIM(LTRIM(SUBSTRING(@s,1,@n))),
-				-- set @s= tail 
-				@s=RTRIM(LTRIM(SUBSTRING(@s,@n+1,LEN(@s)-@n)))
-		end
-		IF LEN(@item) > 0
-		begin
-			INSERT INTO @List SELECT @item, @i
-			set @i += 1
-		end 
-		set @del_index= CHARINDEX(@del,@s,0)
-		set @bracket_index_open= CHARINDEX('[',@s,0)
-	END
-	IF LEN(@s) > 0
-	 INSERT INTO @List SELECT @s , @i-- Put the last item in
-	RETURN
-END
-
-
-
-
-
-
-
-
-GO
-print '-- 15. udf_max'
+print '-- 1. udf_max'
 IF object_id('[util].[udf_max]' ) is not null 
   DROP FUNCTION [util].[udf_max] 
 GO
@@ -1104,8 +194,222 @@ END
 
 
 
+
+
+
 GO
-print '-- 16. parse_sql'
+print '-- 2. ddl_static'
+IF object_id('[dbo].[ddl_static]' ) is not null 
+  DROP PROCEDURE [dbo].[ddl_static] 
+GO
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-21 BvdB part of ddl generation process ( when making new betl release) . create static data ddl. 
+*/    
+CREATE procedure [dbo].[ddl_static] as 
+begin 
+set nocount on 
+print '
+-- begin ddl_content
+set nocount on 
+GO
+INSERT [static].Status ([status_id], [status_name], [description]) VALUES (0, N''unknown'', NULL)
+GO
+INSERT [static].Status ([status_id], [status_name], [description]) VALUES (100, N''success'', N''Execution of batch or transfer finished without any errors. '')
+GO
+INSERT [static].Status ([status_id], [status_name], [description]) VALUES (200, N''error'', N''Execution of batch or transfer raised an error.'')
+GO
+INSERT [static].Status ([status_id], [status_name], [description]) VALUES (300, N''not started'', N''Execution of batch or transfer is not started because it cannot start (maybe it''''s already running). '')
+GO
+INSERT [static].Status ([status_id], [status_name], [description]) VALUES (400, N''running'', N''Batch or transfer is running. do not start a new instance.'')
+GO
+INSERT [static].Status ([status_id], [status_name], [description]) VALUES (600, N''continue'', N''This batch is continuing where the last instance stopped. '')
+GO
+INSERT [static].Status ([status_id], [status_name], [description]) VALUES (700, N''stopped'', N''batch stopped without error (can be continued any time). '')
+GO
+INSERT [static].Status ([status_id], [status_name], [description]) VALUES (800, N''skipped'', N''Transfer is skipped because batch will continue where it has left off. '')
+GO
+INSERT [static].Status ([status_id], [status_name], [description]) VALUES (900, N''deleted'', N''Transfer or batch is deleted / dropped'')
+GO
+'
+print '
+INSERT [static].[Column_type] ([column_type_id], [column_type_name], [column_type_description], [record_dt], [record_user]) VALUES (-1, N''unknown'', N''Unknown,  not relevant'', CAST(N''2015-10-20 13:22:19.590'' AS DateTime), N''bas'')
+GO
+INSERT [static].[Column_type] ([column_type_id], [column_type_name], [column_type_description], [record_dt], [record_user]) VALUES (100, N''nat_pkey'', N''Natural primary key (e.g. user_key)'', CAST(N''2015-10-20 13:22:19.590'' AS DateTime), N''bas'')
+GO
+INSERT [static].[Column_type] ([column_type_id], [column_type_name], [column_type_description], [record_dt], [record_user]) VALUES (110, N''nat_fkey'', N''Natural foreign key (e.g. create_user_key)'', CAST(N''2015-10-20 13:22:19.590'' AS DateTime), N''bas'')
+GO
+INSERT [static].[Column_type] ([column_type_id], [column_type_name], [column_type_description], [record_dt], [record_user]) VALUES (200, N''sur_pkey'', N''Surrogate primary key (e.g. user_id)'', CAST(N''2015-10-20 13:22:19.590'' AS DateTime), N''bas'')
+GO
+INSERT [static].[Column_type] ([column_type_id], [column_type_name], [column_type_description], [record_dt], [record_user]) VALUES (210, N''sur_fkey'', N''Surrogate foreign key (e.g. create_user_id)'', CAST(N''2015-10-20 13:22:19.590'' AS DateTime), N''bas'')
+GO
+INSERT [static].[Column_type] ([column_type_id], [column_type_name], [column_type_description], [record_dt], [record_user]) VALUES (300, N''attribute'', N''low or non repetetive value for containing object. E.g. customer lastname, firstname.'', CAST(N''2015-10-20 13:22:19.590'' AS DateTime), N''bas'')
+GO
+INSERT [static].[Column_type] ([column_type_id], [column_type_name], [column_type_description], [record_dt], [record_user]) VALUES (999, N''meta data'', NULL, CAST(N''2015-10-20 13:22:19.590'' AS DateTime), N''bas'')
+GO
+INSERT [dbo].[Key_domain] ([key_domain_name], [key_domain_id]) VALUES (N''navision'', 1)
+GO
+INSERT [dbo].[Key_domain] ([key_domain_name], [key_domain_id]) VALUES (N''exact'', 2)
+GO
+INSERT [dbo].[Key_domain] ([key_domain_name], [key_domain_id]) VALUES (N''adp'', 2)
+GO
+INSERT [static].[obj_type] ([obj_type_id], [obj_type], [obj_type_level]) VALUES (10, N''table'', 40)
+GO
+INSERT [static].[obj_type] ([obj_type_id], [obj_type], [obj_type_level]) VALUES (20, N''view'', 40)
+GO
+INSERT [static].[obj_type] ([obj_type_id], [obj_type], [obj_type_level]) VALUES (30, N''schema'', 30)
+GO
+INSERT [static].[obj_type] ([obj_type_id], [obj_type], [obj_type_level]) VALUES (40, N''database'', 20)
+GO
+INSERT [static].[obj_type] ([obj_type_id], [obj_type], [obj_type_level]) VALUES (50, N''server'', 10)
+GO
+INSERT [static].[obj_type] ([obj_type_id], [obj_type], [obj_type_level]) VALUES (60, N''user'', 40)
+GO
+INSERT [static].[obj_type] ([obj_type_id], [obj_type], [obj_type_level]) VALUES (70, N''procedure'', 40)
+GO
+INSERT [static].[obj_type] ([obj_type_id], [obj_type], [obj_type_level]) VALUES (80, N''role'', 30)
+GO
+'
+print'
+INSERT [dbo].[Prefix] ([prefix_name], [default_template_id]) VALUES (N''stgd'', 12)
+GO
+INSERT [dbo].[Prefix] ([prefix_name], [default_template_id]) VALUES (N''stgf'', 13)
+GO
+INSERT [dbo].[Prefix] ([prefix_name], [default_template_id]) VALUES (N''stgh'', 8)
+GO
+INSERT [dbo].[Prefix] ([prefix_name], [default_template_id]) VALUES (N''stgl'', 10)
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (10, N''target_schema_id'', N''used for deriving target table'', N''db_object'', NULL, 1, 1, 1, 1, NULL, NULL, CAST(N''2015-08-31T13:18:22.073'' AS DateTime), N''My_PC\BAS'')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (15, N''template_id'', N''which ETL template to use (see def.Template) '', N''db_object'', NULL, 0, 0, 1, 1, NULL, NULL, CAST(N''2017-09-07T09:12:49.160'' AS DateTime), N''My_PC\BAS'')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (20, N''has_synonym_id'', N''apply syn pattern (see biblog.nl)'', N''db_object'', NULL, 0, 0, 0, 1, NULL, NULL, CAST(N''2015-08-31T13:18:56.070'' AS DateTime), N''My_PC\BAS'')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (30, N''has_record_dt'', N''add this column (insert date time) to all tables'', N''db_object'', NULL, 0, 0, 0, 0, 1, NULL, CAST(N''2015-08-31T13:19:09.607'' AS DateTime), N''My_PC\BAS'')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (40, N''has_record_user'', N''add this column (insert username ) to all tables'', N''db_object'', NULL, 0, 0, 1, 0, 1, NULL, CAST(N''2015-08-31T13:19:15.000'' AS DateTime), N''My_PC\BAS'')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (50, N''is_linked_server'', N''Should a server be accessed like a linked server (e.g. via openquery). Used for SSAS servers.'', N''db_object'', NULL, NULL, NULL, NULL, NULL, 1, NULL, CAST(N''2015-08-31T17:17:37.830'' AS DateTime), N''My_PC\BAS'')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (60, N''date_datatype_based_on_suffix'', N''if a column ends with the suffix _date then it''''s a date datatype column (instead of e.g. datetime)'', N''db_object'', N''1'', NULL, NULL, NULL, NULL, 1, NULL, CAST(N''2015-09-02T13:16:15.733'' AS DateTime), N''My_PC\BAS'')
+GO
+'
+print '
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (70, N''is_localhost'', N''This server is localhost. For performance reasons we don''''t want to access localhost via linked server as we would with external sources'', N''db_object'', N''0'', NULL, NULL, NULL, NULL, 1, NULL, CAST(N''2015-09-24T16:22:45.233'' AS DateTime), N''My_PC\BAS'')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (80, N''recreate_tables'', N''This will drop and create tables (usefull during initial development)'', N''db_object'', NULL, NULL, NULL, 1, 1, NULL, NULL, NULL, NULL)
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (90, N''prefix_length'', N''This object name uses a prefix of certain length x. Strip this from target name. '', N''db_object'', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (100, N''etl_meta_fields'', N''etl_run_id, etl_load_dts, etl_end_dts,etl_deleted_flg,etl_active_flg,etl_data_source'', N''db_object'', N''1'', NULL, NULL, 1, 1, NULL, NULL, NULL, NULL)
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (120, N''exec_sql'', N''set this to 0 to print the generated sql instead of executing it. usefull for debugging'', N''user'', N''1'', NULL, NULL, NULL, NULL, NULL, 1, CAST(N''2017-02-02T15:04:49.867'' AS DateTime), N'''')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (130, N''log_level'', N''controls the amount of logging. ERROR,INFO, DEBUG, VERBOSE'', N''user'', N''INFO'', NULL, NULL, NULL, NULL, NULL, 1, CAST(N''2017-02-02T15:06:12.167'' AS DateTime), N'''')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (140, N''nesting'', N''used by dbo.log in combination with log_level  to determine wheter or not to print a message'', N''user'', N''0'', NULL, NULL, NULL, NULL, NULL, 1, CAST(N''2017-02-02T15:08:02.967'' AS DateTime), N'''')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (150, N''delete_detection'', N''detect deleted records'', N''db_object'', N''1'', 1, 1, 1, NULL, NULL, NULL, CAST(N''2017-12-19T14:08:52.533'' AS DateTime), N''company\991371'')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (160, N''use_key_domain'', N''adds key_domain_id to natural primary key of hubs to make key unique for a particular domain. push can derive key_domain e.g.  from source system name'', N''db_object'', NULL, 1, 1, NULL, NULL, NULL, NULL, CAST(N''2018-01-09T10:26:57.017'' AS DateTime), N''company\991371'')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (170, N''privacy_level'', N''scale : normal, sensitive, personal'', N''db_object'', N''10'', 1, 1, NULL, NULL, NULL, NULL, CAST(N''2018-04-09T16:38:43.057'' AS DateTime), N''company\991371'')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (180, N''filter_delete_detection'', N''custom filter for delete detection'', N''db_object'', NULL, 1, 1, NULL, NULL, NULL, NULL, CAST(N''2018-07-04T17:27:29.857'' AS DateTime), N''company\991371'')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (190, N''proc_max_cnt'', N''how many concurrent processes / jobs. default 4 '', N''user'', N''4'', NULL, NULL, NULL, NULL, NULL, 1, CAST(N''2019-01-23T17:20:03.690'' AS DateTime), N''MicrosoftAccount\swjvdberg@outlook.com'')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (200, N''proc_max_wait_time_min'', N''how long should we wait for a proc to finish when proc_max_cnt is reached. default 10 minutes. please increase this value for big datasets!'', N''user'', N''10'', NULL, NULL, NULL, NULL, NULL, 1, CAST(N''2019-01-25T12:27:24.543'' AS DateTime), N''MicrosoftAccount\swjvdberg@outlook.com'')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (210, N''proc_polling_interval_sec'', N''wait polling interval. How long till we check again. range: 1-59 . Too low might affect performance because every time we query  msdb.dbo.sysjobs'', N''user'', N''2'', NULL, NULL, NULL, NULL, NULL, 1, CAST(N''2019-01-25T12:29:17.060'' AS DateTime), N''MicrosoftAccount\swjvdberg@outlook.com'')
+GO
+'
+print '
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (220, N''proc_dead_time_sec'', N''delete jobs that are created more than @proc_dead_time_sec ago and are not running. '', N''user'', N''60'', NULL, NULL, NULL, NULL, NULL, 1, CAST(N''2019-01-25T12:40:13.197'' AS DateTime), N''MicrosoftAccount\swjvdberg@outlook.com'')
+GO
+INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (1, N''truncate_insert'', N''truncate_insert'', NULL, NULL)
+GO
+INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (2, N''drop_insert'', N''drop_insert'', NULL, NULL)
+GO
+INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (3, N''delta_insert_first_seq'', N''delta insert based on a first sequential ascending column'', NULL, NULL)
+GO
+INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (4, N''truncate_insert_create_stgh'', N''truncate_insert imp_table then create stgh view lowercase, nvarchar->varchar, money->decimal '', NULL, NULL)
+GO
+INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (5, N''create_stgh'', N''create stgh view (follow up on template 4)'', CAST(N''2018-05-30 11:03:13.127'' AS DateTime), N''company\991371'')
+GO
+INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (6, N''switch'', N''transfer to switching tables (Datamart)'', NULL, NULL)
+GO
+INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (7, N''delta_insert_eff_dt'', N''delta insert based on eff_dt column'', NULL, NULL)
+GO
+INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (8, N''hub_and_sat'', N''Datavault Hub & Sat (CDC and delete detection)'', NULL, NULL)
+GO
+INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (9, N''hub_sat'', N''Datavault Hub Sat (part of transfer_method 8)'', NULL, NULL)
+GO
+INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (10, N''link_and_sat'', N''Datavault Link & Sat (CDC and delete detection)'', NULL, NULL)
+GO
+INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (11, N''link_sat'', N''Datavault Link Sat (part of transfer_method 10)'', NULL, NULL)
+GO
+INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (12, N''dim'', N''Kimball Dimension'', NULL, NULL)
+GO
+INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (13, N''fact'', N''Kimball Fact'', NULL, NULL)
+GO
+INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (14, N''fact_append'', N''Kimball Fact Append'', NULL, NULL)
+GO
+INSERT [static].[Log_level] ([log_level_id], [log_level], [log_level_description]) VALUES (10, N''ERROR'', N''Only log errors'')
+GO
+INSERT [static].[Log_level] ([log_level_id], [log_level], [log_level_description]) VALUES (20, N''WARN'', N''Log errors and warnings (SSIS mode)'')
+GO
+INSERT [static].[Log_level] ([log_level_id], [log_level], [log_level_description]) VALUES (30, N''INFO'', N''Log headers and footers'')
+GO
+INSERT [static].[Log_level] ([log_level_id], [log_level], [log_level_description]) VALUES (40, N''DEBUG'', N''Log everything only at top nesting level'')
+GO
+INSERT [static].[Log_level] ([log_level_id], [log_level], [log_level_description]) VALUES (50, N''VERBOSE'', N''Log everything all nesting levels'')
+GO
+INSERT [static].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES (10, N''Header'', 30)
+GO
+INSERT [static].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES (20, N''Footer'', 30)
+GO
+INSERT [static].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES (30, N''SQL'', 40)
+GO
+INSERT [static].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES (40, N''VAR'', 40)
+GO
+INSERT [static].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES (50, N''Error'', 10)
+GO
+INSERT [static].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES (60, N''Warn'', 20)
+GO
+INSERT [static].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES (70, N''Step'', 30)
+GO
+INSERT [static].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES (80, N''Progress'', 50)
+GO
+
+'
+print '
+INSERT [static].[Server_type] ([server_type_id], [server_type], [compatibility]) VALUES (10, N''sql server'', N''SQL Server 2012 (SP3) (KB3072779) - 11.0.6020.0 (X64)'')
+GO
+INSERT [static].[Server_type] ([server_type_id], [server_type], [compatibility]) VALUES (20, N''ssas tabular'', N''SQL Server Analysis Services Tabular Databases with Compatibility Level 1200'')
+GO
+insert into dbo.Obj(obj_type_id, obj_name)
+values ( 50, ''LOCALHOST'')
+GO
+exec dbo.setp ''is_localhost'', 1 , ''LOCALHOST''
+'
+print '-- end of ddl_content'
+end
+
+
+
+
+
+
+
+
+
+
+
+
+GO
+print '-- 3. parse_sql'
 IF object_id('[util].[parse_sql]' ) is not null 
   DROP FUNCTION [util].[parse_sql] 
 GO
@@ -1198,35 +502,99 @@ END
 
 
 
+
+
+
 GO
-print '-- 17. print_max'
-IF object_id('[util].[print_max]' ) is not null 
-  DROP PROCEDURE [util].[print_max] 
+print '-- 4. Job_step_ext'
+IF object_id('[dbo].[Job_step_ext]' ) is not null 
+  DROP VIEW [dbo].[Job_step_ext] 
 GO
-/* https://weblogs.asp.net/bdill/sql-server-print-max
-exec util.print_max 'atetew tewtew'
+	  
+-- select * from dbo.Job_ext
+create view [dbo].[Job_step_ext] as 
+SELECT  j.[job_id]
+      ,j.[name] job_name
+      ,j.[description] job_description
+      ,j.[enabled] job_enabled
+      ,j.[category_name]
+      --,[job_schedule_id]
+      ,js.[name] schedule_name 
+      ,js.[enabled] schedule_enabled
+	  ,[step_id]
+      ,[step_name]
+      ,[subsystem]
+      ,[command]
+      ,[on_success_action]
+      ,[on_success_step_id]
+      ,[on_fail_action]
+      ,[on_fail_step_id]
+      ,[database_name]
+      
+  FROM [dbo].[Job] j
+  inner join dbo.Job_schedule  js on j.job_schedule_id = js.job_schedule_id
+  inner join dbo.Job_step s on s.job_id = j.job_id
+--  order by j.job_id, s.step_id
+
+
+
+
+
+
+
+
+
+
+
+GO
+print '-- 5. filter'
+IF object_id('[util].[filter]' ) is not null 
+  DROP FUNCTION [util].[filter] 
+GO
+	  
+/*---------------------------------------------------------------------------------------------
+BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL
+-----------------------------------------------------------------------------------------------
+-- 2018-04-19 BvdB filter characters from string
+select util.filter('aap','d')
+select util.filter('
+aap
+', 'char(10),char(13)')
+select util.filter('
+"aap''
+', 'char(10),char(13),",''')
 */
-CREATE  PROCEDURE util.print_max(@iInput NVARCHAR(MAX) ) 
+CREATE FUNCTION [util].[filter]
+(
+	@s varchar(255)
+	, @filter varchar(200) 
+--	, @return_null bit = 1 
+)
+RETURNS varchar(255)
 AS
 BEGIN
-    IF @iInput IS NULL
-    RETURN;
-    DECLARE @ReversedData NVARCHAR(MAX)
-          , @LineBreakIndex INT
-          , @SearchLength INT;
-    SET @SearchLength = 4000;
-    WHILE LEN(@iInput) > @SearchLength
-    BEGIN
-		SET @ReversedData = LEFT(@iInput COLLATE DATABASE_DEFAULT, @SearchLength);
-		SET @ReversedData = REVERSE(@ReversedData COLLATE DATABASE_DEFAULT);
-		SET @LineBreakIndex = CHARINDEX(CHAR(10) + CHAR(13),
-							  @ReversedData COLLATE DATABASE_DEFAULT);
-		PRINT LEFT(@iInput, @SearchLength - @LineBreakIndex + 1);
-		SET @iInput = RIGHT(@iInput, LEN(@iInput) - @SearchLength 
-							+ @LineBreakIndex - 1);
-    END;
-    IF LEN(@iInput) > 0
-    PRINT @iInput;
+	declare @result as varchar(max)= ''
+		, @i int =1
+		, @n int =len(@s) 
+		, @filter_list as SplitList
+		, @c as char
+	insert into @filter_list
+	select * from  util.split(@filter, ',')
+	
+	update @filter_list
+	set item = char(convert(int, replace(replace(item, 'char(',''), ')','')))  
+	from @filter_list
+	where item like 'char(%'
+	while @i<@n+1
+	begin
+		set @c = substring(@s, @i,1) 
+		if not exists ( select * from @filter_list where item = @c) 
+			set @result+=@c
+		set @i += 1 
+	end
+--	if @return_null =0 
+	--	return isnull(@result , '') 
+	return @result 
 END
 
 
@@ -1236,8 +604,181 @@ END
 
 
 
+
+
 GO
-print '-- 18. ddl_table'
+print '-- 6. udf_min'
+IF object_id('[util].[udf_min]' ) is not null 
+  DROP FUNCTION [util].[udf_min] 
+GO
+	  
+
+	  
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-01 BvdB returns the minimum of two numbers
+select util.udf_min(1,2)
+select util.udf_min(null,2)
+select util.udf_min(2,null)
+select util.udf_min(2,3)
+select util.udf_min(2,2)
+*/
+CREATE FUNCTION [util].[udf_min]
+(
+ @a sql_variant,
+ @b sql_variant
+ 
+)
+RETURNS sql_variant
+AS
+BEGIN
+ if @a is null or @b <= @a
+  return @b
+ else
+  if @b is null or @a < @b
+   return @a
+ return null
+END
+
+
+
+
+
+
+
+
+
+
+GO
+print '-- 7. get_cols'
+IF object_id('[dbo].[get_cols]' ) is not null 
+  DROP FUNCTION [dbo].[get_cols] 
+GO
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-01 BvdB returns a table with all column meta data 
+-- Unfortunately we have to re-define the columTable type here... 
+-- see http://stackoverflow.com/questions/2501324/can-t-sql-function-return-user-defined-table-type
+select * from dbo.get_cols(32)
+exec dbo.info
+*/
+CREATE FUNCTION [dbo].[get_cols]
+(
+	@obj_id int
+)
+RETURNS @cols TABLE(
+	[ordinal_position] [int] NOT NULL PRIMARY KEY,
+	[column_name] [varchar](255) NULL,
+	[column_value] [varchar](255) NULL,
+	[data_type] [varchar](255) NULL,
+	[max_len] [int] NULL,
+	[column_type_id] [int] NULL,
+	[is_nullable] [bit] NULL,
+	[prefix] [varchar](64) NULL,
+	[entity_name] [varchar](64) NULL,
+	[foreignCol_name] [varchar](64) NULL,
+	[foreign_sur_pkey] int NULL,
+	[numeric_precision] [int] NULL,
+	[numeric_scale] [int] NULL,
+	part_of_unique_index BIT NULL,
+	[identity] [bit] NULL,
+	[src_mapping] varchar(255) null
+)  as
+begin 
+	--SET IDENTITY_INSERT @cols ON 
+	insert into @cols(
+		ordinal_position
+		, column_name
+		, column_value
+		, data_type 
+		, max_len
+		, [column_type_id] 
+		, is_nullable
+		, [prefix] 
+		, [entity_name]
+		, [foreignCol_name] 
+		, [foreign_sur_pkey] 
+		  ,[numeric_precision]
+		  ,[numeric_scale]
+		  ,part_of_unique_index 
+		  ,[identity]
+		) 
+		select 
+			ordinal_position
+			, column_name
+			, null column_value
+			, data_type 
+			, max_len
+			, [column_type_id] 
+			, is_nullable
+			, prefix
+			, [entity_name]
+			, [foreign_column_name]
+			, [foreign_sur_pkey] 
+			  ,[numeric_precision]
+			  ,[numeric_scale]
+			  ,part_of_unique_index 
+			  ,null [identity]
+		from dbo.Col_ext
+		where [obj_id] = @obj_id 
+	--SET IDENTITY_INSERT @cols OFF
+	RETURN
+end
+
+--SELECT * from vwCol
+
+
+
+
+
+
+
+
+
+
+GO
+print '-- 8. const'
+IF object_id('[dbo].[const]' ) is not null 
+  DROP FUNCTION [dbo].[const] 
+GO
+	  
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2015-08-31 BvdB returns int value for const string. 
+this way we don't have to use ints foreign keys in our code. 
+Assumption: const is unique across all lookup tables. 
+Lookup tables: obj_type
+select dbo.const('table')
+*/
+CREATE FUNCTION [dbo].[const]
+(
+	@const varchar(255) 
+)
+RETURNS int 
+AS
+BEGIN
+	declare @res as int 
+	SELECT @res = obj_type_id from static.obj_type 
+	where obj_type = @const 
+	
+	RETURN @res
+END
+
+
+
+
+
+
+
+
+
+
+
+GO
+print '-- 9. ddl_table'
 IF object_id('[dbo].[ddl_table]' ) is not null 
   DROP PROCEDURE [dbo].[ddl_table] 
 GO
@@ -1401,27 +942,35 @@ end
 
 
 
+
+
+
 GO
-print '-- 19. column_type_name'
-IF object_id('[dbo].[column_type_name]' ) is not null 
-  DROP FUNCTION [dbo].[column_type_name] 
+print '-- 10. suffix'
+IF object_id('[util].[suffix]' ) is not null 
+  DROP FUNCTION [util].[suffix] 
 GO
 /*------------------------------------------------------------------------------------------------
 -- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
 --------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB 
-select dbo.[column_type_name](300) 
+-- 2017-01-01 BvdB returns true if @s ends with @suffix
+select util.suffix('gfjh_aap', '_aap') 
+select util.suffix('gfjh_aap', 4) 
+select util.suffix('gfjh_aap', '_a3p') 
 */
-CREATE FUNCTION [dbo].[column_type_name]
+CREATE FUNCTION [util].[suffix]
 (
-	@column_type_id int
+	@s as varchar(255)
+	, @len_suffix as int
+	--, @suffix as varchar(255)
 )
-RETURNS varchar(255) 
+RETURNS varchar(255)
 AS
 BEGIN
-	declare @column_type_name as varchar(255) 
-	select @column_type_name = [column_type_name] from static.Column_type where column_type_id = @column_type_id 
-	return @column_type_name + ' (' + convert(varchar(10), @column_type_id ) + ')'
+	declare @n as int=len(@s) 
+			--, @n_suffix as int = len(@suffix)
+	declare @result as bit = 0 
+	return SUBSTRING(@s, @n+1-@len_suffix, @len_suffix) 
 END
 
 
@@ -1430,8 +979,95 @@ END
 
 
 
+
+
+
 GO
-print '-- 20. obj_name'
+print '-- 11. refresh_views'
+IF object_id('[util].[refresh_views]' ) is not null 
+  DROP PROCEDURE [util].[refresh_views] 
+GO
+	  
+	  
+	  
+
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-21 BvdB The meta data of views can get outdated when underlying tables change. Use this proc to refresh all views meta data. 
+exec util.refresh_views 'AdventureWorks2014'
+*/    
+CREATE PROCEDURE [util].[refresh_views]
+	@db_name as varchar(255)  
+AS
+BEGIN
+/*
+	SET NOCOUNT ON;
+	DECLARE @sql AS VARCHAR(MAX) 
+		, @cur_db as varchar(255) 
+    set @cur_db = DB_NAME()
+	SET @sql = '
+DECLARE @sql AS VARCHAR(MAX) =''use '+@db_name + ';
+''
+use '+@db_name+ ';
+SELECT @sql += ''EXEC sp_refreshview '''''' + schema_name(schema_id)+ ''.''+ name + '''''' ;
+''
+  FROM sys.views
+set @sql+= ''USE '+@Cur_db+ '''
+PRINT @sql 
+exec(@sql)
+use ' +@cur_db+ '
+'
+	exec [dbo].[exec_sql] @sql
+	--PRINT @sql 
+--   EXEC(@sql)
+   
+   */
+
+   declare @cur_db as varchar(255) 
+			,@sql as varchar(255) 
+   select @cur_db = DB_NAME()
+   set @sql = 'use '+@db_name
+   exec (@sql) 
+   select DB_NAME()
+	DECLARE @view_name AS NVARCHAR(500);
+	DECLARE views_cursor CURSOR FOR 
+		SELECT TABLE_SCHEMA + '.' +TABLE_NAME FROM INFORMATION_SCHEMA.TABLES 
+		WHERE	TABLE_TYPE = 'VIEW' 
+		ORDER BY TABLE_SCHEMA,TABLE_NAME 
+	
+	OPEN views_cursor 
+	FETCH NEXT FROM views_cursor 
+	INTO @view_name 
+	WHILE (@@FETCH_STATUS <> -1) 
+	BEGIN
+		BEGIN TRY
+			EXEC sp_refreshview @view_name;
+			PRINT @view_name;
+		END TRY
+		BEGIN CATCH
+			PRINT 'Error during refreshing view "' + @view_name + '".'+ + convert(varchar(255), isnull(ERROR_MESSAGE(),''))	;
+		END CATCH;
+		FETCH NEXT FROM views_cursor 
+		INTO @view_name 
+	END 
+	CLOSE views_cursor; 
+	DEALLOCATE views_cursor;
+   set @sql = 'use '+@cur_db
+   exec (@sql) 
+END
+
+
+
+
+
+
+
+
+
+
+GO
+print '-- 12. obj_name'
 IF object_id('[util].[obj_name]' ) is not null 
   DROP FUNCTION [util].[obj_name] 
 GO
@@ -1505,32 +1141,24 @@ END
 
 
 
+
+
+
 GO
-print '-- 21. suffix'
-IF object_id('[util].[suffix]' ) is not null 
-  DROP FUNCTION [util].[suffix] 
+print '-- 13. Int2Char'
+IF object_id('[util].[Int2Char]' ) is not null 
+  DROP FUNCTION [util].[Int2Char] 
 GO
 /*------------------------------------------------------------------------------------------------
 -- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
 --------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB returns true if @s ends with @suffix
-select util.suffix('gfjh_aap', '_aap') 
-select util.suffix('gfjh_aap', 4) 
-select util.suffix('gfjh_aap', '_a3p') 
+-- 2017-01-01 BvdB 
+select util.int2Char(2)
 */
-CREATE FUNCTION [util].[suffix]
-(
-	@s as varchar(255)
-	, @len_suffix as int
-	--, @suffix as varchar(255)
-)
-RETURNS varchar(255)
-AS
+CREATE FUNCTION [util].[Int2Char] (     @i int)
+RETURNS varchar(15) AS
 BEGIN
-	declare @n as int=len(@s) 
-			--, @n_suffix as int = len(@suffix)
-	declare @result as bit = 0 
-	return SUBSTRING(@s, @n+1-@len_suffix, @len_suffix) 
+       RETURN isnull(convert(varchar(15), @i), '')
 END
 
 
@@ -1539,44 +1167,11 @@ END
 
 
 
-GO
-print '-- 22. Transfer_ext'
-IF object_id('[dbo].[Transfer_ext]' ) is not null 
-  DROP VIEW [dbo].[Transfer_ext] 
-GO
-	  
-CREATE view [dbo].[Transfer_ext] as 
-select 
-t.[transfer_id]
-,t.[transfer_name]
-,t.[src_obj_id]
-,t.[target_name]
-,t.[transfer_start_dt]
-,t.[transfer_end_dt]
-,s.status_name status
-,t.[rec_cnt_src]
-,t.[rec_cnt_new]
-,t.[rec_cnt_changed]
-,t.[rec_cnt_deleted]
-,t.[last_error_id]
-,b.batch_id
-, b.[batch_start_dt] 
-,b.[batch_end_dt] 
-, b.batch_name
-, s.status_name batch_status 
-from dbo.Transfer t
-left join dbo.Batch b on t.batch_id = b.batch_id 
-left join static.Status s on s.status_id = t.status_id
-
-
-
-
-
 
 
 
 GO
-print '-- 23. apply_params'
+print '-- 14. apply_params'
 IF object_id('[util].[apply_params]' ) is not null 
   DROP PROCEDURE [util].[apply_params] 
 GO
@@ -1636,233 +1231,87 @@ END
 
 
 
-GO
-print '-- 24. ddl_content'
-IF object_id('[dbo].[ddl_content]' ) is not null 
-  DROP PROCEDURE [dbo].[ddl_content] 
-GO
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-21 BvdB part of ddl generation process ( when making new betl release) . create static data ddl. 
-*/    
-CREATE procedure [dbo].[ddl_content] as 
-begin 
-set nocount on 
-print '
--- begin ddl_content
-set nocount on 
-GO
-INSERT [static].Status ([status_id], [status_name], [description]) VALUES (0, N''unknown'', NULL)
-GO
-INSERT [static].Status ([status_id], [status_name], [description]) VALUES (100, N''success'', N''Execution of batch or transfer finished without any errors. '')
-GO
-INSERT [static].Status ([status_id], [status_name], [description]) VALUES (200, N''error'', N''Execution of batch or transfer raised an error.'')
-GO
-INSERT [static].Status ([status_id], [status_name], [description]) VALUES (300, N''not started'', N''Execution of batch or transfer is not started because it cannot start (maybe it''''s already running). '')
-GO
-INSERT [static].Status ([status_id], [status_name], [description]) VALUES (400, N''running'', N''Batch or transfer is running. do not start a new instance.'')
-GO
-INSERT [static].Status ([status_id], [status_name], [description]) VALUES (600, N''continue'', N''This batch is continuing where the last instance stopped. '')
-GO
-INSERT [static].Status ([status_id], [status_name], [description]) VALUES (700, N''stopped'', N''batch stopped without error (can be continued any time). '')
-GO
-INSERT [static].Status ([status_id], [status_name], [description]) VALUES (800, N''skipped'', N''Transfer is skipped because batch will continue where it has left off. '')
-GO
-INSERT [static].Status ([status_id], [status_name], [description]) VALUES (900, N''deleted'', N''Transfer or batch is deleted / dropped'')
-GO
-'
-print '
-INSERT [static].[Column_type] ([column_type_id], [column_type_name], [column_type_description], [record_dt], [record_user]) VALUES (-1, N''unknown'', N''Unknown,  not relevant'', CAST(N''2015-10-20 13:22:19.590'' AS DateTime), N''bas'')
-GO
-INSERT [static].[Column_type] ([column_type_id], [column_type_name], [column_type_description], [record_dt], [record_user]) VALUES (100, N''nat_pkey'', N''Natural primary key (e.g. user_key)'', CAST(N''2015-10-20 13:22:19.590'' AS DateTime), N''bas'')
-GO
-INSERT [static].[Column_type] ([column_type_id], [column_type_name], [column_type_description], [record_dt], [record_user]) VALUES (110, N''nat_fkey'', N''Natural foreign key (e.g. create_user_key)'', CAST(N''2015-10-20 13:22:19.590'' AS DateTime), N''bas'')
-GO
-INSERT [static].[Column_type] ([column_type_id], [column_type_name], [column_type_description], [record_dt], [record_user]) VALUES (200, N''sur_pkey'', N''Surrogate primary key (e.g. user_id)'', CAST(N''2015-10-20 13:22:19.590'' AS DateTime), N''bas'')
-
-GO
-INSERT [static].[Column_type] ([column_type_id], [column_type_name], [column_type_description], [record_dt], [record_user]) VALUES (210, N''sur_fkey'', N''Surrogate foreign key (e.g. create_user_id)'', CAST(N''2015-10-20 13:22:19.590'' AS DateTime), N''bas'')
-GO
-INSERT [static].[Column_type] ([column_type_id], [column_type_name], [column_type_description], [record_dt], [record_user]) VALUES (300, N''attribute'', N''low or non repetetive value for containing object. E.g. customer lastname, firstname.'', CAST(N''2015-10-20 13:22:19.590'' AS DateTime), N''bas'')
-GO
-INSERT [static].[Column_type] ([column_type_id], [column_type_name], [column_type_description], [record_dt], [record_user]) VALUES (999, N''meta data'', NULL, CAST(N''2015-10-20 13:22:19.590'' AS DateTime), N''bas'')
-GO
-INSERT [dbo].[Key_domain] ([key_domain_name], [key_domain_id]) VALUES (N''navision'', 1)
-GO
-INSERT [dbo].[Key_domain] ([key_domain_name], [key_domain_id]) VALUES (N''exact'', 2)
-GO
-INSERT [dbo].[Key_domain] ([key_domain_name], [key_domain_id]) VALUES (N''adp'', 2)
-GO
-INSERT [static].[obj_type] ([obj_type_id], [obj_type], [obj_type_level]) VALUES (10, N''table'', 40)
-GO
-INSERT [static].[obj_type] ([obj_type_id], [obj_type], [obj_type_level]) VALUES (20, N''view'', 40)
-GO
-INSERT [static].[obj_type] ([obj_type_id], [obj_type], [obj_type_level]) VALUES (30, N''schema'', 30)
-GO
-INSERT [static].[obj_type] ([obj_type_id], [obj_type], [obj_type_level]) VALUES (40, N''database'', 20)
-GO
-INSERT [static].[obj_type] ([obj_type_id], [obj_type], [obj_type_level]) VALUES (50, N''server'', 10)
-GO
-INSERT [static].[obj_type] ([obj_type_id], [obj_type], [obj_type_level]) VALUES (60, N''user'', 40)
-GO
-INSERT [static].[obj_type] ([obj_type_id], [obj_type], [obj_type_level]) VALUES (70, N''procedure'', 40)
-GO
-INSERT [static].[obj_type] ([obj_type_id], [obj_type], [obj_type_level]) VALUES (80, N''role'', 30)
-GO
-'
-print'
-INSERT [dbo].[Prefix] ([prefix_name], [default_template_id]) VALUES (N''stgd'', 12)
-GO
-INSERT [dbo].[Prefix] ([prefix_name], [default_template_id]) VALUES (N''stgf'', 13)
-GO
-INSERT [dbo].[Prefix] ([prefix_name], [default_template_id]) VALUES (N''stgh'', 8)
-GO
-INSERT [dbo].[Prefix] ([prefix_name], [default_template_id]) VALUES (N''stgl'', 10)
-GO
-
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (10, N''target_schema_id'', N''used for deriving target table'', N''db_object'', NULL, 1, 1, 1, 1, NULL, NULL, CAST(N''2015-08-31 13:18:22.073'' AS DateTime), N''My_PC\BAS'')
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (15, N''template_id'', N''which ETL template to use (see def.Template) '', N''db_object'', NULL, 0, 0, 1, 1, NULL, NULL, CAST(N''2017-09-07 09:12:49.160'' AS DateTime), N''My_PC\BAS'')
-
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (20, N''has_synonym_id'', N''apply syn pattern (see biblog.nl)'', N''db_object'', NULL, 0, 0, 0, 1, NULL, NULL, CAST(N''2015-08-31 13:18:56.070'' AS DateTime), N''My_PC\BAS'')
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (30, N''has_record_dt'', N''add this column (insert date time) to all tables'', N''db_object'', NULL, 0, 0, 0, 0, 1, NULL, CAST(N''2015-08-31 13:19:09.607'' AS DateTime), N''My_PC\BAS'')
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (40, N''has_record_user'', N''add this column (insert username ) to all tables'', N''db_object'', NULL, 0, 0, 1, 0, 1, NULL, CAST(N''2015-08-31 13:19:15.000'' AS DateTime), N''My_PC\BAS'')
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (50, N''is_linked_server'', N''Should a server be accessed like a linked server (e.g. via openquery). Used for SSAS servers.'', N''db_object'', NULL, NULL, NULL, NULL, NULL, 1, NULL, CAST(N''2015-08-31 17:17:37.830'' AS DateTime), N''My_PC\BAS'')
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (60, N''date_datatype_based_on_suffix'', N''if a column ends with the suffix _date then it''''s a date datatype column (instead of e.g. datetime)'', N''db_object'', N''1'', NULL, NULL, NULL, NULL, 1, NULL, CAST(N''2015-09-02 13:16:15.733'' AS DateTime), N''My_PC\BAS'')
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (70, N''is_localhost'', N''This server is localhost. For performance reasons we don''''t want to access localhost via linked server as we would with external sources'', N''db_object'', N''0'', NULL, NULL, NULL, NULL, 1, NULL, CAST(N''2015-09-24 16:22:45.233'' AS DateTime), N''My_PC\BAS'')
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (80, N''recreate_tables'', N''This will drop and create tables (usefull during initial development)'', N''db_object'', NULL, NULL, NULL, 1, 1, NULL, NULL, NULL, NULL)
-GO
-'
-print '
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (90, N''prefix_length'', N''This object name uses a prefix of certain length x. Strip this from target name. '', N''db_object'', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (100, N''etl_meta_fields'', N''etl_run_id, etl_load_dts, etl_end_dts,etl_deleted_flg,etl_active_flg,etl_data_source'', N''db_object'', N''1'', NULL, NULL, 1, 1, NULL, NULL, NULL, NULL)
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (120, N''exec_sql'', N''set this to 0 to print the generated sql instead of executing it. usefull for debugging'', N''user'', N''1'', NULL, NULL, NULL, NULL, NULL, 1, CAST(N''2017-02-02 15:04:49.867'' AS DateTime), N'''')
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (130, N''log_level'', N''controls the amount of logging. ERROR,INFO, DEBUG, VERBOSE'', N''user'', N''INFO'', NULL, NULL, NULL, NULL, NULL, 1, CAST(N''2017-02-02 15:06:12.167'' AS DateTime), N'''')
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (140, N''nesting'', N''used by dbo.log in combination with log_level  to determine wheter or not to print a message'', N''user'', N''0'', NULL, NULL, NULL, NULL, NULL, 1, CAST(N''2017-02-02 15:08:02.967'' AS DateTime), N'''')
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (150, N''delete_detection'', N''detect deleted records'', N''db_object'', N''1'', 1, 1, 1, NULL, NULL, NULL, CAST(N''2017-12-19 14:08:52.533'' AS DateTime), N''company\991371'')
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (160, N''use_key_domain'', N''adds key_domain_id to natural primary key of hubs to make key unique for a particular domain. push can derive key_domain e.g.  from source system name'', N''db_object'', NULL, 1, 1, NULL, NULL, NULL, NULL, CAST(N''2018-01-09 10:26:57.017'' AS DateTime), N''company\991371'')
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (170, N''privacy_level'', N''scale : normal, sensitive, personal'', N''db_object'', N''10'', 1, 1, NULL, NULL, NULL, NULL, CAST(N''2018-04-09 16:38:43.057'' AS DateTime), N''company\991371'')
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (180, N''filter_delete_detection'', N''custom filter for delete detection'', N''db_object'', NULL, 1, 1, NULL, NULL, NULL, NULL, CAST(N''2018-07-04 17:27:29.857'' AS DateTime), N''company\991371'')
-GO
-'
-print '
-INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (1, N''truncate_insert'', N''truncate_insert'', NULL, NULL)
-GO
-INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (2, N''drop_insert'', N''drop_insert'', NULL, NULL)
-GO
-INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (3, N''delta_insert_first_seq'', N''delta insert based on a first sequential ascending column'', NULL, NULL)
-GO
-INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (4, N''truncate_insert_create_stgh'', N''truncate_insert imp_table then create stgh view lowercase, nvarchar->varchar, money->decimal '', NULL, NULL)
-GO
-INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (5, N''create_stgh'', N''create stgh view (follow up on template 4)'', CAST(N''2018-05-30 11:03:13.127'' AS DateTime), N''company\991371'')
-GO
-INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (6, N''switch'', N''transfer to switching tables (Datamart)'', NULL, NULL)
-GO
-INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (7, N''delta_insert_eff_dt'', N''delta insert based on eff_dt column'', NULL, NULL)
-GO
-INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (8, N''hub_and_sat'', N''Datavault Hub & Sat (CDC and delete detection)'', NULL, NULL)
-GO
-INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (9, N''hub_sat'', N''Datavault Hub Sat (part of transfer_method 8)'', NULL, NULL)
-GO
-INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (10, N''link_and_sat'', N''Datavault Link & Sat (CDC and delete detection)'', NULL, NULL)
-GO
-INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (11, N''link_sat'', N''Datavault Link Sat (part of transfer_method 10)'', NULL, NULL)
-GO
-INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (12, N''dim'', N''Kimball Dimension'', NULL, NULL)
-GO
-INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (13, N''fact'', N''Kimball Fact'', NULL, NULL)
-GO
-INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (14, N''fact_append'', N''Kimball Fact Append'', NULL, NULL)
-GO
-INSERT [static].[Log_level] ([log_level_id], [log_level], [log_level_description]) VALUES (10, N''ERROR'', N''Only log errors'')
-GO
-INSERT [static].[Log_level] ([log_level_id], [log_level], [log_level_description]) VALUES (20, N''WARN'', N''Log errors and warnings (SSIS mode)'')
-GO
-INSERT [static].[Log_level] ([log_level_id], [log_level], [log_level_description]) VALUES (30, N''INFO'', N''Log headers and footers'')
-GO
-INSERT [static].[Log_level] ([log_level_id], [log_level], [log_level_description]) VALUES (40, N''DEBUG'', N''Log everything only at top nesting level'')
-GO
-INSERT [static].[Log_level] ([log_level_id], [log_level], [log_level_description]) VALUES (50, N''VERBOSE'', N''Log everything all nesting levels'')
-GO
-INSERT [static].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES (10, N''Header'', 30)
-GO
-INSERT [static].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES (20, N''Footer'', 30)
-GO
-INSERT [static].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES (30, N''SQL'', 40)
-GO
-INSERT [static].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES (40, N''VAR'', 40)
-GO
-INSERT [static].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES (50, N''Error'', 10)
-GO
-INSERT [static].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES (60, N''Warn'', 20)
-GO
-INSERT [static].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES (70, N''Step'', 30)
-GO
-'
-print '
-INSERT [static].[Server_type] ([server_type_id], [server_type], [compatibility]) VALUES (10, N''sql server'', N''SQL Server 2012 (SP3) (KB3072779) - 11.0.6020.0 (X64)'')
-GO
-INSERT [static].[Server_type] ([server_type_id], [server_type], [compatibility]) VALUES (20, N''ssas tabular'', N''SQL Server Analysis Services Tabular Databases with Compatibility Level 1200'')
-GO
-insert into dbo.Obj(obj_type_id, obj_name)
-values ( 50, ''LOCALHOST'')
-GO
-exec dbo.setp ''is_localhost'', 1 , ''LOCALHOST''
-'
-print '-- end of ddl_content'
-end
-
-
-
-
-
 
 
 
 GO
-print '-- 25. const'
-IF object_id('[dbo].[const]' ) is not null 
-  DROP FUNCTION [dbo].[const] 
+print '-- 15. obj_id'
+IF object_id('[dbo].[obj_id]' ) is not null 
+  DROP FUNCTION [dbo].[obj_id] 
 GO
 	  
+
 /*------------------------------------------------------------------------------------------------
 -- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
 --------------------------------------------------------------------------------------------------
--- 2015-08-31 BvdB returns int value for const string. 
-this way we don't have to use ints foreign keys in our code. 
-Assumption: const is unique across all lookup tables. 
-Lookup tables: obj_type
-select dbo.const('table')
+-- 2017-09-06 BvdB Return meta data id for a full object name
+select dbo.obj_id'AdventureWorks2014.Person.Person', null) --> points to table 
+select dbo.obj_id'AdventureWorks2014.Person', null) --> points to schema
+select dbo.obj_id'AdventureWorks2014', null) --> points to db
+select dbo.obj_id'BETL', null) --> points to db
+select dbo.obj_id'MicrosoftAccount\swjvdberg@outlook.com', null) --> points to db
+select * from dbo.Obj
 */
-CREATE FUNCTION [dbo].[const]
-(
-	@const varchar(255) 
-)
-RETURNS int 
+CREATE FUNCTION [dbo].[obj_id]( @fullObj_name varchar(255) , @scope varchar(255) = null ) 
+RETURNS int
 AS
 BEGIN
-	declare @res as int 
-	SELECT @res = obj_type_id from static.obj_type 
-	where obj_type = @const 
+	declare @t TABLE (item VARCHAR(8000), i int)
+	declare  
+	     @elem1 varchar(255)
+	     ,@elem2 varchar(255)
+	     ,@elem3 varchar(255)
+	     ,@elem4 varchar(255)
+		, @cnt_elems int 
+		, @obj_id int 
+--		, @remove_chars varchar(255)
+		, @cnt as int 
 	
-	RETURN @res
+	insert into @t 
+	select replace(replace(item, '[',''),']','') item, i 
+	from util.split(@fullObj_name , '.') 
+	--select * from @t 
+	-- @t contains elemenents of fullObj_name 
+	-- can be [server].[db].[schema].[table|view]
+	-- as long as it's unique 
+	select @cnt_elems = MAX(i) from @t	
+	select @elem1 = item from @t where i=@cnt_elems
+	select @elem2 = item from @t where i=@cnt_elems-1
+	select @elem3 = item from @t where i=@cnt_elems-2
+	select @elem4 = item from @t where i=@cnt_elems-3
+	select @obj_id= max(o.obj_id), @cnt = count(*) 
+	from dbo.[Obj] o
+	LEFT OUTER JOIN dbo.[Obj] AS parent_o ON o.parent_id = parent_o.[obj_id] 
+	LEFT OUTER JOIN dbo.[Obj] AS grand_parent_o ON parent_o.parent_id = grand_parent_o.[obj_id] 
+	LEFT OUTER JOIN dbo.[Obj] AS great_grand_parent_o ON grand_parent_o.parent_id = great_grand_parent_o.[obj_id] 
+	where 
+	(
+		o.obj_type_id<> 60 -- not a user
+		and o.[obj_name] = @elem1 
+		and ( @elem2 is null or parent_o.[obj_name] = @elem2 ) 
+		and ( @elem3 is null or grand_parent_o.[obj_name] = @elem3) 
+		and ( @elem4 is null or great_grand_parent_o.[obj_name] = @elem4) 
+		and ( @scope is null 
+				or @scope = o.scope 
+				or @scope = parent_o.scope 
+				or @scope = grand_parent_o.scope 
+				or @scope = great_grand_parent_o.scope 
+				or o.obj_type_id= 50 -- scope not relevant for servers. 
+			)  
+	) 
+	or 
+	(
+		o.obj_type_id=60 -- user
+		and o.obj_name = @fullObj_name
+	) 
+	and o.delete_dt is null 
+	
+	declare @res as int
+	if @cnt >1 
+		set @res =  -@cnt
+	else 
+		set @res =@obj_id 
+	return @res 
 END
 
 
@@ -1872,8 +1321,42 @@ END
 
 
 
+
+
 GO
-print '-- 26. prefix'
+print '-- 16. column_type_name'
+IF object_id('[dbo].[column_type_name]' ) is not null 
+  DROP FUNCTION [dbo].[column_type_name] 
+GO
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-01 BvdB 
+select dbo.[column_type_name](300) 
+*/
+CREATE FUNCTION [dbo].[column_type_name]
+(
+	@column_type_id int
+)
+RETURNS varchar(255) 
+AS
+BEGIN
+	declare @column_type_name as varchar(255) 
+	select @column_type_name = [column_type_name] from static.Column_type where column_type_id = @column_type_id 
+	return @column_type_name + ' (' + convert(varchar(10), @column_type_id ) + ')'
+END
+
+
+
+
+
+
+
+
+
+
+GO
+print '-- 17. prefix'
 IF object_id('[util].[prefix]' ) is not null 
   DROP FUNCTION [util].[prefix] 
 GO
@@ -1906,277 +1389,40 @@ END
 
 
 
-GO
-print '-- 27. schema_id'
-IF object_id('[dbo].[schema_id]' ) is not null 
-  DROP FUNCTION [dbo].[schema_id] 
-GO
-	  
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2019-03-21 BvdB return schema_id of this full object name 
---  e.g. LOCALHOST.AdventureWorks2014.Person.Sales -> schema_id(LOCALHOST.AdventureWorks2014.Person)
-*/
-CREATE FUNCTION [dbo].[schema_id]( @fullObj_name varchar(255), @scope varchar(255) = null  ) 
-RETURNS int
-AS
-BEGIN
-	--declare @fullObj_name varchar(255)= 'AdventureWorks.dbo.Store'
-	declare @t TABLE (item VARCHAR(8000), i int)
-	declare  
-	     @elem1 varchar(255)
-	     ,@elem2 varchar(255)
-	     ,@elem3 varchar(255)
-	     ,@elem4 varchar(255)
-		, @cnt_elems int 
-		, @obj_id int 
-		, @remove_chars varchar(255)
-		, @cnt as int 
-		 
-	set @remove_chars = replace(@fullObj_name, '[','')
-	set @remove_chars = replace(@remove_chars , ']','')
-	
-	insert into @t 
-	select * from util.split(@remove_chars , '.') 
-	--select * from @t 
-	-- @t contains elemenents of fullObj_name 
-	-- can be [server].[db].[schema].[table|view]
-	-- as long as it's unique 
-	select @cnt_elems = MAX(i) from @t	
-	select @elem1 = item from @t where i=@cnt_elems
-	select @elem2 = item from @t where i=@cnt_elems-1
-	select @elem3 = item from @t where i=@cnt_elems-2
-	select @elem4 = item from @t where i=@cnt_elems-3
-	select @obj_id= max(o.obj_id), @cnt = count(*) 
-	from dbo.[Obj] o
-	LEFT OUTER JOIN dbo.[Obj] AS parent_o ON o.parent_id = parent_o.[obj_id] 
-	LEFT OUTER JOIN dbo.[Obj] AS grand_parent_o ON parent_o.parent_id = grand_parent_o.[obj_id] 
-	LEFT OUTER JOIN dbo.[Obj] AS great_grand_parent_o ON grand_parent_o.parent_id = great_grand_parent_o.[obj_id] 
-	where 	o.[obj_name] = @elem2
-	and ( @elem3 is null or parent_o.[obj_name] = @elem3) 
-	and ( @elem4 is null or grand_parent_o.[obj_name] = @elem4) 
-	and ( @scope is null or 
-			@scope = o.scope
-			or @scope = parent_o.scope
-			or @scope = grand_parent_o.scope
-			or @scope = great_grand_parent_o.scope) 
-	declare @res as int
-	if @cnt >1 
-		set @res =  -@cnt
-	else 
-		set @res =@obj_id 
-	return @res 
-END
-
-
-
-
 
 
 
 GO
-print '-- 28. trim'
-IF object_id('[util].[trim]' ) is not null 
-  DROP FUNCTION [util].[trim] 
+print '-- 18. Transfer_ext'
+IF object_id('[dbo].[Transfer_ext]' ) is not null 
+  DROP VIEW [dbo].[Transfer_ext] 
 GO
 	  
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-21 BvdB remove left and right spaces and double and single quotes. 
-*/    
-CREATE FUNCTION [util].[trim]
-(
-	@s varchar(200)
-	, @return_null bit = 1 
-)
-RETURNS varchar(200)
-AS
-BEGIN
-	declare @result as varchar(max)= replace(replace(convert(varchar(200), ltrim(rtrim(@s))), '"', ''), '''' , '')
-	if @return_null =0 
-		return isnull(@result , '') 
-	return @result 
-END
+CREATE view [dbo].[Transfer_ext] as 
+select 
+t.[transfer_id]
+,t.[transfer_name]
+,t.[src_obj_id]
+,t.[target_name]
+,t.[transfer_start_dt]
+,t.[transfer_end_dt]
+,s.status_name status
+,t.[rec_cnt_src]
+,t.[rec_cnt_new]
+,t.[rec_cnt_changed]
+,t.[rec_cnt_deleted]
+,t.[last_error_id]
+,b.batch_id
+, b.[batch_start_dt] 
+,b.[batch_end_dt] 
+, b.batch_name
+, s.status_name batch_status 
+from dbo.Transfer t
+left join dbo.Batch b on t.batch_id = b.batch_id 
+left join static.Status s on s.status_id = t.status_id
 
 
 
-
-
-
-
-GO
-print '-- 29. ddl_clear'
-IF object_id('[dbo].[ddl_clear]' ) is not null 
-  DROP PROCEDURE [dbo].[ddl_clear] 
-GO
-	  
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-21 BvdB Beware: this will clear the entire BETL database (all non ms objects) !
-*/    
-CREATE procedure [dbo].[ddl_clear] @execute as bit = 0  as
-begin 
-	set nocount on 
-	declare @sql as varchar(max) =''
-	select @sql+= 'DROP '+
-	   case 
-	   when q.type ='P' then 'PROCEDURE' 
-	   when q.type='U' then 'TABLE'
-	   when q.type= 'V' then 'VIEW'
-	   when q.type= 'TT' then 'TYPE'
-	   else 'FUNCTION' end + ' ' + 
-	   fullname + '
-	;
-	'
-	from  (
-	select so.object_id, so.name , so.type,  quotename(s.name) + '.' + quotename(so.name)  fullname 
-	from sys.objects so
-	inner join sys.schemas s on so.schema_id = s.schema_id 
-	where     so.type in  ( 'U', 'V', 'P', 'IF' , 'FT', 'FS', 'FN', 'TF')
-						AND so.is_ms_shipped = 0
-     
-	union all 
-		SELECT null, name , 'TT' type ,name fullname
-		FROM sys.types WHERE is_table_type = 1 
-    ) q
-
---select quotename(s.name) + '.' + quotename(so.name), so.type
---from sys.objects so 
---inner join sys.schemas s on so.schema_id = s.schema_id 
---where   --  so.type in  ( 'U', 'V', 'P', 'IF' , 'FT', 'FS', 'FN')
---						 so.is_ms_shipped = 0
---order by 1
-				
-	if @execute = 1  
-	   exec(@sql) 
-	else 	
-		print @sql
-end
-
-
-
-
-
-
-
-GO
-print '-- 30. get_cols'
-IF object_id('[dbo].[get_cols]' ) is not null 
-  DROP FUNCTION [dbo].[get_cols] 
-GO
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB returns a table with all column meta data 
--- Unfortunately we have to re-define the columTable type here... 
--- see http://stackoverflow.com/questions/2501324/can-t-sql-function-return-user-defined-table-type
-select * from dbo.get_cols(32)
-exec dbo.info
-*/
-CREATE FUNCTION [dbo].[get_cols]
-(
-	@obj_id int
-)
-RETURNS @cols TABLE(
-	[ordinal_position] [int] NOT NULL PRIMARY KEY,
-	[column_name] [varchar](255) NULL,
-	[column_value] [varchar](255) NULL,
-	[data_type] [varchar](255) NULL,
-	[max_len] [int] NULL,
-	[column_type_id] [int] NULL,
-	[is_nullable] [bit] NULL,
-	[prefix] [varchar](64) NULL,
-	[entity_name] [varchar](64) NULL,
-	[foreignCol_name] [varchar](64) NULL,
-	[foreign_sur_pkey] int NULL,
-	[numeric_precision] [int] NULL,
-	[numeric_scale] [int] NULL,
-	part_of_unique_index BIT NULL,
-	[identity] [bit] NULL,
-	[src_mapping] varchar(255) null
-)  as
-begin 
-	--SET IDENTITY_INSERT @cols ON 
-	insert into @cols(
-		ordinal_position
-		, column_name
-		, column_value
-		, data_type 
-		, max_len
-		, [column_type_id] 
-		, is_nullable
-		, [prefix] 
-		, [entity_name]
-		, [foreignCol_name] 
-		, [foreign_sur_pkey] 
-		  ,[numeric_precision]
-		  ,[numeric_scale]
-		  ,part_of_unique_index 
-		  ,[identity]
-		) 
-		select 
-			ordinal_position
-			, column_name
-			, null column_value
-			, data_type 
-			, max_len
-			, [column_type_id] 
-			, is_nullable
-			, prefix
-			, [entity_name]
-			, [foreign_column_name]
-			, [foreign_sur_pkey] 
-			  ,[numeric_precision]
-			  ,[numeric_scale]
-			  ,part_of_unique_index 
-			  ,null [identity]
-		from dbo.Col_ext
-		where [obj_id] = @obj_id 
-	--SET IDENTITY_INSERT @cols OFF
-	RETURN
-end
-
---SELECT * from vwCol
-
-
-
-
-
-
-
-GO
-print '-- 31. Job_step_ext'
-IF object_id('[dbo].[Job_step_ext]' ) is not null 
-  DROP VIEW [dbo].[Job_step_ext] 
-GO
-	  
--- select * from dbo.Job_ext
-create view [dbo].[Job_step_ext] as 
-SELECT  j.[job_id]
-      ,j.[name] job_name
-      ,j.[description] job_description
-      ,j.[enabled] job_enabled
-      ,j.[category_name]
-      --,[job_schedule_id]
-      ,js.[name] schedule_name 
-      ,js.[enabled] schedule_enabled
-	  ,[step_id]
-      ,[step_name]
-      ,[subsystem]
-      ,[command]
-      ,[on_success_action]
-      ,[on_success_step_id]
-      ,[on_fail_action]
-      ,[on_fail_step_id]
-      ,[database_name]
-      
-  FROM [dbo].[Job] j
-  inner join dbo.Job_schedule  js on j.job_schedule_id = js.job_schedule_id
-  inner join dbo.Job_step s on s.job_id = j.job_id
---  order by j.job_id, s.step_id
 
 
 
@@ -2186,105 +1432,7 @@ SELECT  j.[job_id]
 
 
 GO
-print '-- 32. udf_min'
-IF object_id('[util].[udf_min]' ) is not null 
-  DROP FUNCTION [util].[udf_min] 
-GO
-	  
-
-	  
-/*------------------------------------------------------------------------------------------------
--- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
---------------------------------------------------------------------------------------------------
--- 2017-01-01 BvdB returns the minimum of two numbers
-select util.udf_min(1,2)
-select util.udf_min(null,2)
-select util.udf_min(2,null)
-select util.udf_min(2,3)
-select util.udf_min(2,2)
-*/
-CREATE FUNCTION [util].[udf_min]
-(
- @a sql_variant,
- @b sql_variant
- 
-)
-RETURNS sql_variant
-AS
-BEGIN
- if @a is null or @b <= @a
-  return @b
- else
-  if @b is null or @a < @b
-   return @a
- return null
-END
-
-
-
-
-
-
-
-GO
-print '-- 33. filter'
-IF object_id('[util].[filter]' ) is not null 
-  DROP FUNCTION [util].[filter] 
-GO
-	  
-/*---------------------------------------------------------------------------------------------
-BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL
------------------------------------------------------------------------------------------------
--- 2018-04-19 BvdB filter characters from string
-select util.filter('aap','d')
-select util.filter('
-aap
-', 'char(10),char(13)')
-select util.filter('
-"aap''
-', 'char(10),char(13),",''')
-*/
-CREATE FUNCTION [util].[filter]
-(
-	@s varchar(255)
-	, @filter varchar(200) 
---	, @return_null bit = 1 
-)
-RETURNS varchar(255)
-AS
-BEGIN
-	declare @result as varchar(max)= ''
-		, @i int =1
-		, @n int =len(@s) 
-		, @filter_list as SplitList
-		, @c as char
-	insert into @filter_list
-	select * from  util.split(@filter, ',')
-	
-	update @filter_list
-	set item = char(convert(int, replace(replace(item, 'char(',''), ')','')))  
-	from @filter_list
-	where item like 'char(%'
-	while @i<@n+1
-	begin
-		set @c = substring(@s, @i,1) 
-		if not exists ( select * from @filter_list where item = @c) 
-			set @result+=@c
-		set @i += 1 
-	end
---	if @return_null =0 
-	--	return isnull(@result , '') 
-	return @result 
-END
-
-
-
-
-
-
-
-GO
-print '-- 34. remove_comments'
+print '-- 19. remove_comments'
 IF object_id('[util].[remove_comments]' ) is not null 
   DROP FUNCTION [util].[remove_comments] 
 GO
@@ -2369,8 +1517,11 @@ end
 
 
 
+
+
+
 GO
-print '-- 35. Obj_ext'
+print '-- 20. Obj_ext'
 IF object_id('[dbo].[Obj_ext]' ) is not null 
   DROP VIEW [dbo].[Obj_ext] 
 GO
@@ -2473,6 +1624,651 @@ left join dbo.Prefix p on q2_1.prefix = p.prefix_name
 
 
 
+
+
+
+GO
+print '-- 21. Col'
+IF object_id('[dbo].[Col]' ) is not null 
+  DROP VIEW [dbo].[Col] 
+GO
+	  
+CREATE VIEW [dbo].[Col] AS
+	SELECT     * 
+	FROM  [dbo].[Col_hist] AS h
+	WHERE     (eff_dt =
+                      ( SELECT     MAX(eff_dt) max_eff_dt
+                        FROM       [dbo].[Col_hist] h2
+                        WHERE      h.column_id = h2.column_id
+                       )
+              )
+		AND delete_dt IS NULL 
+
+
+
+
+
+
+
+
+
+
+GO
+print '-- 22. current_db'
+IF object_id('[dbo].[current_db]' ) is not null 
+  DROP FUNCTION [dbo].[current_db] 
+GO
+
+	  
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2015-08-31 BvdB returns current database in kind of dirty way... 
+
+use [AW_Staging]
+select betl.dbo.current_db()
+
+*/
+CREATE FUNCTION [dbo].current_db() RETURNS varchar(1000) 
+AS
+BEGIN
+	declare @db_name  as varchar(1000) 
+
+	SELECT @db_name = d.name
+	FROM sys.dm_tran_locks
+	inner join sys.databases d with(nolock) on resource_database_id  = d.database_id
+	WHERE request_session_id = @@SPID and resource_type = 'DATABASE' and request_owner_type = 'SHARED_TRANSACTION_WORKSPACE'
+--	and d.name<>db_name() 
+
+	RETURN @db_name  
+END
+
+
+
+
+
+
+
+
+
+
+
+GO
+print '-- 23. print_max'
+IF object_id('[util].[print_max]' ) is not null 
+  DROP PROCEDURE [util].[print_max] 
+GO
+/* https://weblogs.asp.net/bdill/sql-server-print-max
+exec util.print_max 'atetew tewtew'
+*/
+CREATE  PROCEDURE util.print_max(@iInput NVARCHAR(MAX) ) 
+AS
+BEGIN
+    IF @iInput IS NULL
+    RETURN;
+    DECLARE @ReversedData NVARCHAR(MAX)
+          , @LineBreakIndex INT
+          , @SearchLength INT;
+    SET @SearchLength = 4000;
+    WHILE LEN(@iInput) > @SearchLength
+    BEGIN
+		SET @ReversedData = LEFT(@iInput COLLATE DATABASE_DEFAULT, @SearchLength);
+		SET @ReversedData = REVERSE(@ReversedData COLLATE DATABASE_DEFAULT);
+		SET @LineBreakIndex = CHARINDEX(CHAR(10) + CHAR(13),
+							  @ReversedData COLLATE DATABASE_DEFAULT);
+		PRINT LEFT(@iInput, @SearchLength - @LineBreakIndex + 1);
+		SET @iInput = RIGHT(@iInput, LEN(@iInput) - @SearchLength 
+							+ @LineBreakIndex - 1);
+    END;
+    IF LEN(@iInput) > 0
+    PRINT @iInput;
+END
+
+
+
+
+
+
+
+
+
+
+
+GO
+print '-- 24. addQuotes'
+IF object_id('[util].[addQuotes]' ) is not null 
+  DROP FUNCTION [util].[addQuotes] 
+GO
+	  
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-01 BvdB 
+*/
+CREATE FUNCTION [util].[addQuotes]
+(
+	@s varchar(7900) 
+)
+RETURNS varchar(8000) 
+AS
+BEGIN
+	RETURN '''' + isnull(@s , '') + '''' 
+END
+
+
+
+
+
+
+
+
+
+
+GO
+print '-- 25. prefix_first_underscore'
+IF object_id('[util].[prefix_first_underscore]' ) is not null 
+  DROP FUNCTION [util].[prefix_first_underscore] 
+GO
+	  
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-01 BvdB extract prefix from string
+SELECT dbo.guess_foreignCol_id('par_relatie_id')
+SELECT [dbo].[prefix_first_underscore]('relatie_id')
+*/    
+CREATE FUNCTION [util].[prefix_first_underscore]( @column_name VARCHAR(255) ) 
+RETURNS VARCHAR(255) 
+AS
+BEGIN
+	DECLARE @res VARCHAR(255) 
+	,		@pos INT 
+	SET @pos = CHARINDEX('_', @column_name)
+	IF @pos IS NOT NULL and @pos>1
+		SET @res = SUBSTRING(@column_name, 1, @pos-1)
+	RETURN @res 
+	/* 
+		declare @n as int=len(@s) 
+			--, @n_suffix as int = len(@suffix)
+	declare @result as bit = 0 
+	return SUBSTRING(@s, 1, @n-@len_suffix) 
+	*/
+END
+
+
+
+
+
+
+
+
+
+
+
+GO
+print '-- 26. Job_ext'
+IF object_id('[dbo].[Job_ext]' ) is not null 
+  DROP VIEW [dbo].[Job_ext] 
+GO
+	  
+
+-- select * from dbo.Job_ext
+CREATE view [dbo].[Job_ext] as 
+SELECT  j.[job_id]
+      ,j.[name] job_name
+      ,j.[description] job_description
+      ,j.[enabled] job_enabled
+      ,j.[category_name]
+      ,j.[job_schedule_id]
+      ,js.[name] schedule_name 
+      ,js.[enabled] schedule_enabled
+      ,[freq_type]
+      ,[freq_interval]
+      ,[freq_subday_type]
+      ,[freq_subday_interval]
+      ,[freq_relative_interval]
+      ,[freq_recurrence_factor]
+      ,[active_start_date]
+      ,[active_end_date]
+      ,[active_start_time]
+      ,[active_end_time]
+  FROM [dbo].[Job] j
+  inner join dbo.Job_schedule  js on j.job_schedule_id = js.job_schedule_id
+  --inner join dbo.Job_step s on s.job_id = j.job_id
+--  order by j.job_id, s.step_id
+
+
+
+
+
+
+
+
+
+
+
+GO
+print '-- 27. refresh_ssas_meta'
+IF object_id('[dbo].[refresh_ssas_meta]' ) is not null 
+  DROP PROCEDURE [dbo].[refresh_ssas_meta] 
+GO
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-01 BvdB reads ssas tabular meta data into repository
+*/
+CREATE procedure [dbo].[refresh_ssas_meta] as 
+begin 
+
+if object_id('tempdb..#ssas_queries') is not null
+	drop table #ssas_queries
+/* 
+disable because : SQL Server blocked access to STATEMENT 'OpenRowset/OpenDatasource' of component 'Ad Hoc Distributed Queries' because this component is turned off as part of the security configuration for this server. A system administrator can enable the use of 'Ad Hoc Distributed Queries' by using sp_configure. For more information about enabling 'Ad Hoc Distributed Queries', search for 'Ad Hoc Distributed Queries' in SQL Server Books Online.
+	 
+select * into #ssas_queries from openrowset('MSOLAP',
+ 'DATASOURCE=ssas01.company.nl;Initial Catalog=TAB_CKTO_respons_company;User=company\991371;password=anT1svsrnv'
+ , '
+select [name], [QueryDefinition] from 
+[$System].[TMSCHEMA_PARTITIONS]
+' ) 
+	
+select * from 
+#ssas_queries
+*/
+end
+
+
+
+
+
+
+
+
+
+
+GO
+print '-- 28. content_type_name'
+IF object_id('[dbo].[content_type_name]' ) is not null 
+  DROP FUNCTION [dbo].[content_type_name] 
+GO
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-01 BvdB get name by id. 
+select dbo.[content_type_name](300) 
+*/
+create FUNCTION [dbo].[content_type_name]
+(
+	@content_type_id int
+)
+RETURNS varchar(255) 
+AS
+BEGIN
+	declare @content_type_name as varchar(255) 
+	select @content_type_name = [content_type_name] from dbo.Content_type where content_type_id = @content_type_id 
+	return @content_type_name + ' (' + convert(varchar(10), @content_type_id ) + ')'
+END
+
+
+
+
+
+
+
+
+
+
+GO
+print '-- 29. schema_id'
+IF object_id('[dbo].[schema_id]' ) is not null 
+  DROP FUNCTION [dbo].[schema_id] 
+GO
+	  
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2019-03-21 BvdB return schema_id of this full object name 
+--  e.g. LOCALHOST.AdventureWorks2014.Person.Sales -> schema_id(LOCALHOST.AdventureWorks2014.Person)
+*/
+CREATE FUNCTION [dbo].[schema_id]( @fullObj_name varchar(255), @scope varchar(255) = null  ) 
+RETURNS int
+AS
+BEGIN
+	--declare @fullObj_name varchar(255)= 'AdventureWorks.dbo.Store'
+	declare @t TABLE (item VARCHAR(8000), i int)
+	declare  
+	     @elem1 varchar(255)
+	     ,@elem2 varchar(255)
+	     ,@elem3 varchar(255)
+	     ,@elem4 varchar(255)
+		, @cnt_elems int 
+		, @obj_id int 
+		, @remove_chars varchar(255)
+		, @cnt as int 
+		 
+	set @remove_chars = replace(@fullObj_name, '[','')
+	set @remove_chars = replace(@remove_chars , ']','')
+	
+	insert into @t 
+	select * from util.split(@remove_chars , '.') 
+	--select * from @t 
+	-- @t contains elemenents of fullObj_name 
+	-- can be [server].[db].[schema].[table|view]
+	-- as long as it's unique 
+	select @cnt_elems = MAX(i) from @t	
+	select @elem1 = item from @t where i=@cnt_elems
+	select @elem2 = item from @t where i=@cnt_elems-1
+	select @elem3 = item from @t where i=@cnt_elems-2
+	select @elem4 = item from @t where i=@cnt_elems-3
+	select @obj_id= max(o.obj_id), @cnt = count(*) 
+	from dbo.[Obj] o
+	LEFT OUTER JOIN dbo.[Obj] AS parent_o ON o.parent_id = parent_o.[obj_id] 
+	LEFT OUTER JOIN dbo.[Obj] AS grand_parent_o ON parent_o.parent_id = grand_parent_o.[obj_id] 
+	LEFT OUTER JOIN dbo.[Obj] AS great_grand_parent_o ON grand_parent_o.parent_id = great_grand_parent_o.[obj_id] 
+	where 	o.[obj_name] = @elem2
+	and ( @elem3 is null or parent_o.[obj_name] = @elem3) 
+	and ( @elem4 is null or grand_parent_o.[obj_name] = @elem4) 
+	and ( @scope is null or 
+			@scope = o.scope
+			or @scope = parent_o.scope
+			or @scope = grand_parent_o.scope
+			or @scope = great_grand_parent_o.scope) 
+	declare @res as int
+	if @cnt >1 
+		set @res =  -@cnt
+	else 
+		set @res =@obj_id 
+	return @res 
+END
+
+
+
+
+
+
+
+
+
+
+GO
+print '-- 30. suffix_first_underscore'
+IF object_id('[util].[suffix_first_underscore]' ) is not null 
+  DROP FUNCTION [util].[suffix_first_underscore] 
+GO
+	  
+
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-01 BvdB 
+SELECT dbo.guess_foreignCol_id('par_relatie_id')
+SELECT [dbo].[suffix_first_underscore]('relatie_id')
+*/    
+CREATE FUNCTION [util].[suffix_first_underscore]( @column_name VARCHAR(255) ) 
+RETURNS VARCHAR(255) 
+AS
+BEGIN
+	DECLARE @res VARCHAR(255) 
+	,		@pos INT 
+	SET @pos = CHARINDEX('_', @column_name)
+	IF @pos IS NOT NULL
+		SET @res = SUBSTRING(@column_name, @pos+1, LEN(@column_name) - @pos)
+	RETURN @res 
+	/* 
+		declare @n as int=len(@s) 
+			--, @n_suffix as int = len(@suffix)
+	declare @result as bit = 0 
+	return SUBSTRING(@s, 1, @n-@len_suffix) 
+	*/
+END
+
+
+
+
+
+
+
+
+
+
+
+GO
+print '-- 31. parent'
+IF object_id('[util].[parent]' ) is not null 
+  DROP FUNCTION [util].[parent] 
+GO
+	  
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2019-03-21 BvdB returns parent by parsing the string. e.g. localhost.AdventureWorks2014.dbo = localhost.AdventureWorks2014
+select util.parent('localhost.AdventureWorks2014.dbo')
+*/    
+CREATE FUNCTION [util].[parent]( @fullObj_name varchar(255) ) 
+RETURNS varchar(255) 
+AS
+BEGIN
+	declare @rev_str as varchar(255) 
+			, @i as int
+			, @res as varchar(255) 
+	set @rev_str = reverse(@fullObj_name ) 
+	set @i = charindex('.', @rev_str) 
+	
+	if @i = 0 
+		set @res = null 
+	else 
+		set @res =  substring( @fullObj_name, 1, len( @fullObj_name) - @i ) 
+	return @res 
+END
+
+
+
+
+
+
+
+
+
+
+
+GO
+print '-- 32. split'
+IF object_id('[util].[split]' ) is not null 
+  DROP FUNCTION [util].[split] 
+GO
+	  
+	  
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-01 BvdB splits strings. Keeps string together when surrounded by [ ] 
+CREATE TYPE SplitListType AS TABLE 	(item VARCHAR(8000), i int)
+select * from util.split('AAP,NOOT', ',')
+select * from util.split('[AAP,NOOT],VIS,[NOOT,MIES],OLIFANT', ',')
+*/
+CREATE  FUNCTION [util].[split](
+    @s VARCHAR(8000) -- List of delimited items
+  , @del VARCHAR(16) = ',' -- delimiter that separates items
+) RETURNS @List TABLE (item VARCHAR(8000), i int)
+BEGIN
+	DECLARE 
+		@item VARCHAR(8000)
+		, @i int =1
+		, @n int 
+		, @del_index int
+		, @bracket_index_open int
+		, @bracket_index_close int
+	
+	set @del_index = CHARINDEX(@del,@s,0)
+	set @bracket_index_open = CHARINDEX('[',@s,0)
+	WHILE @del_index <> 0 -- while there is a delimiter
+	BEGIN
+		if @del_index < @bracket_index_open or @bracket_index_open=0 -- delimeter occurs before [ or there is no [
+		begin 
+			set @n = @del_index-1
+			SELECT
+				@item=RTRIM(LTRIM(SUBSTRING(@s,1,@n))),
+				-- set @s= tail 
+				@s=RTRIM(LTRIM(SUBSTRING(@s,@del_index+LEN(@del),LEN(@s)-@n)))
+		end 
+		else -- [ occurs before delimiter
+		begin
+			set @bracket_index_close = CHARINDEX(']',@s,@bracket_index_open)
+			set @n = case when @bracket_index_close=0 then len(@s) else  @bracket_index_close end
+			
+			SELECT
+				@item=RTRIM(LTRIM(SUBSTRING(@s,1,@n))),
+				-- set @s= tail 
+				@s=RTRIM(LTRIM(SUBSTRING(@s,@n+1,LEN(@s)-@n)))
+		end
+		IF LEN(@item) > 0
+		begin
+			INSERT INTO @List SELECT @item, @i
+			set @i += 1
+		end 
+		set @del_index= CHARINDEX(@del,@s,0)
+		set @bracket_index_open= CHARINDEX('[',@s,0)
+	END
+	IF LEN(@s) > 0
+	 INSERT INTO @List SELECT @s , @i-- Put the last item in
+	RETURN
+END
+
+
+
+
+
+
+
+
+
+
+
+GO
+print '-- 33. ddl_clear'
+IF object_id('[dbo].[ddl_clear]' ) is not null 
+  DROP PROCEDURE [dbo].[ddl_clear] 
+GO
+	  
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-21 BvdB Beware: this will clear the entire BETL database (all non ms objects) !
+*/    
+CREATE procedure [dbo].[ddl_clear] @execute as bit = 0  as
+begin 
+	set nocount on 
+	declare @sql as varchar(max) =''
+	select @sql+= 'DROP '+
+	   case 
+	   when q.type ='P' then 'PROCEDURE' 
+	   when q.type='U' then 'TABLE'
+	   when q.type= 'V' then 'VIEW'
+	   when q.type= 'TT' then 'TYPE'
+	   else 'FUNCTION' end + ' ' + 
+	   fullname + '
+	;
+	'
+	from  (
+	select so.object_id, so.name , so.type,  quotename(s.name) + '.' + quotename(so.name)  fullname 
+	from sys.objects so
+	inner join sys.schemas s on so.schema_id = s.schema_id 
+	where     so.type in  ( 'U', 'V', 'P', 'IF' , 'FT', 'FS', 'FN', 'TF')
+						AND so.is_ms_shipped = 0
+     
+	union all 
+		SELECT null, name , 'TT' type ,name fullname
+		FROM sys.types WHERE is_table_type = 1 
+    ) q
+
+--select quotename(s.name) + '.' + quotename(so.name), so.type
+--from sys.objects so 
+--inner join sys.schemas s on so.schema_id = s.schema_id 
+--where   --  so.type in  ( 'U', 'V', 'P', 'IF' , 'FT', 'FS', 'FN')
+--						 so.is_ms_shipped = 0
+--order by 1
+				
+	if @execute = 1  
+	   exec(@sql) 
+	else 	
+		print @sql
+end
+
+
+
+
+
+
+
+
+
+
+GO
+print '-- 34. Batch_ext'
+IF object_id('[dbo].[Batch_ext]' ) is not null 
+  DROP VIEW [dbo].[Batch_ext] 
+GO
+	  
+create view dbo.Batch_ext as 
+select 
+b.[batch_id] 
+,b.[batch_name] 
+,b.[batch_start_dt] 
+,b.[batch_end_dt] 
+, s.status_name batch_status 
+, b.prev_batch_id
+, prev_b.batch_start_dt prev_batch_start_dt
+, prev_b.batch_end_dt prev_batch_end_dt
+, prev_s.status_name prev_batch_status 
+from dbo.Batch b
+inner join static.Status s on s.status_id = b.status_id
+left join dbo.Batch prev_b on b.prev_batch_id = prev_b.batch_id 
+left join static.Status prev_s on prev_s.status_id = prev_b.status_id
+
+
+
+
+
+
+
+
+
+
+
+GO
+print '-- 35. trim'
+IF object_id('[util].[trim]' ) is not null 
+  DROP FUNCTION [util].[trim] 
+GO
+	  
+/*------------------------------------------------------------------------------------------------
+-- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
+--------------------------------------------------------------------------------------------------
+-- 2017-01-21 BvdB remove left and right spaces and double and single quotes. 
+*/    
+CREATE FUNCTION [util].[trim]
+(
+	@s varchar(200)
+	, @return_null bit = 1 
+)
+RETURNS varchar(200)
+AS
+BEGIN
+	declare @result as varchar(max)= replace(replace(convert(varchar(200), ltrim(rtrim(@s))), '"', ''), '''' , '')
+	if @return_null =0 
+		return isnull(@result , '') 
+	return @result 
+END
+
+
+
+
+
+
+
+
+
+
 GO
 print '-- 36. Col_ext'
 IF object_id('[dbo].[Col_ext]' ) is not null 
@@ -2512,6 +2308,9 @@ SELECT *
 FROM vw_column
 WHERE column_id IN ( 1140) 
 */
+
+
+
 
 
 
@@ -2780,6 +2579,9 @@ end
 
 
 
+
+
+
 GO
 print '-- 38. create_jobs'
 IF object_id('[dbo].[create_jobs]' ) is not null 
@@ -2812,6 +2614,9 @@ select '''+ job_name + ''' as job_name
 	--print @sql 
 	exec [dbo].[exec_sql] @transfer_id, @sql
 end
+
+
+
 
 
 
@@ -2899,6 +2704,9 @@ begin
 	-- standard BETL footer code... 
 	exec dbo.log @transfer_id, 'footer', '? ?(?) ', @proc_name , @obj_name, @obj_type_id
 end
+
+
+
 
 
 
@@ -3105,6 +2913,9 @@ END
 
 
 
+
+
+
 GO
 print '-- 41. create_view'
 IF object_id('[dbo].[create_view]' ) is not null 
@@ -3245,6 +3056,9 @@ SET @refresh_sql = '
 	exec dbo.log @transfer_id, 'footer', 'DONE ? ? ? ?', @proc_name , @trg_obj_name, @transfer_id
 	-- END standard BETL footer code... 
 END
+
+
+
 
 
 
@@ -3394,10 +3208,13 @@ INSERT [static].[Version] ([major_version], [minor_version], [build], build_dt) 
 GO
 	'
 	exec [dbo].[ddl_other]
-	exec [dbo].[ddl_content]
+	exec [dbo].[ddl_static]
 	set nocount on 
 	print '--END BETL Release version ' + @version_str
 end
+
+
+
 
 
 
@@ -3565,6 +3382,9 @@ GO
 		set @i+=1
 	end
 end
+
+
+
 
 
 
@@ -3884,6 +3704,9 @@ end
 
 
 
+
+
+
 GO
 print '-- 45. get_obj_id'
 IF object_id('[dbo].[get_obj_id]' ) is not null 
@@ -4005,6 +3828,9 @@ END
 
 
 
+
+
+
 GO
 print '-- 46. get_prop'
 IF object_id('[dbo].[get_prop]' ) is not null 
@@ -4029,6 +3855,9 @@ begin
 	Set @obj_id = dbo.obj_id(@fullObj_name, @scope) 
 	return dbo.get_prop_obj_id(@prop, @obj_id) 
 end
+
+
+
 
 
 
@@ -4098,6 +3927,9 @@ begin
 	where seq_nr = 1
 	return @res
 end
+
+
+
 
 
 
@@ -4205,6 +4037,9 @@ end
 
 
 
+
+
+
 GO
 print '-- 49. guess_entity_name'
 IF object_id('[dbo].[guess_entity_name]' ) is not null 
@@ -4237,6 +4072,9 @@ BEGIN
 	WHERE column_id = @foreignCol_id  
 	RETURN @res 
 END
+
+
+
 
 
 
@@ -4334,6 +4172,9 @@ END
 
 
 
+
+
+
 GO
 print '-- 51. guess_prefix'
 IF object_id('[dbo].[guess_prefix]' ) is not null 
@@ -4380,6 +4221,9 @@ BEGIN
 	-- Return the result of the function
 	RETURN @prefix
 END
+
+
+
 
 
 
@@ -4480,6 +4324,9 @@ END
 
 
 
+
+
+
 GO
 print '-- 53. log_error'
 IF object_id('[dbo].[log_error]' ) is not null 
@@ -4509,8 +4356,12 @@ BEGIN
 		,@sp_name as varchar(255) = object_name(@@PROCID)
 	select @batch_id = batch_id from dbo.Transfer where transfer_id = @transfer_id 
 	
-	set @msg = 'Error: '+ convert(varchar(255), isnull(@msg,'')) 
+	set @msg = '-- Error: '+ convert(varchar(255), isnull(@msg,'')) 
 	print @msg
+
+	insert into dbo.Transfer_log(log_dt, msg, transfer_id,log_type_id)
+	values( getdate(), @msg, @transfer_id, 50) 
+
 --	exec dbo.log @transfer_id, 'header', '?(?) severity ? ?', @sp_name ,@transfer_id, @severity, @msg
     INSERT INTO [dbo].[Error]([error_code],[error_msg],[error_line],[error_procedure],[error_severity],[transfer_id]) 
     VALUES (
@@ -4529,11 +4380,12 @@ BEGIN
     where batch_id = @batch_id
        
 --	exec dbo.log @transfer_id, 'ERROR' , @msg
-	insert into dbo.Transfer_log(log_dt, msg, transfer_id,log_type_id)
-	values( getdate(), @msg, @transfer_id, 50) 
 	
    footer:
 END
+
+
+
 
 
 
@@ -4579,6 +4431,9 @@ inner join dbo.obj_ext dep on obj_dep.to_obj_id = dep.obj_id
 
 
 
+
+
+
 GO
 print '-- 55. Obj_transfer'
 IF object_id('[dbo].[Obj_transfer]' ) is not null 
@@ -4600,6 +4455,9 @@ where
 and obj_type in ('view', 'table') 
 and [schema] in ( 'idv', 'rdv') 
 --order by [schema], o.scope, full_obj_name
+
+
+
 
 
 
@@ -4711,6 +4569,9 @@ end
 
 
 
+
+
+
 GO
 print '-- 57. Prop_ext'
 IF object_id('[dbo].[Prop_ext]' ) is not null 
@@ -4732,6 +4593,9 @@ INNER JOIN static.Property AS p ON o.obj_type = 'table' AND p.apply_table = 1 OR
 						 OR o.obj_type = 'user' AND p.apply_user = 1 
 LEFT OUTER JOIN
                          dbo.Property_Value AS pv ON pv.property_id = p.property_id AND pv.obj_id = o.obj_id
+
+
+
 
 
 
@@ -4775,6 +4639,7 @@ CREATE PROCEDURE [dbo].[push]
 	, @template_id as smallint=null
 	, @scope as varchar(255) = null 
 	, @transfer_id as int = 0 -- see logging hierarchy above.
+	, @async as bit=0 -- run asynchronously 
 AS
 BEGIN
 	begin try 
@@ -5735,7 +5600,7 @@ set @rec_cnt_new =@@rowcount
 	EXEC util.apply_params @sql2 output, @p
 	EXEC util.apply_params @sql_delete_detection output, @p
 	set @sql+= @sql2
-	exec @result = dbo.exec_sql @transfer_id, @sql 
+	exec @result = dbo.exec_sql @transfer_id=@transfer_id, @sql=@sql,  @async=@async
 	if @result <> 0 
 		goto footer
 	exec @result = dbo.exec_sql @transfer_id, @sql_delete_detection
@@ -5754,6 +5619,7 @@ set @rec_cnt_new =@@rowcount
 			, @batch_id=@batch_id
 			, @template_id = 9 -- only sat
 			, @scope =@scope
+			, @async= @async
 --			, @transfer_id=@transfer_id
 	if @template_id IN ( 10)  -- Datavault Link Sat (CDC and delete detection)
 		exec @result = [dbo].[push]
@@ -5762,6 +5628,7 @@ set @rec_cnt_new =@@rowcount
 			, @template_id = 11 -- only sat
 			, @scope =@scope
 --			, @transfer_id=@transfer_id
+			, @async= @async
 
 	if @template_id IN ( 4)  -- Truncate insert -> create stgh view
 		exec @result = [dbo].[push]
@@ -5769,6 +5636,7 @@ set @rec_cnt_new =@@rowcount
 			, @batch_id=@batch_id
 			, @template_id = 5 -- only sat
 			, @scope = @scope -- set current schema as scope
+			, @async= @async
 --			, @transfer_id=@transfer_id
 		-- standard BETL footer code... 
    footer:
@@ -5805,6 +5673,9 @@ set @rec_cnt_new =@@rowcount
 		
    return @result 
 END
+
+
+
 
 
 
@@ -5878,7 +5749,7 @@ BEGIN
 				<scope_sql>
 				and full_obj_name like "<full_obj_names>" ESCAPE "\"
 		) 
-		select @sql+= ''	exec <betl>.dbo.push @full_obj_name=''''''+ q.full_obj_name  + '''''', @batch_id =<batch_id>
+		select @sql+= ''	exec <betl>.dbo.push @full_obj_name=''''''+ q.full_obj_name  + '''''', @batch_id =<batch_id>, @async=1
 ''
 		from q
 		
@@ -5925,6 +5796,9 @@ BEGIN
 	exec dbo.log @transfer_id, 'footer', 'DONE ? ? scope ? transfer_id ?', @proc_name , @full_obj_names, @scope, @transfer_id
 	return @result
 end
+
+
+
 
 
 
@@ -6446,6 +6320,9 @@ END
 
 
 
+
+
+
 GO
 print '-- 61. reset_col'
 IF object_id('[dbo].[reset_col]' ) is not null 
@@ -6531,6 +6408,9 @@ end
 
 
 
+
+
+
 GO
 print '-- 62. schema_name'
 IF object_id('[dbo].[schema_name]' ) is not null 
@@ -6557,6 +6437,9 @@ BEGIN
 	where [obj_id] = @schema_id
 	return @res 
 END
+
+
+
 
 
 
@@ -6831,6 +6714,9 @@ END
 
 
 
+
+
+
 GO
 print '-- 64. set_scope'
 IF object_id('[dbo].[set_scope]' ) is not null 
@@ -6882,6 +6768,9 @@ begin
 		exec dbo.log @transfer_id, 'footer', 'DONE ? ? ', @proc_name , @full_obj_name, @scope
 	-- END standard BETL footer code... 
 end
+
+
+
 
 
 
@@ -6955,6 +6844,9 @@ end
 
 
 
+
+
+
 GO
 print '-- 66. udf_max3'
 IF object_id('[util].[udf_max3]' ) is not null 
@@ -6977,6 +6869,9 @@ as
 begin
 	return util.udf_max(dbo.udf_max(@a, @b) , @c) 
 end
+
+
+
 
 
 
@@ -7016,6 +6911,9 @@ end
 
 
 
+
+
+
 GO
 print '-- 68. dec_nesting'
 IF object_id('[dbo].[dec_nesting]' ) is not null 
@@ -7046,25 +6944,35 @@ end
 
 
 
+
+
+
 GO
 print '-- 69. exec_sql'
 IF object_id('[dbo].[exec_sql]' ) is not null 
   DROP PROCEDURE [dbo].[exec_sql] 
 GO
-	  
+
+
+
 /*------------------------------------------------------------------------------------------------
 -- BETL, meta data driven ETL generation, licensed under GNU GPL https://github.com/basvdberg/BETL 
 --------------------------------------------------------------------------------------------------
 -- 2017-01-01 BvdB execute and log sql statement ( if exec_sql = 1) 
+exec betl.dbo.setp 'log_level', 'verbose'
 declare @result as int=0
-exec @result = dbo.exec_sql 'select getdate()'
+exec @result = dbo.exec_sql 0, 'WAITFOR DELAY ''00:01:02''  ', 'tempdb', 1
+
+--exec @result = dbo.exec_sql 0, 'select db_name()', 'tempdb', 1
+exec @result = dbo.exec_sql 0, 'select db_name()'
 print @result 
 -- =============================================
 */
 CREATE PROCEDURE [dbo].[exec_sql]
 	@transfer_id as int =0 
-	, @sql as varchar(max)
+	, @sql as nvarchar(max)
 	, @trg_db as varchar(255) =null 
+	, @async bit =0 -- set to 1 to run asynchronously 
 AS
 BEGIN
 	SET NOCOUNT ON;
@@ -7075,46 +6983,212 @@ BEGIN
 			, @min_log_level_id smallint
 			, @exec_sql bit
 			, @result as int =0
-			, @nsql nvarchar(max) = @sql 
 			, @msg as varchar(255) = 'error in exec_sql'
 			, @sev as int = 15
 			, @number as int =0
-	--exec dbo.get_var 'log_level_id', @log_level_id output
-	--if @log_level_id is null 
-	--	set @log_level_id= 30 -- info 
-	--exec dbo.get_var 'nesting', @nesting output
-	--if @nesting is null 
-	--	set @nesting=0
+			, @db_exec nvarchar(1000)
+			, @proc_max_cnt as int = 0 
+			, @cnt_proc as int = 0 
+			, @category_id as int 
+			, @cnt_procs as int
+			, @proc_name_pattern as varchar(255) = 'betl_proc_' -- +convert(varchar(255), @transfer_id) 
+			, @wait_time_sec as int 
+			, @proc_max_wait_time_min as int 
+			, @proc_max_wait_time_sec as int 
+			, @job_id as uniqueidentifier 
+			, @job_name as varchar(255) 
+			, @tmp_sql as varchar(max) 
+			, @proc_polling_interval_sec as int 
+			, @time_str as varchar(50) 
+			, @proc_dead_time_sec as int 
+	
 	exec dbo.getp 'exec_sql', @exec_sql output
 	if @exec_sql is null 
 		set @exec_sql=1
+
+	if @trg_db is null 
+		set @trg_db = db_name()
+
 	exec dbo.log @transfer_id, 'sql', @sql -- whether sql is logged is determined in usp log
-	--if @log_level_id>40 -- debug and verbose
-	--	if not @nesting>1 -- for debug and verbose -> only exec nesting>1 
-	--		return
-	--	return -- don
-	if @exec_sql =1 and @trg_db is null 
+
+	if @exec_sql =1 
 	begin
 		begin try
-			exec @result = sys.sp_executesql @nsql
+			SET @db_exec = @trg_db+ '.sys.sp_executesql';
+			if @async =0
+				exec @result = @db_exec @sql
+				--exec @result = @sql 
+			else
+			begin -- @async =1
+				-- how many concurrent processes / jobs. default 4 
+				exec dbo.getp 'proc_max_cnt', @proc_max_cnt output
+				-- how long should we wait for a proc to finish when proc_max_cnt is reached. default 1 minute
+				-- in other words. When proc_max_cnt are running simultaneously. How long will it take for a slot to come free. 
+				exec dbo.getp 'proc_max_wait_time_min', @proc_max_wait_time_min output
+				set @proc_max_wait_time_sec = @proc_max_wait_time_min * 60
+				-- wait polling interval. How long till we check again. range: 1-59 
+				exec dbo.getp 'proc_polling_interval_sec', @proc_polling_interval_sec output
+				set @time_str = '00:00:'+convert(varchar(2), @proc_polling_interval_sec) ;  
+				-- delete jobs that are created more than @proc_dead_time_sec ago and are not running. 
+				-- warning: do not set this too low or else new jobs that are being setup are deleted as well. 
+				exec dbo.getp 'proc_dead_time_sec', @proc_dead_time_sec output
+				
+				if isnull(@proc_max_cnt,0) <=0 
+					goto footer
+
+				-- make sure that the job category exists 
+				select @category_id = category_id from msdb.dbo.syscategories where category_class = 1 and category_type = 1 and name ='betl'
+				if @category_id is null 
+					exec msdb.dbo.sp_add_category @class = 'job', @type = 'local', @name = 'betl'
+			    select @category_id = category_id from msdb.dbo.syscategories where category_class = 1 and category_type = 1 and name ='betl'
+				if @category_id is null 
+				begin 
+					exec dbo.log @transfer_id, 'ERROR', 'cannot create job category betl'
+					goto footer
+				end 
+					
+				-- select *from msdb.dbo.syscategories  where category_class = 1 and category_type = 1 and name ='betl'
+			    -- EXEC msdb.dbo.sp_delete_category  @class=N'job',  @name=N'betl' ;  
+
+				-- cleanup any not running jobs. 
+				-- i.e. jobs that are created more than a minute ago and are not running. 
+				-- jobs are created in a transaction, so there should not be a partially created job
+				-- but to be sure we added a check on the last step ( set servername). 
+				set @tmp_sql = '' 
+				select @tmp_sql += 'exec msdb.dbo.sp_delete_job @job_id='''+ convert(varchar(255), j.job_id) + '''' + @nl
+				from msdb.dbo.sysjobs j
+				inner join msdb.sys.servers s on j.originating_server_id = s.server_id
+				left join msdb.dbo.sysjobactivity AS a ON a.job_id = j.job_id
+				where category_id = @category_id and j.name like @proc_name_pattern+ '%'
+				and not ( a.start_execution_date IS not NULL and a.stop_execution_date IS NULL)  -- not running 
+				and datediff(second, j.date_created, getdate()) > @proc_dead_time_sec
+				and s.name = @@servername
+
+				if isnull(@tmp_sql,'')  <> ''
+				begin
+					exec dbo.log @transfer_id, 'info', @tmp_sql
+					exec [dbo].[exec_sql] @transfer_id, @tmp_sql, 'msdb'
+				end
+				-- try to create job, but wait for a proc to finish when @cnt_procs >= @proc_max_cnts (maximum @proc_max_wait_time_min seconds)
+				set @wait_time_sec = 0 
+				select @cnt_procs = count(*)  
+				from msdb.dbo.sysjobs
+				where category_id = @category_id and name like @proc_name_pattern + '%'
+
+				while @wait_time_sec < @proc_max_wait_time_sec and @cnt_procs >= @proc_max_cnt
+				begin 
+					exec dbo.log @transfer_id, 'PROGRESS', 'Waiting ? seconds for a process to finish', @proc_polling_interval_sec
+					RAISERROR ('Waiting...', 0, 1) WITH NOWAIT
+					
+					WAITFOR DELAY @time_str 
+					set @wait_time_sec += @proc_polling_interval_sec; 
+
+					select @cnt_procs = count(*)  
+					from msdb.dbo.sysjobs
+					where category_id = @category_id and name like @proc_name_pattern+ '%'
+				end 
+
+				exec dbo.log @transfer_id, 'INFO', 'procs ?,max ?,wait time ?,max ?, polling_interval ?', @cnt_procs, @proc_max_cnt, @wait_time_sec , @proc_max_wait_time_sec, @proc_polling_interval_sec
+				
+				if @cnt_procs < @proc_max_cnt
+				begin
+
+					-- create sql agent job 
+					set @job_name = @proc_name_pattern  + 	format(getdate(), 'yyyy_MM_dd_HH_mm_ss_') + convert(varchar(255), @transfer_id) + '_'+convert(Varchar(255), newid() ) 
+					exec dbo.log @transfer_id, 'INFO', 'create job ?', @job_name 
+
+					BEGIN TRANSACTION
+					EXEC @result =  msdb.dbo.sp_add_job @job_name=@job_name, 
+							@enabled=1, 
+							@notify_level_eventlog=0, 
+							@notify_level_email=0, 
+							@notify_level_netsend=0, 
+							@notify_level_page=0, 
+							@delete_level=0, 
+							@description='betl auto created job',
+							@category_name='betl', 
+							@job_id = @job_id OUTPUT
+					IF (@@ERROR <> 0 OR @result <> 0) 
+					begin
+						exec dbo.log @transfer_id, 'ERROR', 'Error creating job ? , ?', @job_name, @cnt_procs
+					end
+					else
+					begin 
+						exec dbo.log @transfer_id, 'INFO', 'Job ?(?) created. Other procs running: ?', @job_name, @job_id , @cnt_procs
+					end 
+					
+					-- for some reason jobs. skip the set options of e.g. views. 
+					-- this may result in errors like: SELECT failed because the following SET options have incorrect settings: 'QUOTED_IDENTIFIER'. 
+					set @sql = 'SET ANSI_NULLS ON' + @nl + 'GO'+ @nl + 'SET QUOTED_IDENTIFIER ON'+ @nl+ 'GO' + @nl+ @sql 
+
+					EXEC @result = msdb.dbo.sp_add_jobstep @job_id=@job_id, @step_name=N'exec betl sql', 
+						@step_id=1, 
+						@cmdexec_success_code=0, 
+						@subsystem = N'TSQL',  
+						@command = @sql,   
+    					@retry_attempts=0, 
+						@retry_interval=0, 
+						@os_run_priority=0, 
+						@database_name=@trg_db , 
+						@on_success_action=3, -- go to next step
+						@on_fail_action=3, -- also go to next step
+						@flags=0
+					IF (@@ERROR <> 0 OR @result <> 0) 
+					begin
+						exec dbo.log @transfer_id, 'ERROR', 'Error creating job step exec sql for job ? ', @job_id
+					end
+
+					set @tmp_sql = 'exec msdb.dbo.sp_delete_job @job_id=''' + convert(varchar(255),@job_id)+''''
+					EXEC @result = msdb.dbo.sp_add_jobstep @job_id=@job_id, @step_name=N'delete myself', 
+						@step_id=2, 
+						@cmdexec_success_code=0, 
+						@subsystem = N'TSQL',  
+						@command = @tmp_sql,
+    					@retry_attempts=0, 
+						@retry_interval=0, 
+						@os_run_priority=0, 
+						@database_name='master' , 
+						@flags=0
+					IF (@@ERROR <> 0 OR @result <> 0) 
+					begin
+						exec dbo.log @transfer_id, 'ERROR', 'Error creating job step to delete myself for job ? ', @job_id
+					end
+
+					EXEC @result =  msdb.dbo.sp_add_jobserver @job_id=@job_id, 
+						@server_name = @@servername
+
+					COMMIT TRANSACTION 
+					-- start the job
+				
+					EXEC @result = msdb.dbo.sp_start_job @job_id=@job_id
+					if @result<> 0 
+						exec betl.dbo.log @transfer_id, 'error', 'error starting job ? using msdb.dbo.sp_start_job. note that sp_start_job errors cannot be caught, but are printed when executed from ssms', @job_id
+				end 
+				else
+				begin 
+					exec dbo.log @transfer_id, 'ERROR', 'Waited for ? seconds, but no process finished', @wait_time_sec
+					goto footer
+				end
+
+			end -- @async =1
+
+	
+			footer:
+
+
 		end try 
 		begin catch
 				set @msg  =ERROR_MESSAGE() 
 				set @sev = ERROR_SEVERITY()
 				set @number = ERROR_NUMBER() 
+				IF @@trancount > 0 ROLLBACK TRANSACTION
+				print 'catch'
 				exec dbo.log_error @transfer_id=@transfer_id, @msg=@msg,  @severity=@sev, @number=@number
 				if @result =0 
 					set @result = -1
 		end catch 
 	end
-	if @exec_sql =1 and @trg_db is not null 
-	begin 
-		declare @DBExec nvarchar(255)
-		SET @DBExec = @trg_db+ '.sys.sp_executesql';
-		
-		exec @result = @DBExec @nsql
-	end 
-	
+
 	if @result is null 
 		set @result =-2
 	
@@ -7122,6 +7196,9 @@ BEGIN
 		RAISERROR(@msg , @sev ,@number)  WITH NOWAIT
 	return @result 
 END
+
+
+
 
 
 
@@ -7185,6 +7262,9 @@ end
 
 
 
+
+
+
 GO
 print '-- 71. inc_nesting'
 IF object_id('[dbo].[inc_nesting]' ) is not null 
@@ -7207,6 +7287,9 @@ begin
 	set @nesting = isnull(@nesting+1 , 1) 
 	exec dbo.setp 'nesting', @nesting
 end
+
+
+
 
 
 
@@ -7367,6 +7450,9 @@ END
 
 
 
+
+
+
 GO
 print '-- 73. my_info'
 IF object_id('[dbo].[my_info]' ) is not null 
@@ -7410,6 +7496,9 @@ END
 
 
 
+
+
+
 GO
 print '-- 74. onError'
 IF object_id('[dbo].[onError]' ) is not null 
@@ -7439,6 +7528,9 @@ begin
 	footer: 
 	
 end
+
+
+
 
 
 
@@ -7499,6 +7591,9 @@ BEGIN
 	exec dbo.log @transfer_id, 'footer', 'DONE ? ? ? ?', @proc_name , @full_obj_name, @obj_tree_depth, @transfer_id
 	-- END standard BETL footer code... 
 END
+
+
+
 
 
 
@@ -7580,6 +7675,9 @@ end
 
 
 
+
+
+
 GO
 print '-- 77. set_target_schema'
 IF object_id('[dbo].[set_target_schema]' ) is not null 
@@ -7611,6 +7709,9 @@ begin
 	exec dbo.log @transfer_id, 'footer', 'DONE ? ? , ? (?)', @proc_name , @full_obj_name, @target_schema_name, @schema_id 
 	-- END standard BETL footer code... 
 end 
+
+
+
 
 
 
@@ -7721,6 +7822,9 @@ end
 
 
 
+
+
+
 GO
 print '-- 79. sp_start'
 IF object_id('[dbo].[sp_start]' ) is not null 
@@ -7784,6 +7888,9 @@ begin
 		RAISERROR(@msg , 15 , 0)  WITH NOWAIT
 	end 
 end
+
+
+
 
 
 
@@ -7934,6 +8041,9 @@ begin
 	end 
 	exec dbo.log 0, 'footer', '? ?(?)..? (?)', @proc_name , @batch_name, @batch_id, @prev_batch_id, @status
 end
+
+
+
 
 
 
@@ -8114,6 +8224,9 @@ end
 
 
 
+
+
+
 GO
 print '-- 82. debug'
 IF object_id('[dbo].[debug]' ) is not null 
@@ -8141,6 +8254,9 @@ BEGIN
     footer:
 	exec my_info
 END
+
+
+
 
 
 
@@ -8187,6 +8303,9 @@ end
 
 
 
+
+
+
 GO
 print '-- 84. end_batch'
 IF object_id('[dbo].[end_batch]' ) is not null 
@@ -8222,6 +8341,9 @@ begin
 	and status_id <> 200 -- never overwrite error batch status
 	footer:
 end
+
+
+
 
 
 
@@ -8304,6 +8426,9 @@ end
 
 
 
+
+
+
 GO
 print '-- 86. process_stack'
 IF object_id('[dbo].[process_stack]' ) is not null 
@@ -8337,6 +8462,9 @@ begin
 end
 
  
+
+
+
 
 
 
@@ -8390,6 +8518,9 @@ end
 
 
 
+
+
+
 GO
 print '-- 88. reset'
 IF object_id('[dbo].[reset]' ) is not null 
@@ -8423,6 +8554,9 @@ begin
 	exec dbo.log @transfer_id, 'footer', 'DONE ? ', @proc_name 
 	-- END standard BETL footer code... 
 end
+
+
+
 
 
 
@@ -8482,6 +8616,9 @@ begin
 		
 	footer: 
 end
+
+
+
 
 
 
@@ -8550,6 +8687,9 @@ end
 
 
 
+
+
+
 GO
 
 -- begin ddl_content
@@ -8581,7 +8721,6 @@ GO
 INSERT [static].[Column_type] ([column_type_id], [column_type_name], [column_type_description], [record_dt], [record_user]) VALUES (110, N'nat_fkey', N'Natural foreign key (e.g. create_user_key)', CAST(N'2015-10-20 13:22:19.590' AS DateTime), N'bas')
 GO
 INSERT [static].[Column_type] ([column_type_id], [column_type_name], [column_type_description], [record_dt], [record_user]) VALUES (200, N'sur_pkey', N'Surrogate primary key (e.g. user_id)', CAST(N'2015-10-20 13:22:19.590' AS DateTime), N'bas')
-
 GO
 INSERT [static].[Column_type] ([column_type_id], [column_type_name], [column_type_description], [record_dt], [record_user]) VALUES (210, N'sur_fkey', N'Surrogate foreign key (e.g. create_user_id)', CAST(N'2015-10-20 13:22:19.590' AS DateTime), N'bas')
 GO
@@ -8620,47 +8759,52 @@ INSERT [dbo].[Prefix] ([prefix_name], [default_template_id]) VALUES (N'stgh', 8)
 GO
 INSERT [dbo].[Prefix] ([prefix_name], [default_template_id]) VALUES (N'stgl', 10)
 GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (10, N'target_schema_id', N'used for deriving target table', N'db_object', NULL, 1, 1, 1, 1, NULL, NULL, CAST(N'2015-08-31T13:18:22.073' AS DateTime), N'My_PC\BAS')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (15, N'template_id', N'which ETL template to use (see def.Template) ', N'db_object', NULL, 0, 0, 1, 1, NULL, NULL, CAST(N'2017-09-07T09:12:49.160' AS DateTime), N'My_PC\BAS')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (20, N'has_synonym_id', N'apply syn pattern (see biblog.nl)', N'db_object', NULL, 0, 0, 0, 1, NULL, NULL, CAST(N'2015-08-31T13:18:56.070' AS DateTime), N'My_PC\BAS')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (30, N'has_record_dt', N'add this column (insert date time) to all tables', N'db_object', NULL, 0, 0, 0, 0, 1, NULL, CAST(N'2015-08-31T13:19:09.607' AS DateTime), N'My_PC\BAS')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (40, N'has_record_user', N'add this column (insert username ) to all tables', N'db_object', NULL, 0, 0, 1, 0, 1, NULL, CAST(N'2015-08-31T13:19:15.000' AS DateTime), N'My_PC\BAS')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (50, N'is_linked_server', N'Should a server be accessed like a linked server (e.g. via openquery). Used for SSAS servers.', N'db_object', NULL, NULL, NULL, NULL, NULL, 1, NULL, CAST(N'2015-08-31T17:17:37.830' AS DateTime), N'My_PC\BAS')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (60, N'date_datatype_based_on_suffix', N'if a column ends with the suffix _date then it''s a date datatype column (instead of e.g. datetime)', N'db_object', N'1', NULL, NULL, NULL, NULL, 1, NULL, CAST(N'2015-09-02T13:16:15.733' AS DateTime), N'My_PC\BAS')
+GO
 
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (10, N'target_schema_id', N'used for deriving target table', N'db_object', NULL, 1, 1, 1, 1, NULL, NULL, CAST(N'2015-08-31 13:18:22.073' AS DateTime), N'My_PC\BAS')
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (15, N'template_id', N'which ETL template to use (see def.Template) ', N'db_object', NULL, 0, 0, 1, 1, NULL, NULL, CAST(N'2017-09-07 09:12:49.160' AS DateTime), N'My_PC\BAS')
-
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (20, N'has_synonym_id', N'apply syn pattern (see biblog.nl)', N'db_object', NULL, 0, 0, 0, 1, NULL, NULL, CAST(N'2015-08-31 13:18:56.070' AS DateTime), N'My_PC\BAS')
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (30, N'has_record_dt', N'add this column (insert date time) to all tables', N'db_object', NULL, 0, 0, 0, 0, 1, NULL, CAST(N'2015-08-31 13:19:09.607' AS DateTime), N'My_PC\BAS')
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (40, N'has_record_user', N'add this column (insert username ) to all tables', N'db_object', NULL, 0, 0, 1, 0, 1, NULL, CAST(N'2015-08-31 13:19:15.000' AS DateTime), N'My_PC\BAS')
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (50, N'is_linked_server', N'Should a server be accessed like a linked server (e.g. via openquery). Used for SSAS servers.', N'db_object', NULL, NULL, NULL, NULL, NULL, 1, NULL, CAST(N'2015-08-31 17:17:37.830' AS DateTime), N'My_PC\BAS')
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (60, N'date_datatype_based_on_suffix', N'if a column ends with the suffix _date then it''s a date datatype column (instead of e.g. datetime)', N'db_object', N'1', NULL, NULL, NULL, NULL, 1, NULL, CAST(N'2015-09-02 13:16:15.733' AS DateTime), N'My_PC\BAS')
-GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (70, N'is_localhost', N'This server is localhost. For performance reasons we don''t want to access localhost via linked server as we would with external sources', N'db_object', N'0', NULL, NULL, NULL, NULL, 1, NULL, CAST(N'2015-09-24 16:22:45.233' AS DateTime), N'My_PC\BAS')
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (70, N'is_localhost', N'This server is localhost. For performance reasons we don''t want to access localhost via linked server as we would with external sources', N'db_object', N'0', NULL, NULL, NULL, NULL, 1, NULL, CAST(N'2015-09-24T16:22:45.233' AS DateTime), N'My_PC\BAS')
 GO
 INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (80, N'recreate_tables', N'This will drop and create tables (usefull during initial development)', N'db_object', NULL, NULL, NULL, 1, 1, NULL, NULL, NULL, NULL)
 GO
-
 INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (90, N'prefix_length', N'This object name uses a prefix of certain length x. Strip this from target name. ', N'db_object', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL)
 GO
 INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (100, N'etl_meta_fields', N'etl_run_id, etl_load_dts, etl_end_dts,etl_deleted_flg,etl_active_flg,etl_data_source', N'db_object', N'1', NULL, NULL, 1, 1, NULL, NULL, NULL, NULL)
 GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (120, N'exec_sql', N'set this to 0 to print the generated sql instead of executing it. usefull for debugging', N'user', N'1', NULL, NULL, NULL, NULL, NULL, 1, CAST(N'2017-02-02 15:04:49.867' AS DateTime), N'')
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (120, N'exec_sql', N'set this to 0 to print the generated sql instead of executing it. usefull for debugging', N'user', N'1', NULL, NULL, NULL, NULL, NULL, 1, CAST(N'2017-02-02T15:04:49.867' AS DateTime), N'')
 GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (130, N'log_level', N'controls the amount of logging. ERROR,INFO, DEBUG, VERBOSE', N'user', N'INFO', NULL, NULL, NULL, NULL, NULL, 1, CAST(N'2017-02-02 15:06:12.167' AS DateTime), N'')
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (130, N'log_level', N'controls the amount of logging. ERROR,INFO, DEBUG, VERBOSE', N'user', N'INFO', NULL, NULL, NULL, NULL, NULL, 1, CAST(N'2017-02-02T15:06:12.167' AS DateTime), N'')
 GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (140, N'nesting', N'used by dbo.log in combination with log_level  to determine wheter or not to print a message', N'user', N'0', NULL, NULL, NULL, NULL, NULL, 1, CAST(N'2017-02-02 15:08:02.967' AS DateTime), N'')
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (140, N'nesting', N'used by dbo.log in combination with log_level  to determine wheter or not to print a message', N'user', N'0', NULL, NULL, NULL, NULL, NULL, 1, CAST(N'2017-02-02T15:08:02.967' AS DateTime), N'')
 GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (150, N'delete_detection', N'detect deleted records', N'db_object', N'1', 1, 1, 1, NULL, NULL, NULL, CAST(N'2017-12-19 14:08:52.533' AS DateTime), N'company\991371')
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (150, N'delete_detection', N'detect deleted records', N'db_object', N'1', 1, 1, 1, NULL, NULL, NULL, CAST(N'2017-12-19T14:08:52.533' AS DateTime), N'company\991371')
 GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (160, N'use_key_domain', N'adds key_domain_id to natural primary key of hubs to make key unique for a particular domain. push can derive key_domain e.g.  from source system name', N'db_object', NULL, 1, 1, NULL, NULL, NULL, NULL, CAST(N'2018-01-09 10:26:57.017' AS DateTime), N'company\991371')
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (160, N'use_key_domain', N'adds key_domain_id to natural primary key of hubs to make key unique for a particular domain. push can derive key_domain e.g.  from source system name', N'db_object', NULL, 1, 1, NULL, NULL, NULL, NULL, CAST(N'2018-01-09T10:26:57.017' AS DateTime), N'company\991371')
 GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (170, N'privacy_level', N'scale : normal, sensitive, personal', N'db_object', N'10', 1, 1, NULL, NULL, NULL, NULL, CAST(N'2018-04-09 16:38:43.057' AS DateTime), N'company\991371')
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (170, N'privacy_level', N'scale : normal, sensitive, personal', N'db_object', N'10', 1, 1, NULL, NULL, NULL, NULL, CAST(N'2018-04-09T16:38:43.057' AS DateTime), N'company\991371')
 GO
-INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (180, N'filter_delete_detection', N'custom filter for delete detection', N'db_object', NULL, 1, 1, NULL, NULL, NULL, NULL, CAST(N'2018-07-04 17:27:29.857' AS DateTime), N'company\991371')
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (180, N'filter_delete_detection', N'custom filter for delete detection', N'db_object', NULL, 1, 1, NULL, NULL, NULL, NULL, CAST(N'2018-07-04T17:27:29.857' AS DateTime), N'company\991371')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (190, N'proc_max_cnt', N'how many concurrent processes / jobs. default 4 ', N'user', N'4', NULL, NULL, NULL, NULL, NULL, 1, CAST(N'2019-01-23T17:20:03.690' AS DateTime), N'MicrosoftAccount\swjvdberg@outlook.com')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (200, N'proc_max_wait_time_min', N'how long should we wait for a proc to finish when proc_max_cnt is reached. default 10 minutes. please increase this value for big datasets!', N'user', N'10', NULL, NULL, NULL, NULL, NULL, 1, CAST(N'2019-01-25T12:27:24.543' AS DateTime), N'MicrosoftAccount\swjvdberg@outlook.com')
+GO
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (210, N'proc_polling_interval_sec', N'wait polling interval. How long till we check again. range: 1-59 . Too low might affect performance because every time we query  msdb.dbo.sysjobs', N'user', N'2', NULL, NULL, NULL, NULL, NULL, 1, CAST(N'2019-01-25T12:29:17.060' AS DateTime), N'MicrosoftAccount\swjvdberg@outlook.com')
 GO
 
+INSERT [static].[Property] ([property_id], [property_name], [description], [property_scope], [default_value], [apply_table], [apply_view], [apply_schema], [apply_db], [apply_srv], [apply_user], [record_dt], [record_user]) VALUES (220, N'proc_dead_time_sec', N'delete jobs that are created more than @proc_dead_time_sec ago and are not running. ', N'user', N'60', NULL, NULL, NULL, NULL, NULL, 1, CAST(N'2019-01-25T12:40:13.197' AS DateTime), N'MicrosoftAccount\swjvdberg@outlook.com')
+GO
 INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (1, N'truncate_insert', N'truncate_insert', NULL, NULL)
 GO
 INSERT [static].[Template] ([template_id], [template], [template_description], [record_dt], [record_name]) VALUES (2, N'drop_insert', N'drop_insert', NULL, NULL)
@@ -8713,6 +8857,9 @@ INSERT [static].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUE
 GO
 INSERT [static].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES (70, N'Step', 30)
 GO
+INSERT [static].[Log_type] ([log_type_id], [log_type], [min_log_level_id]) VALUES (80, N'Progress', 50)
+GO
+
 
 INSERT [static].[Server_type] ([server_type_id], [server_type], [compatibility]) VALUES (10, N'sql server', N'SQL Server 2012 (SP3) (KB3072779) - 11.0.6020.0 (X64)')
 GO
@@ -8723,4 +8870,5 @@ values ( 50, 'LOCALHOST')
 GO
 exec dbo.setp 'is_localhost', 1 , 'LOCALHOST'
 -- end of ddl_content
---END BETL Release version 3.1.28 , date: 2018-12-19 13:51:37
+--END BETL Release version 3.2.1 , date: 2019-01-25 13:52:33
+
