@@ -58,10 +58,16 @@ BETL uses extensive logging, so you can see what happens. Debugging is also easy
 Please visit our [wiki](https://github.com/basvdberg/betl/wiki) for getting started. 
 go directly to [getting started](https://github.com/basvdberg/betl/wiki/Getting-started)
 
+# ERD of betl meta data
+
+
 ## Latest news
 
+# pull
+The latest developments are now being done on a pull mechanism using topological sort using a-cyclic directed graphs ( a nice mathematical way of saying that we sort the order of processing using foreign key dependencies). This way we don't need to use datavault for the benefit of easier parralel processing. In Datavault you can process all hubs, sats and links simultaneously and in a 3NF database you have to determine the processing order. 
+
 # GDPR
-Currently I am working to integrate GDPR (general data protection regulation) reporting into betl. Because BETL is meta data based adding lineage is relatively easy, however this can be tricky when using stored procedures, views or ssis to transform your data. Nevertheless we have done a pretty good job at discovering most dependencies including SSAS Tabular Cube meta data and Active directory. (Send me an email for more info..)
+I am working to integrate GDPR (general data protection regulation) reporting into betl. Because BETL is meta data based adding lineage is relatively easy, however this can be tricky when using stored procedures, views or ssis to transform your data. Nevertheless we have done a pretty good job at discovering most dependencies including SSAS Tabular Cube meta data and Active directory. (Send me an email for more info..)
 
 # presentation at Bi-united September 2017 
 Have a look at our [presentation](http://slides.com/mr_bas/betl#/) at [Bi-united](http://www.bi-united.nl/)) 
