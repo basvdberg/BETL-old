@@ -60,7 +60,7 @@ go directly to [getting started](https://github.com/basvdberg/betl/wiki/Getting-
 
 # ERD of betl meta data
 
-![betl birds eye](https://github.com/basvdberg/BETL/blob/master/Documentation/BETL_Birds_eye.png)
+![betl birds eye](https://github.com/basvdberg/BETL/blob/master/Documentation/betl_erd.png)
 
 ## Latest news
 
