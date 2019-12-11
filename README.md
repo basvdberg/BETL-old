@@ -1,6 +1,10 @@
 # BETL 
 Find more about BETL here: http://www.etlautomation.com.
 
+Latest news
+
+I am currently working on migrating BETL to the Azure platform, based on Data factory and Azure SQL DB. In the next release I will split BETL into 2 components. A meta data repository and an ETL generation engine. Send me a message if you want to receive this pre-release. 
+
 Welcome to BETL, an open source ETL automation engine, written in 100% T-SQL (MS SQL Server). The main reasons for using BETL are:
 
  * It will improve your productivity considerably
