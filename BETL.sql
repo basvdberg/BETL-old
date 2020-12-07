@@ -79,79 +79,396 @@ GO
 -- end user defined tables
 -- create table [dbo].[Transfer_log]
 GO
-CREATE TABLE [dbo].[Transfer_log](	  [log_id] INT NOT NULL IDENTITY(1,1)	, [log_dt] DATETIME NULL DEFAULT(getdate())	, [msg] VARCHAR(MAX) NULL	, [transfer_id] INT NULL	, [log_level_id] INT NULL	, [log_type_id] INT NULL	, [exec_sql] BIT NULL	, CONSTRAINT [PK_log_id] PRIMARY KEY ([log_id] DESC))
+CREATE TABLE [dbo].[Transfer_log]
+(
+	  [log_id] INT NOT NULL IDENTITY(1,1)
+	, [log_dt] DATETIME NULL DEFAULT(getdate())
+	, [msg] VARCHAR(MAX) NULL
+	, [transfer_id] INT NULL
+	, [log_level_id] INT NULL
+	, [log_type_id] INT NULL
+	, [exec_sql] BIT NULL
+	, CONSTRAINT [PK_log_id] PRIMARY KEY ([log_id] DESC)
+)
+
 -- create table [dbo].[Error]
 GO
-CREATE TABLE [dbo].[Error](	  [error_id] INT NOT NULL IDENTITY(1,1)	, [error_code] INT NULL	, [error_msg] VARCHAR(5000) NULL	, [error_line] INT NULL	, [error_procedure] VARCHAR(255) NULL	, [error_procedure_id] VARCHAR(255) NULL	, [error_execution_id] VARCHAR(255) NULL	, [error_event_name] VARCHAR(255) NULL	, [error_severity] INT NULL	, [error_state] INT NULL	, [error_source] VARCHAR(255) NULL	, [error_interactive_mode] VARCHAR(255) NULL	, [error_machine_name] VARCHAR(255) NULL	, [error_user_name] VARCHAR(255) NULL	, [transfer_id] INT NULL	, [record_dt] DATETIME NULL DEFAULT(getdate())	, [record_user] VARCHAR(50) NULL	, CONSTRAINT [PK_error_id] PRIMARY KEY ([error_id] DESC))
+CREATE TABLE [dbo].[Error]
+(
+	  [error_id] INT NOT NULL IDENTITY(1,1)
+	, [error_code] INT NULL
+	, [error_msg] VARCHAR(5000) NULL
+	, [error_line] INT NULL
+	, [error_procedure] VARCHAR(255) NULL
+	, [error_procedure_id] VARCHAR(255) NULL
+	, [error_execution_id] VARCHAR(255) NULL
+	, [error_event_name] VARCHAR(255) NULL
+	, [error_severity] INT NULL
+	, [error_state] INT NULL
+	, [error_source] VARCHAR(255) NULL
+	, [error_interactive_mode] VARCHAR(255) NULL
+	, [error_machine_name] VARCHAR(255) NULL
+	, [error_user_name] VARCHAR(255) NULL
+	, [transfer_id] INT NULL
+	, [record_dt] DATETIME NULL DEFAULT(getdate())
+	, [record_user] VARCHAR(50) NULL
+	, CONSTRAINT [PK_error_id] PRIMARY KEY ([error_id] DESC)
+)
+
 -- create table [dbo].[Col_hist]
 GO
-CREATE TABLE [dbo].[Col_hist](	  [column_id] INT NOT NULL IDENTITY(1,1)	, [eff_dt] DATETIME NOT NULL	, [obj_id] INT NOT NULL	, [column_name] VARCHAR(64) NOT NULL	, [prefix] VARCHAR(64) NULL	, [entity_name] VARCHAR(64) NULL	, [foreign_column_id] INT NULL	, [ordinal_position] SMALLINT NULL	, [is_nullable] BIT NULL	, [data_type] VARCHAR(100) NULL	, [max_len] INT NULL	, [numeric_precision] INT NULL	, [numeric_scale] INT NULL	, [column_type_id] INT NULL	, [src_column_id] INT NULL	, [delete_dt] DATETIME NULL	, [record_dt] DATETIME NULL DEFAULT(getdate())	, [record_user] VARCHAR(50) NULL DEFAULT(suser_sname())	, [chksum] INT NOT NULL	, [transfer_id] INT NULL	, [part_of_unique_index] BIT NULL DEFAULT((0))	, CONSTRAINT [PK__Hst_column] PRIMARY KEY ([column_id] ASC, [eff_dt] DESC))CREATE UNIQUE NONCLUSTERED INDEX [IX_Unique__Column_obj_col_eff] ON [dbo].[Col_hist] ([obj_id] ASC, [column_name] ASC, [eff_dt] ASC)
+CREATE TABLE [dbo].[Col_hist]
+(
+	  [column_id] INT NOT NULL IDENTITY(1,1)
+	, [eff_dt] DATETIME NOT NULL
+	, [obj_id] INT NOT NULL
+	, [column_name] VARCHAR(64) NOT NULL
+	, [prefix] VARCHAR(64) NULL
+	, [entity_name] VARCHAR(64) NULL
+	, [foreign_column_id] INT NULL
+	, [ordinal_position] SMALLINT NULL
+	, [is_nullable] BIT NULL
+	, [data_type] VARCHAR(100) NULL
+	, [max_len] INT NULL
+	, [numeric_precision] INT NULL
+	, [numeric_scale] INT NULL
+	, [column_type_id] INT NULL
+	, [src_column_id] INT NULL
+	, [delete_dt] DATETIME NULL
+	, [record_dt] DATETIME NULL DEFAULT(getdate())
+	, [record_user] VARCHAR(50) NULL DEFAULT(suser_sname())
+	, [chksum] INT NOT NULL
+	, [transfer_id] INT NULL
+	, [part_of_unique_index] BIT NULL DEFAULT((0))
+	, CONSTRAINT [PK__Hst_column] PRIMARY KEY ([column_id] ASC, [eff_dt] DESC)
+)
+
+CREATE UNIQUE NONCLUSTERED INDEX [IX_Unique__Column_obj_col_eff] ON [dbo].[Col_hist] ([obj_id] ASC, [column_name] ASC, [eff_dt] ASC)
+
 -- create table [static].[Column_type]
 GO
-CREATE TABLE [static].[Column_type](	  [column_type_id] INT NOT NULL	, [column_type_name] VARCHAR(50) NULL	, [column_type_description] VARCHAR(255) NULL	, [record_dt] DATETIME NULL	, [record_user] VARCHAR(50) NULL	, CONSTRAINT [PK_Column_type] PRIMARY KEY ([column_type_id] ASC))
+CREATE TABLE [static].[Column_type]
+(
+	  [column_type_id] INT NOT NULL
+	, [column_type_name] VARCHAR(50) NULL
+	, [column_type_description] VARCHAR(255) NULL
+	, [record_dt] DATETIME NULL
+	, [record_user] VARCHAR(50) NULL
+	, CONSTRAINT [PK_Column_type] PRIMARY KEY ([column_type_id] ASC)
+)
+
 -- create table [dbo].[Prefix]
 GO
-CREATE TABLE [dbo].[Prefix](	  [prefix_name] VARCHAR(100) NOT NULL	, [default_template_id] INT NULL	, CONSTRAINT [PK_Prefix_1] PRIMARY KEY ([prefix_name] ASC))
+CREATE TABLE [dbo].[Prefix]
+(
+	  [prefix_name] VARCHAR(100) NOT NULL
+	, [default_template_id] INT NULL
+	, CONSTRAINT [PK_Prefix_1] PRIMARY KEY ([prefix_name] ASC)
+)
+
 -- create table [dbo].[Key_domain]
 GO
-CREATE TABLE [dbo].[Key_domain](	  [key_domain_name] VARCHAR(255) NOT NULL	, [key_domain_id] INT NOT NULL	, CONSTRAINT [PK_Key_domain] PRIMARY KEY ([key_domain_name] ASC))
+CREATE TABLE [dbo].[Key_domain]
+(
+	  [key_domain_name] VARCHAR(255) NOT NULL
+	, [key_domain_id] INT NOT NULL
+	, CONSTRAINT [PK_Key_domain] PRIMARY KEY ([key_domain_name] ASC)
+)
+
 -- create table [dbo].[Job]
 GO
-CREATE TABLE [dbo].[Job](	  [job_id] INT NOT NULL IDENTITY(10,10)	, [name] VARCHAR(255) NULL	, [description] VARCHAR(255) NULL	, [enabled] BIT NULL DEFAULT((1))	, [category_name] VARCHAR(255) NULL	, [job_schedule_id] INT NULL	, CONSTRAINT [PK_Job] PRIMARY KEY ([job_id] ASC))CREATE UNIQUE NONCLUSTERED INDEX [IX_Job] ON [dbo].[Job] ([name] ASC)
+CREATE TABLE [dbo].[Job]
+(
+	  [job_id] INT NOT NULL IDENTITY(10,10)
+	, [name] VARCHAR(255) NULL
+	, [description] VARCHAR(255) NULL
+	, [enabled] BIT NULL DEFAULT((1))
+	, [category_name] VARCHAR(255) NULL
+	, [job_schedule_id] INT NULL
+	, CONSTRAINT [PK_Job] PRIMARY KEY ([job_id] ASC)
+)
+
+CREATE UNIQUE NONCLUSTERED INDEX [IX_Job] ON [dbo].[Job] ([name] ASC)
+
 -- create table [dbo].[Query]
 GO
-CREATE TABLE [dbo].[Query](	  [column_id] INT NOT NULL	, [column_name] VARCHAR(64) NOT NULL	, [schema] VARCHAR(100) NULL	, [db] VARCHAR(100) NULL	, [full_obj_name] VARCHAR(411) NOT NULL	, [Column_type_id] INT NULL	, [Column_type_name] VARCHAR(50) NULL	, [prefix] VARCHAR(64) NULL	, [entity_name] VARCHAR(64) NULL	, [foreign_column_id] INT NULL	, [foreign_column_name] VARCHAR(64) NULL	, [foreign_sur_pkey] INT NULL	, [foreign_sur_pkey_name] VARCHAR(64) NULL	, [is_nullable] BIT NULL	, [ordinal_position] SMALLINT NULL	, [data_type] VARCHAR(100) NULL	, [max_len] INT NULL	, [numeric_precision] INT NULL	, [numeric_scale] INT NULL	, [src_column_id] INT NULL	, [obj_id] INT NOT NULL	, [obj_name] VARCHAR(100) NOT NULL	, [chksum] INT NOT NULL	, [part_of_unique_index] BIT NULL	, [server_type_id] INT NULL)
+CREATE TABLE [dbo].[Query]
+(
+	  [column_id] INT NOT NULL
+	, [column_name] VARCHAR(64) NOT NULL
+	, [schema] VARCHAR(100) NULL
+	, [db] VARCHAR(100) NULL
+	, [full_obj_name] VARCHAR(411) NOT NULL
+	, [Column_type_id] INT NULL
+	, [Column_type_name] VARCHAR(50) NULL
+	, [prefix] VARCHAR(64) NULL
+	, [entity_name] VARCHAR(64) NULL
+	, [foreign_column_id] INT NULL
+	, [foreign_column_name] VARCHAR(64) NULL
+	, [foreign_sur_pkey] INT NULL
+	, [foreign_sur_pkey_name] VARCHAR(64) NULL
+	, [is_nullable] BIT NULL
+	, [ordinal_position] SMALLINT NULL
+	, [data_type] VARCHAR(100) NULL
+	, [max_len] INT NULL
+	, [numeric_precision] INT NULL
+	, [numeric_scale] INT NULL
+	, [src_column_id] INT NULL
+	, [obj_id] INT NOT NULL
+	, [obj_name] VARCHAR(100) NOT NULL
+	, [chksum] INT NOT NULL
+	, [part_of_unique_index] BIT NULL
+	, [server_type_id] INT NULL
+)
+
 -- create table [dbo].[Transfer]
 GO
-CREATE TABLE [dbo].[Transfer](	  [transfer_id] INT NOT NULL IDENTITY(1,1)	, [batch_id] INT NULL	, [transfer_name] VARCHAR(100) NULL	, [src_obj_id] INT NULL	, [target_name] VARCHAR(255) NULL	, [transfer_start_dt] DATETIME NULL	, [transfer_end_dt] DATETIME NULL	, [status_id] INT NULL	, [rec_cnt_src] INT NULL	, [rec_cnt_new] INT NULL	, [rec_cnt_changed] INT NULL	, [rec_cnt_deleted] INT NULL	, [last_error_id] INT NULL	, [prev_transfer_id] INT NULL	, [transfer_seq] INT NULL	, CONSTRAINT [PK_transfer_id] PRIMARY KEY ([transfer_id] DESC))CREATE UNIQUE NONCLUSTERED INDEX [ix_Transfer_batch_transfer_name_unique] ON [dbo].[Transfer] ([batch_id] ASC, [transfer_name] ASC)CREATE NONCLUSTERED INDEX [ix_transfer_transfer_name_seq_nr] ON [dbo].[Transfer] ([transfer_name] ASC, [transfer_seq] ASC)
+CREATE TABLE [dbo].[Transfer]
+(
+	  [transfer_id] INT NOT NULL IDENTITY(1,1)
+	, [batch_id] INT NULL
+	, [transfer_name] VARCHAR(100) NULL
+	, [src_obj_id] INT NULL
+	, [target_name] VARCHAR(255) NULL
+	, [transfer_start_dt] DATETIME NULL
+	, [transfer_end_dt] DATETIME NULL
+	, [status_id] INT NULL
+	, [rec_cnt_src] INT NULL
+	, [rec_cnt_new] INT NULL
+	, [rec_cnt_changed] INT NULL
+	, [rec_cnt_deleted] INT NULL
+	, [last_error_id] INT NULL
+	, [prev_transfer_id] INT NULL
+	, [transfer_seq] INT NULL
+	, CONSTRAINT [PK_transfer_id] PRIMARY KEY ([transfer_id] DESC)
+)
+
+CREATE UNIQUE NONCLUSTERED INDEX [ix_Transfer_batch_transfer_name_unique] ON [dbo].[Transfer] ([batch_id] ASC, [transfer_name] ASC)
+
+CREATE NONCLUSTERED INDEX [ix_transfer_transfer_name_seq_nr] ON [dbo].[Transfer] ([transfer_name] ASC, [transfer_seq] ASC)
+
 -- create table [static].[Status]
 GO
-CREATE TABLE [static].[Status](	  [status_id] INT NOT NULL	, [status_name] VARCHAR(50) NULL	, [description] VARCHAR(255) NULL	, CONSTRAINT [PK_Status] PRIMARY KEY ([status_id] ASC))
+CREATE TABLE [static].[Status]
+(
+	  [status_id] INT NOT NULL
+	, [status_name] VARCHAR(50) NULL
+	, [description] VARCHAR(255) NULL
+	, CONSTRAINT [PK_Status] PRIMARY KEY ([status_id] ASC)
+)
+
 -- create table [dbo].[Job_schedule]
 GO
-CREATE TABLE [dbo].[Job_schedule](	  [job_schedule_id] INT NOT NULL IDENTITY(10,10)	, [name] SYSNAME NOT NULL	, [enabled] INT NOT NULL	, [freq_type] INT NOT NULL	, [freq_interval] INT NOT NULL	, [freq_subday_type] INT NOT NULL	, [freq_subday_interval] INT NOT NULL	, [freq_relative_interval] INT NOT NULL	, [freq_recurrence_factor] INT NOT NULL	, [active_start_date] INT NOT NULL	, [active_end_date] INT NOT NULL	, [active_start_time] INT NOT NULL	, [active_end_time] INT NOT NULL	, CONSTRAINT [PK_Job_schedule] PRIMARY KEY ([job_schedule_id] ASC))CREATE UNIQUE NONCLUSTERED INDEX [IX_Job_schedule] ON [dbo].[Job_schedule] ([job_schedule_id] ASC)
+CREATE TABLE [dbo].[Job_schedule]
+(
+	  [job_schedule_id] INT NOT NULL IDENTITY(10,10)
+	, [name] SYSNAME NOT NULL
+	, [enabled] INT NOT NULL
+	, [freq_type] INT NOT NULL
+	, [freq_interval] INT NOT NULL
+	, [freq_subday_type] INT NOT NULL
+	, [freq_subday_interval] INT NOT NULL
+	, [freq_relative_interval] INT NOT NULL
+	, [freq_recurrence_factor] INT NOT NULL
+	, [active_start_date] INT NOT NULL
+	, [active_end_date] INT NOT NULL
+	, [active_start_time] INT NOT NULL
+	, [active_end_time] INT NOT NULL
+	, CONSTRAINT [PK_Job_schedule] PRIMARY KEY ([job_schedule_id] ASC)
+)
+
+CREATE UNIQUE NONCLUSTERED INDEX [IX_Job_schedule] ON [dbo].[Job_schedule] ([job_schedule_id] ASC)
+
 -- create table [dbo].[Privacy]
 GO
-CREATE TABLE [dbo].[Privacy](	  [db] VARCHAR(50) NULL	, [table_name] NVARCHAR(255) NULL	, [sensitive] NVARCHAR(255) NULL	, [column_name] NVARCHAR(255) NULL	, [personal] NVARCHAR(255) NULL)
+CREATE TABLE [dbo].[Privacy]
+(
+	  [db] VARCHAR(50) NULL
+	, [table_name] NVARCHAR(255) NULL
+	, [sensitive] NVARCHAR(255) NULL
+	, [column_name] NVARCHAR(255) NULL
+	, [personal] NVARCHAR(255) NULL
+)
+
 -- create table [dbo].[Stack]
 GO
-CREATE TABLE [dbo].[Stack](	  [stack_id] INT NOT NULL IDENTITY(1,1)	, [value] VARCHAR(4000) NULL	, [record_dt] DATETIME NULL DEFAULT(getdate())	, [record_user] VARCHAR(255) NULL DEFAULT(suser_sname())	, CONSTRAINT [PK_Stack] PRIMARY KEY ([stack_id] DESC))
+CREATE TABLE [dbo].[Stack]
+(
+	  [stack_id] INT NOT NULL IDENTITY(1,1)
+	, [value] VARCHAR(4000) NULL
+	, [record_dt] DATETIME NULL DEFAULT(getdate())
+	, [record_user] VARCHAR(255) NULL DEFAULT(suser_sname())
+	, CONSTRAINT [PK_Stack] PRIMARY KEY ([stack_id] DESC)
+)
+
 -- create table [dbo].[Job_step]
 GO
-CREATE TABLE [dbo].[Job_step](	  [job_step_id] INT NOT NULL IDENTITY(1,1)	, [step_id] INT NULL DEFAULT((1))	, [step_name] VARCHAR(255) NULL	, [subsystem] VARCHAR(255) NULL DEFAULT('SSIS')	, [command] NVARCHAR(4000) NULL	, [on_success_action] INT NULL DEFAULT((3))	, [on_success_step_id] INT NULL DEFAULT((0))	, [on_fail_action] INT NULL DEFAULT((2))	, [on_fail_step_id] INT NULL	, [database_name] VARCHAR(255) NULL DEFAULT('master')	, [job_id] INT NULL	, CONSTRAINT [PK_job_step] PRIMARY KEY ([job_step_id] ASC))
+CREATE TABLE [dbo].[Job_step]
+(
+	  [job_step_id] INT NOT NULL IDENTITY(1,1)
+	, [step_id] INT NULL DEFAULT((1))
+	, [step_name] VARCHAR(255) NULL
+	, [subsystem] VARCHAR(255) NULL DEFAULT('SSIS')
+	, [command] NVARCHAR(4000) NULL
+	, [on_success_action] INT NULL DEFAULT((3))
+	, [on_success_step_id] INT NULL DEFAULT((0))
+	, [on_fail_action] INT NULL DEFAULT((2))
+	, [on_fail_step_id] INT NULL
+	, [database_name] VARCHAR(255) NULL DEFAULT('master')
+	, [job_id] INT NULL
+	, CONSTRAINT [PK_job_step] PRIMARY KEY ([job_step_id] ASC)
+)
+
 -- create table [dbo].[Obj]
 GO
-CREATE TABLE [dbo].[Obj](	  [obj_id] INT NOT NULL IDENTITY(1,1)	, [obj_type_id] INT NOT NULL	, [server_type_id] INT NULL DEFAULT((10))	, [obj_name] VARCHAR(100) NOT NULL	, [parent_id] INT NULL	, [scope] VARCHAR(50) NULL	, [identifier] INT NULL	, [template_id] SMALLINT NULL	, [delete_dt] DATETIME NULL	, [record_dt] DATETIME NULL DEFAULT(getdate())	, [record_user] VARCHAR(50) NULL DEFAULT(suser_sname())	, [prefix] VARCHAR(50) NULL	, [obj_name_no_prefix] VARCHAR(100) NULL	, CONSTRAINT [PK__Obj] PRIMARY KEY ([obj_id] DESC))ALTER TABLE [dbo].[Obj] WITH CHECK ADD CONSTRAINT [FK__obj__obj] FOREIGN KEY([parent_id]) REFERENCES [dbo].[Obj] ([obj_id])ALTER TABLE [dbo].[Obj] CHECK CONSTRAINT [FK__obj__obj]
+CREATE TABLE [dbo].[Obj]
+(
+	  [obj_id] INT NOT NULL IDENTITY(1,1)
+	, [obj_type_id] INT NOT NULL
+	, [server_type_id] INT NULL DEFAULT((10))
+	, [obj_name] VARCHAR(100) NOT NULL
+	, [parent_id] INT NULL
+	, [scope] VARCHAR(50) NULL
+	, [identifier] INT NULL
+	, [template_id] SMALLINT NULL
+	, [delete_dt] DATETIME NULL
+	, [record_dt] DATETIME NULL DEFAULT(getdate())
+	, [record_user] VARCHAR(50) NULL DEFAULT(suser_sname())
+	, [prefix] VARCHAR(50) NULL
+	, [obj_name_no_prefix] VARCHAR(100) NULL
+	, CONSTRAINT [PK__Obj] PRIMARY KEY ([obj_id] DESC)
+)
+
+ALTER TABLE [dbo].[Obj] WITH CHECK ADD CONSTRAINT [FK__obj__obj] FOREIGN KEY([parent_id]) REFERENCES [dbo].[Obj] ([obj_id])
+ALTER TABLE [dbo].[Obj] CHECK CONSTRAINT [FK__obj__obj]
+
 -- create table [static].[Template]
 GO
-CREATE TABLE [static].[Template](	  [template_id] SMALLINT NOT NULL	, [template] VARCHAR(100) NULL	, [template_description] VARCHAR(100) NULL	, [record_dt] DATETIME NULL DEFAULT(getdate())	, [record_name] VARCHAR(255) NULL DEFAULT(suser_sname())	, CONSTRAINT [PK_Template] PRIMARY KEY ([template_id] ASC))
+CREATE TABLE [static].[Template]
+(
+	  [template_id] SMALLINT NOT NULL
+	, [template] VARCHAR(100) NULL
+	, [template_description] VARCHAR(100) NULL
+	, [record_dt] DATETIME NULL DEFAULT(getdate())
+	, [record_name] VARCHAR(255) NULL DEFAULT(suser_sname())
+	, CONSTRAINT [PK_Template] PRIMARY KEY ([template_id] ASC)
+)
+
 -- create table [static].[obj_type]
 GO
-CREATE TABLE [static].[obj_type](	  [obj_type_id] INT NOT NULL	, [obj_type] VARCHAR(100) NULL	, [obj_type_level] INT NULL	, CONSTRAINT [PK_obj_type] PRIMARY KEY ([obj_type_id] ASC))
+CREATE TABLE [static].[obj_type]
+(
+	  [obj_type_id] INT NOT NULL
+	, [obj_type] VARCHAR(100) NULL
+	, [obj_type_level] INT NULL
+	, CONSTRAINT [PK_obj_type] PRIMARY KEY ([obj_type_id] ASC)
+)
+
 -- create table [static].[Property]
 GO
-CREATE TABLE [static].[Property](	  [property_id] INT NOT NULL	, [property_name] VARCHAR(255) NULL	, [description] VARCHAR(255) NULL	, [property_scope] VARCHAR(50) NULL	, [default_value] VARCHAR(255) NULL	, [apply_table] BIT NULL	, [apply_view] BIT NULL	, [apply_schema] BIT NULL	, [apply_db] BIT NULL	, [apply_srv] BIT NULL	, [apply_user] BIT NULL	, [record_dt] DATETIME NULL DEFAULT(getdate())	, [record_user] VARCHAR(255) NULL DEFAULT(suser_sname())	, CONSTRAINT [PK_Property_1] PRIMARY KEY ([property_id] ASC))
+CREATE TABLE [static].[Property]
+(
+	  [property_id] INT NOT NULL
+	, [property_name] VARCHAR(255) NULL
+	, [description] VARCHAR(255) NULL
+	, [property_scope] VARCHAR(50) NULL
+	, [default_value] VARCHAR(255) NULL
+	, [apply_table] BIT NULL
+	, [apply_view] BIT NULL
+	, [apply_schema] BIT NULL
+	, [apply_db] BIT NULL
+	, [apply_srv] BIT NULL
+	, [apply_user] BIT NULL
+	, [record_dt] DATETIME NULL DEFAULT(getdate())
+	, [record_user] VARCHAR(255) NULL DEFAULT(suser_sname())
+	, CONSTRAINT [PK_Property_1] PRIMARY KEY ([property_id] ASC)
+)
+
 -- create table [dbo].[Obj_dep]
 GO
-CREATE TABLE [dbo].[Obj_dep](	  [from_obj_id] INT NOT NULL	, [to_obj_id] INT NOT NULL	, [data_source] VARCHAR(50) NOT NULL	, [record_dt] DATETIME NULL DEFAULT(getdate())	, [record_user] VARCHAR(50) NULL DEFAULT(suser_sname())	, CONSTRAINT [PK__Obj_dep__7C69C680D927C550] PRIMARY KEY ([from_obj_id] ASC, [to_obj_id] ASC))
+CREATE TABLE [dbo].[Obj_dep]
+(
+	  [from_obj_id] INT NOT NULL
+	, [to_obj_id] INT NOT NULL
+	, [data_source] VARCHAR(50) NOT NULL
+	, [record_dt] DATETIME NULL DEFAULT(getdate())
+	, [record_user] VARCHAR(50) NULL DEFAULT(suser_sname())
+	, CONSTRAINT [PK__Obj_dep__7C69C680D927C550] PRIMARY KEY ([from_obj_id] ASC, [to_obj_id] ASC)
+)
+
 -- create table [dbo].[Batch]
 GO
-CREATE TABLE [dbo].[Batch](	  [batch_id] INT NOT NULL IDENTITY(1,1)	, [batch_name] VARCHAR(100) NULL	, [batch_start_dt] DATETIME NULL DEFAULT(getdate())	, [batch_end_dt] DATETIME NULL	, [status_id] INT NULL	, [last_error_id] INT NULL	, [prev_batch_id] INT NULL	, [exec_server] VARCHAR(100) NULL DEFAULT(@@servername)	, [exec_host] VARCHAR(100) NULL DEFAULT(host_name())	, [exec_user] VARCHAR(100) NULL DEFAULT(suser_sname())	, [guid] BIGINT NULL	, [continue_batch] BIT NULL DEFAULT((0))	, [batch_seq] INT NULL	, CONSTRAINT [PK_run_id] PRIMARY KEY ([batch_id] DESC))
+CREATE TABLE [dbo].[Batch]
+(
+	  [batch_id] INT NOT NULL IDENTITY(1,1)
+	, [batch_name] VARCHAR(100) NULL
+	, [batch_start_dt] DATETIME NULL DEFAULT(getdate())
+	, [batch_end_dt] DATETIME NULL
+	, [status_id] INT NULL
+	, [last_error_id] INT NULL
+	, [prev_batch_id] INT NULL
+	, [exec_server] VARCHAR(100) NULL DEFAULT(@@servername)
+	, [exec_host] VARCHAR(100) NULL DEFAULT(host_name())
+	, [exec_user] VARCHAR(100) NULL DEFAULT(suser_sname())
+	, [guid] BIGINT NULL
+	, [continue_batch] BIT NULL DEFAULT((0))
+	, [batch_seq] INT NULL
+	, CONSTRAINT [PK_run_id] PRIMARY KEY ([batch_id] DESC)
+)
+
 -- create table [static].[Server_type]
 GO
-CREATE TABLE [static].[Server_type](	  [server_type_id] INT NOT NULL	, [server_type] VARCHAR(100) NULL	, [compatibility] VARCHAR(255) NULL	, CONSTRAINT [PK_Server_type] PRIMARY KEY ([server_type_id] ASC))
+CREATE TABLE [static].[Server_type]
+(
+	  [server_type_id] INT NOT NULL
+	, [server_type] VARCHAR(100) NULL
+	, [compatibility] VARCHAR(255) NULL
+	, CONSTRAINT [PK_Server_type] PRIMARY KEY ([server_type_id] ASC)
+)
+
 -- create table [dbo].[Property_value]
 GO
-CREATE TABLE [dbo].[Property_value](	  [property_id] INT NOT NULL	, [obj_id] INT NOT NULL	, [value] VARCHAR(255) NULL	, [record_dt] DATETIME NULL DEFAULT(getdate())	, [record_user] VARCHAR(255) NULL DEFAULT(suser_sname())	, CONSTRAINT [PK_Property_Value] PRIMARY KEY ([property_id] ASC, [obj_id] ASC))
+CREATE TABLE [dbo].[Property_value]
+(
+	  [property_id] INT NOT NULL
+	, [obj_id] INT NOT NULL
+	, [value] VARCHAR(255) NULL
+	, [record_dt] DATETIME NULL DEFAULT(getdate())
+	, [record_user] VARCHAR(255) NULL DEFAULT(suser_sname())
+	, CONSTRAINT [PK_Property_Value] PRIMARY KEY ([property_id] ASC, [obj_id] ASC)
+)
+
 -- create table [static].[Log_level]
 GO
-CREATE TABLE [static].[Log_level](	  [log_level_id] SMALLINT NOT NULL	, [log_level] VARCHAR(50) NULL	, [log_level_description] VARCHAR(255) NULL	, CONSTRAINT [PK_Log_level_1] PRIMARY KEY ([log_level_id] ASC))
+CREATE TABLE [static].[Log_level]
+(
+	  [log_level_id] SMALLINT NOT NULL
+	, [log_level] VARCHAR(50) NULL
+	, [log_level_description] VARCHAR(255) NULL
+	, CONSTRAINT [PK_Log_level_1] PRIMARY KEY ([log_level_id] ASC)
+)
+
 -- create table [static].[Log_type]
 GO
-CREATE TABLE [static].[Log_type](	  [log_type_id] SMALLINT NOT NULL	, [log_type] VARCHAR(50) NULL	, [min_log_level_id] INT NULL	, CONSTRAINT [PK_Log_type_1] PRIMARY KEY ([log_type_id] ASC))
+CREATE TABLE [static].[Log_type]
+(
+	  [log_type_id] SMALLINT NOT NULL
+	, [log_type] VARCHAR(50) NULL
+	, [min_log_level_id] INT NULL
+	, CONSTRAINT [PK_Log_type_1] PRIMARY KEY ([log_type_id] ASC)
+)
+
 -- create table [static].[Version]
 GO
-CREATE TABLE [static].[Version](	  [major_version] INT NOT NULL	, [minor_version] INT NOT NULL	, [build] INT NOT NULL	, [build_dt] DATETIME NULL	, CONSTRAINT [PK_Version] PRIMARY KEY ([major_version] ASC, [minor_version] ASC, [build] ASC))
+CREATE TABLE [static].[Version]
+(
+	  [major_version] INT NOT NULL
+	, [minor_version] INT NOT NULL
+	, [build] INT NOT NULL
+	, [build_dt] DATETIME NULL
+	, CONSTRAINT [PK_Version] PRIMARY KEY ([major_version] ASC, [minor_version] ASC, [build] ASC)
+)
+
 GO
 
 INSERT [static].[Version] ([major_version], [minor_version], [build], build_dt) VALUES (3,2,1,'2019-01-25 13:52:33')
@@ -1866,7 +2183,7 @@ if object_id('tempdb..#ssas_queries') is not null
 disable because : SQL Server blocked access to STATEMENT 'OpenRowset/OpenDatasource' of component 'Ad Hoc Distributed Queries' because this component is turned off as part of the security configuration for this server. A system administrator can enable the use of 'Ad Hoc Distributed Queries' by using sp_configure. For more information about enabling 'Ad Hoc Distributed Queries', search for 'Ad Hoc Distributed Queries' in SQL Server Books Online.
 	 
 select * into #ssas_queries from openrowset('MSOLAP',
- 'DATASOURCE=ssas01.company.nl;Initial Catalog=TAB_CKTO_respons_company;User=company\991371;password=anT1svsrnv'
+ 'DATASOURCE='
  , '
 select [name], [QueryDefinition] from 
 [$System].[TMSCHEMA_PARTITIONS]
@@ -6271,7 +6588,7 @@ end catch
 	insert into @p values ('from2'					, @from2 ) 
 	insert into @p values ('sql_from'				, @sql_from ) 
 	insert into @p values ('sql_lookup_prefix'		, @sql_lookup_prefix ) 
-	insert into @p values ('credentials'			, 'User=company\991371;password=anT1svsrnv') 
+	insert into @p values ('credentials'			, '') 
 	insert into @p values ('temp_table'				, '#betl_meta_<obj_id>') 
 
 	EXEC util.apply_params @cols_sql_select output, @p
