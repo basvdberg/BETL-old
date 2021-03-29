@@ -1,6 +1,6 @@
 # Latest news
 
-I am currently working on migrating BETL to the Azure platform, based on Data factory and Azure SQL DB. In the next release I will split BETL into 2 components. A meta data repository and an ETL generation engine. Send me a message if you want to receive this pre-release. 
+Please have a look at the new BETL framework here: https://github.com/basvdberg/BETL.
 
 # BETL 
 Find more about BETL here: http://www.etlautomation.com.
